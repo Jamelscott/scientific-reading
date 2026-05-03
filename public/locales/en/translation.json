@@ -83,6 +83,27 @@
     "successRate": "Success rate",
     "analytique": "Analytics"
   },
+  "reports": {
+    "subtitle": "View performance analytics and insights",
+    "metrics": {
+      "numberOfClasses": "Number of Classes",
+      "numberOfStudents": "Number of Students",
+      "goodGrades": "Good Grades",
+      "satisfactoryGrades": "Satisfactory Grades",
+      "failingGrades": "Failing Grades"
+    },
+    "classPerformance": "Class Performance",
+    "studentProgress": "Student Progress",
+    "chartPlaceholder": "Chart placeholder",
+    "totalStudents": "Total Students",
+    "averageScore": "Average Score",
+    "classes": "Classes",
+    "legend": {
+      "success": "Success (Good)",
+      "adequate": "Adequate",
+      "needsImprovement": "Needs improvement"
+    }
+  },
   "studentTracking": {
     "backToDashboard": "Back to dashboard",
     "addStudent": "Add student",

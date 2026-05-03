@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Student } from "../../../stores/useStudentStore";
+import { EvaluationButton } from "./EvaluationButton";
 
 interface Evaluation {
   studentId: number;
@@ -24,28 +25,9 @@ export function ClassTable({
 }: ClassTableProps) {
   const { t } = useTranslation();
 
-  // Create a map of studentId -> evaluation for quick lookup
   const evaluationMap = new Map(
     evaluations.map((evaluation) => [evaluation.studentId, evaluation]),
   );
-
-  const getStatusColor = (
-    status: "success" | "adequate" | "needs-improvement" | null,
-  ) => {
-    if (status === "success") return "#c9e265";
-    if (status === "adequate") return "#ffde59";
-    if (status === "needs-improvement") return "#ff5757";
-    return "#f8ffdb";
-  };
-
-  const getStatusText = (
-    status: "success" | "adequate" | "needs-improvement" | null,
-  ) => {
-    if (status === "success") return "✓";
-    if (status === "adequate") return "~";
-    if (status === "needs-improvement") return "!";
-    return "";
-  };
 
   return (
     <div className="p-6 flex-1 overflow-y-auto">
@@ -112,7 +94,8 @@ export function ClassTable({
                           }}
                         >
                           {status ? (
-                            <button
+                            <EvaluationButton
+                              status={status}
                               onClick={() =>
                                 onStudentClick(
                                   student.id,
@@ -120,23 +103,19 @@ export function ClassTable({
                                   studentEvaluations,
                                 )
                               }
-                              className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto transition-all cursor-pointer"
-                              style={{
-                                background: getStatusColor(status),
-                                color:
-                                  status === "success" ? "#000000" : "#ffffff",
-                              }}
-                            >
-                              {getStatusText(status)}
-                            </button>
+                            />
                           ) : (
-                            <button
-                              className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto transition-all hover:bg-gray-200 cursor-pointer"
-                              style={{
-                                background: "#f8ffdb",
-                                border: "1px dashed #cccccc",
-                              }}
-                            ></button>
+                            <EvaluationButton
+                              status={status}
+                              onClick={() =>
+                                onStudentClick(
+                                  student.id,
+                                  student.name,
+                                  studentEvaluations,
+                                )
+                              }
+                              empty
+                            />
                           )}
                         </td>
                       ))}

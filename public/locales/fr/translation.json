@@ -83,6 +83,27 @@
     "successRate": "Taux de réussite",
     "analytique": "Analytique"
   },
+  "reports": {
+    "subtitle": "Consultez l'analytique de performance et les aperçus",
+    "metrics": {
+      "numberOfClasses": "Nombre de classes",
+      "numberOfStudents": "Nombre d'élèves",
+      "goodGrades": "Bonnes notes",
+      "satisfactoryGrades": "Notes satisfaisantes",
+      "failingGrades": "Notes insuffisantes"
+    },
+    "classPerformance": "Performance de la classe",
+    "studentProgress": "Progrès des élèves",
+    "chartPlaceholder": "Espace réservé au graphique",
+    "totalStudents": "Total d'élèves",
+    "averageScore": "Note moyenne",
+    "classes": "Classes",
+    "legend": {
+      "success": "Réussite (Bien)",
+      "adequate": "Adéquat",
+      "needsImprovement": "À améliorer"
+    }
+  },
   "studentTracking": {
     "backToDashboard": "Retour au tableau de bord",
     "addStudent": "Ajouter un élève",

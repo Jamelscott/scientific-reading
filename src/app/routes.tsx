@@ -5,6 +5,7 @@ import { ClassPage } from "./pages/ClassPage";
 import { SchoolBoardDashboard } from "./pages/SchoolBoardDashboard";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { ReportsPage } from "./pages/ReportsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
   {
     path: "/settings",
     Component: SettingsPage,
+  },
+  {
+    path: "/rapports",
+    Component: ReportsPage,
   },
   {
     path: "*",
