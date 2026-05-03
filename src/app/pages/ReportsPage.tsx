@@ -157,9 +157,9 @@ export function ReportsPage() {
     });
 
     return [
-      { name: "Good", value: goodStudents, color: "#c9e265" },
-      { name: "Satisfactory", value: satisfactoryStudents, color: "#ffde59" },
-      { name: "Failing", value: failingStudents, color: "#ff5757" },
+      { name: "good", value: goodStudents, color: "#c9e265" },
+      { name: "satisfactory", value: satisfactoryStudents, color: "#ffde59" },
+      { name: "failing", value: failingStudents, color: "#ff5757" },
     ];
   };
 
@@ -486,7 +486,7 @@ export function ReportsPage() {
                         />
                         <div>
                           <p style={{ color: "#004aad", fontWeight: "500" }}>
-                            {item.name}
+                            {t(`reports.legend.${item.name}`)}
                           </p>
                           <p style={{ color: "#6b7280", fontSize: "14px" }}>
                             {item.value} student{item.value !== 1 ? "s" : ""}
@@ -530,10 +530,7 @@ export function ReportsPage() {
             <p style={{ color: "#6b7280" }} className="text-sm mb-2">
               {t("reports.averageScore")}
             </p>
-            <p
-              className="text-3xl font-semibold"
-              style={{ color: "#004aad" }}
-            >
+            <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
               {calculateAverageScore().score}
             </p>
             <p style={{ color: "#6b7280" }} className="text-xs mt-2">
