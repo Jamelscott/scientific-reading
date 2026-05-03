@@ -285,9 +285,6 @@ export function ReportsPage() {
             <p className="text-2xl font-semibold" style={{ color: "#c9e265" }}>
               {calculateGradeDistribution().good}%
             </p>
-            <p style={{ color: "#6b7280" }} className="text-xs mt-2">
-              {t("reports.averageScore")}: {calculateAverageScore().score}
-            </p>
           </div>
 
           {/* Satisfactory Grades */}
@@ -548,9 +545,6 @@ export function ReportsPage() {
             </p>
             <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
               {classes.length}
-            </p>
-            <p style={{ color: "#6b7280" }} className="text-xs mt-2">
-              {t("reports.averageScore")}: {calculateAverageScore().score}
             </p>
           </div>
         </div>
