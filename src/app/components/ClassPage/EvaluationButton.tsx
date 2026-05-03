@@ -43,13 +43,21 @@ export function EvaluationButton({
   return (
     <button
       onClick={onClick}
-      className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto transition-all cursor-pointer"
+      className="w-10 h-10 rounded-lg transition-all cursor-pointer"
       style={{
         background: getStatusColor(status),
         color: status === "success" ? "#000000" : "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 0,
+        fontSize: "16px",
+        fontWeight: "bold",
       }}
     >
-      {getStatusText(status)}
+      <span style={{ display: "block", marginTop: "-2px" }}>
+        {getStatusText(status)}
+      </span>
     </button>
   );
 }

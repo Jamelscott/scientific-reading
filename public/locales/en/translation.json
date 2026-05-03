@@ -101,10 +101,7 @@
     "legend": {
       "success": "Success (Good)",
       "adequate": "Adequate",
-      "needsImprovement": "Needs improvement",
-      "good": "Good",
-      "satisfactory": "Satisfactory",
-      "failing": "Failing"
+      "needsImprovement": "Needs improvement"
     }
   },
   "studentTracking": {

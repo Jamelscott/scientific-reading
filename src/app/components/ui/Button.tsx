@@ -26,8 +26,7 @@ export function Button({
 
   const variantStyles = {
     primary: "hover:bg-[#003a86] bg-[#004aad] text-white",
-    secondary:
-      "hover:bg-gray-50 hover:border-gray-200 bg-white border text-black",
+    secondary: "hover:bg-gray-50 hover:border-gray-200 border text-black",
   };
 
   return (

@@ -6,12 +6,14 @@ import {
   useClassStore,
   useEvaluationsStore,
   useStudentStore,
+  useTeacherStore,
 } from "../../stores";
 import { AddStudentModal } from "../components/AddStudentModal";
 import { EditEvaluationModal } from "../components/EditEvaluationModal";
 import { EvaluationLegend } from "../components/EvaluationLegend";
 import { Button } from "../components/ui/Button";
 import { ClassTable } from "../components/ClassPage/ClassTable";
+import { exportTableToPdf } from "../components/utils/exportToPdf";
 
 export function ClassPage() {
   const { t } = useTranslation();
@@ -20,6 +22,7 @@ export function ClassPage() {
   const classes = useClassStore((state) => state.classes);
   const setActiveClass = useClassStore((state) => state.setActiveClass);
   const updateClass = useClassStore((state) => state.updateClass);
+  const teacher = useTeacherStore((state) => state.teacher);
 
   // Parse classId from URL and set it as active
   const activeClassId = classId ? parseInt(classId, 10) : 1;
@@ -79,6 +82,12 @@ export function ClassPage() {
     } else if (e.key === "Escape") {
       setIsEditingClassName(false);
     }
+  };
+
+  const handleExportPDF = async () => {
+    if (!activeClass?.name) return;
+    const teacherName = teacher?.name || "Teacher";
+    await exportTableToPdf(activeClass.name, teacherName);
   };
 
   return (
@@ -142,17 +151,7 @@ export function ClassPage() {
                 className="bg-[#38b6ff] text-white"
               />
               <Button
-                onClick={() => {
-                  /* TODO: wire enter results action */
-                }}
-                label="studentTracking.enterResults"
-                leadingIcon={<FileText className="w-5 h-5" />}
-                variant="primary"
-              />
-              <Button
-                onClick={() => {
-                  /* TODO: wire export PDF action */
-                }}
+                onClick={handleExportPDF}
                 label="studentTracking.exportPdf"
                 leadingIcon={<Download className="w-5 h-5" />}
                 variant="secondary"
