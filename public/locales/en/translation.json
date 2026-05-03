@@ -114,11 +114,21 @@
     "evaluation": "Evaluation"
   },
   "login": {
-    "title": "Sign in",
+    "appName": "Scientific Reading",
+    "appSubtitle": "Learning Progress Tracking",
+    "tagline": "Teach. Track. Transform.",
+    "description": "Monitor assessment results and help every student succeed.",
+    "gradeRange": "Kindergarten to 2nd grade",
+    "formTitle": "Teacher Sign In",
     "email": "Email",
+    "emailPlaceholder": "your@email.com",
     "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
     "submit": "Sign in",
-    "forgotPassword": "Forgot password?"
+    "or": "or",
+    "googleSignIn": "Sign in with Google"
   },
   "notFound": {
     "title": "Page not found",

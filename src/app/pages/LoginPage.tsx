@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function LoginPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+
+  const handleLanguageToggle = () => {
+    const newLang = i18n.language === "en" ? "fr" : "en";
+    i18n.changeLanguage(newLang);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,6 +22,22 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+      {/* Language Toggle */}
+      <div className="fixed top-4 right-4 z-10">
+        <button
+          onClick={handleLanguageToggle}
+          className="px-4 py-2 rounded-lg border transition-all flex items-center gap-2"
+          style={{
+            background: "#ffffff",
+            borderColor: "#dff3ff",
+            color: "#004aad",
+          }}
+        >
+          <span className="font-semibold">
+            {i18n.language === "en" ? "FR" : "EN"}
+          </span>
+        </button>
+      </div>
       {/* Left Side - Branding */}
       <div className="flex-1 bg-[#dff3ff] p-16 flex flex-col justify-between">
         <div>
@@ -22,21 +45,20 @@ export function LoginPage() {
             <BookOpen className="w-10 h-10" style={{ color: "#004aad" }} />
             <div>
               <h1 className="text-3xl" style={{ color: "#004aad" }}>
-                Lecture scientifique
+                {t("login.appName")}
               </h1>
               <p className="text-lg" style={{ color: "#004aad" }}>
-                Suivi des apprentissages
+                {t("login.appSubtitle")}
               </p>
             </div>
           </div>
 
           <div className="space-y-4 mb-12">
             <h2 className="text-2xl" style={{ color: "#004aad" }}>
-              Enseigner. Suivre. Transformer.
+              {t("login.tagline")}
             </h2>
             <p className="text-lg max-w-md" style={{ color: "#000000" }}>
-              Surveiller les résultats des évaluations et aider chaque élève à
-              réussir.
+              {t("login.description")}
             </p>
           </div>
 
@@ -149,7 +171,7 @@ export function LoginPage() {
         </div>
 
         <p className="text-sm" style={{ color: "#004aad" }}>
-          Maternelle à la 2e année
+          {t("login.gradeRange")}
         </p>
       </div>
 
@@ -161,7 +183,7 @@ export function LoginPage() {
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <h2 className="text-2xl mb-8" style={{ color: "#004aad" }}>
-              Connexion enseignant(e)
+              {t("login.formTitle")}
             </h2>
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -170,7 +192,7 @@ export function LoginPage() {
                   className="block text-sm mb-2"
                   style={{ color: "#000000" }}
                 >
-                  Courriel
+                  {t("login.email")}
                 </label>
                 <input
                   type="email"
@@ -181,7 +203,7 @@ export function LoginPage() {
                     background: "#f8ffdb",
                     borderColor: "#dff3ff",
                   }}
-                  placeholder="votre@email.com"
+                  placeholder={t("login.emailPlaceholder")}
                 />
               </div>
 
@@ -190,7 +212,7 @@ export function LoginPage() {
                   className="block text-sm mb-2"
                   style={{ color: "#000000" }}
                 >
-                  Mot de passe
+                  {t("login.password")}
                 </label>
                 <input
                   type="password"
@@ -201,7 +223,7 @@ export function LoginPage() {
                     background: "#f8ffdb",
                     borderColor: "#dff3ff",
                   }}
-                  placeholder="••••••••"
+                  placeholder={t("login.passwordPlaceholder")}
                 />
               </div>
 
@@ -215,11 +237,11 @@ export function LoginPage() {
                     style={{ accentColor: "#004aad" }}
                   />
                   <span className="text-sm" style={{ color: "#000000" }}>
-                    Se souvenir de moi
+                    {t("login.rememberMe")}
                   </span>
                 </label>
                 <a href="#" className="text-sm" style={{ color: "#38b6ff" }}>
-                  Mot de passe oublié?
+                  {t("login.forgotPassword")}
                 </a>
               </div>
 
@@ -231,7 +253,7 @@ export function LoginPage() {
                   color: "#ffffff",
                 }}
               >
-                Se connecter
+                {t("login.submit")}
               </button>
 
               <div className="relative my-6">
@@ -243,7 +265,7 @@ export function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-4 bg-white" style={{ color: "#000000" }}>
-                    ou
+                    {t("login.or")}
                   </span>
                 </div>
               </div>
@@ -275,7 +297,7 @@ export function LoginPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Se connecter avec Google
+                {t("login.googleSignIn")}
               </button>
             </form>
           </div>

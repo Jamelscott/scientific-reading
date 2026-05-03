@@ -114,11 +114,21 @@
     "evaluation": "Évaluation"
   },
   "login": {
-    "title": "Se connecter",
+    "appName": "Lecture scientifique",
+    "appSubtitle": "Suivi des apprentissages",
+    "tagline": "Enseigner. Suivre. Transformer.",
+    "description": "Surveiller les résultats des évaluations et aider chaque élève à réussir.",
+    "gradeRange": "Maternelle à la 2e année",
+    "formTitle": "Connexion enseignant(e)",
     "email": "Courriel",
+    "emailPlaceholder": "votre@email.com",
     "password": "Mot de passe",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié?",
     "submit": "Se connecter",
-    "forgotPassword": "Mot de passe oublié?"
+    "or": "ou",
+    "googleSignIn": "Se connecter avec Google"
   },
   "notFound": {
     "title": "Page introuvable",
