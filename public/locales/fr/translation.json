@@ -1,0 +1,154 @@
+{
+  "app": {
+    "title": "Lecture scientifique"
+  },
+  "nav": {
+    "myClasses": "Mes classes",
+    "evaluations": "Évaluations",
+    "reports": "Rapports",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Se déconnecter"
+  },
+  "dashboard": {
+    "welcome": "Bon retour, Mme Gisèle!",
+    "subtitle": "Accédez à votre classe et suivez la progression des élèves.",
+    "addClass": "Ajouter une classe",
+    "editClasses": "Modifier les classes",
+    "myClass": "Ma classe",
+    "className": "Nom de la classe",
+    "classExample": "Ex: 1re année Mme Gisèle",
+    "viewMyClass": "Voir ma classe",
+    "createClass": "Créer la classe",
+    "studentsCount": "{{count}} élèves",
+    "grade": "Niveau",
+    "gradeOptions": {
+      "maternelle": "Maternelle",
+      "1re": "1re année",
+      "2e": "2e année"
+    },
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "errors": {
+      "classNameRequired": "Le nom de la classe est requis",
+      "gradeRequired": "Le niveau est requis"
+    }
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "subtitle": "Gérez vos informations personnelles",
+    "teacher": "Enseignante",
+    "edit": "Modifier",
+    "cancelEdit": "Annuler",
+    "save": "Enregistrer les modifications",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Courriel",
+    "phone": "Téléphone",
+    "school": "École",
+    "startDate": "Date de début",
+    "teachingInfo": "Informations d'enseignement",
+    "level": "Niveau",
+    "classes": "Nombre de classes",
+    "students": "Élèves",
+    "errors": {
+      "firstNameRequired": "Le prénom est requis",
+      "lastNameRequired": "Le nom est requis",
+      "emailRequired": "Le courriel est requis",
+      "emailInvalid": "Veuillez entrer une adresse courriel valide",
+      "phoneInvalid": "Veuillez entrer un numéro de téléphone valide à 10 chiffres",
+      "schoolRequired": "Le nom de l'école est requis"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez vos préférences",
+    "language": "Langue",
+    "languageDescription": "Choisissez la langue d'affichage",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "emailNotifications": "Notifications par courriel",
+    "pushNotifications": "Notifications push",
+    "weeklyReport": "Rapport de progression hebdomadaire",
+    "account": "Compte",
+    "changePassword": "Changer le mot de passe",
+    "deleteAccount": "Supprimer le compte"
+  },
+  "schoolBoard": {
+    "title": "Aperçu",
+    "schoolYear": "Année scolaire",
+    "schools": "Écoles",
+    "students": "Élèves",
+    "teachers": "Enseignants",
+    "successRate": "Taux de réussite",
+    "analytique": "Analytique"
+  },
+  "studentTracking": {
+    "backToDashboard": "Retour au tableau de bord",
+    "addStudent": "Ajouter un élève",
+    "editEvaluations": "Modifier les évaluations",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "cancel": "Annuler",
+    "confirm": "Ajouter",
+    "enterResults": "Saisir les résultats",
+    "studentName": "Nom de l'élève",
+    "studentsCount": "{{count}} élèves",
+    "exampleFirst": "Ex: Amélie",
+    "exampleLast": "Ex: Dubois",
+    "studentFirstName": "Prénom de l'élève",
+    "studentLastName": "Nom de famille",
+    "firstNamePlaceholder": "Ex: Amélie",
+    "lastNamePlaceholder": "Ex: Dubois",
+    "addStudentButton": "Ajouter l'élève",
+    "errors": {
+      "firstNameRequired": "Le prénom est requis",
+      "lastNameRequired": "Le nom est requis"
+    },
+    "legend": {
+      "success": "Réussite (Bien)",
+      "adequate": "Adéquat",
+      "needsImprovement": "À améliorer"
+    },
+    "exportPdf": "Exporter PDF",
+    "evaluation": "Évaluation"
+  },
+  "login": {
+    "title": "Se connecter",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "forgotPassword": "Mot de passe oublié?"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "subtitle": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "backToDashboard": "Retour au tableau de bord"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "markAsRead": "Marquer comme lu",
+    "empty": "Aucune notification",
+    "viewAll": "Voir toutes les notifications",
+    "items": {
+      "evalCompleted": { "title": "Évaluation complétée", "message": "Toutes les évaluations pour la semaine ont été saisies", "time": "Il y a 2 heures" },
+      "newReport": { "title": "Nouveau rapport disponible", "message": "Le rapport mensuel de progression est prêt", "time": "Il y a 5 heures" },
+      "evalReminder": { "title": "Rappel d’évaluation", "message": "3 élèves n’ont pas encore d’évaluation 8", "time": "Il y a 1 jour" },
+      "systemUpdate": { "title": "Mise à jour du système", "message": "Une nouvelle version de l’application est disponible", "time": "Il y a 2 jours" },
+      "studentAdded": { "title": "Élève ajouté", "message": "Amélie Dubois a été ajoutée à votre classe", "time": "Il y a 3 jours" }
+    }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "removeStudent": "Retirer l'élève",
+    "confirmDelete": "Êtes-vous sûr?"
+  }
+}

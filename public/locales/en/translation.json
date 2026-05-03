@@ -1,0 +1,154 @@
+{
+  "app": {
+    "title": "Scientific Reading"
+  },
+  "nav": {
+    "myClasses": "My Classes",
+    "evaluations": "Evaluations",
+    "reports": "Reports",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, Ms. Gisèle!",
+    "subtitle": "Access your class and track student progress.",
+    "addClass": "Add a class",
+    "editClasses": "Edit Classes",
+    "myClass": "My class",
+    "className": "Class name",
+    "classExample": "Ex: 1st grade Ms. Gisèle",
+    "viewMyClass": "View my class",
+    "createClass": "Create class",
+    "studentsCount": "{{count}} students",
+    "grade": "Grade",
+    "gradeOptions": {
+      "maternelle": "Kindergarten",
+      "1re": "1st grade",
+      "2e": "2nd grade"
+    },
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "errors": {
+      "classNameRequired": "Class name is required",
+      "gradeRequired": "Grade is required"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information",
+    "teacher": "Teacher",
+    "edit": "Edit",
+    "cancelEdit": "Cancel",
+    "save": "Save changes",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "school": "School",
+    "startDate": "Start date",
+    "teachingInfo": "Teaching information",
+    "level": "Level",
+    "classes": "Number of classes",
+    "students": "Students",
+    "errors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneInvalid": "Please enter a valid 10-digit phone number",
+      "schoolRequired": "School name is required"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your preferences",
+    "language": "Language",
+    "languageDescription": "Choose your preferred display language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "emailNotifications": "Email notifications",
+    "pushNotifications": "Push notifications",
+    "weeklyReport": "Weekly progress report",
+    "account": "Account",
+    "changePassword": "Change password",
+    "deleteAccount": "Delete account"
+  },
+  "schoolBoard": {
+    "title": "Overview",
+    "schoolYear": "School year",
+    "schools": "Schools",
+    "students": "Students",
+    "teachers": "Teachers",
+    "successRate": "Success rate",
+    "analytique": "Analytics"
+  },
+  "studentTracking": {
+    "backToDashboard": "Back to dashboard",
+    "addStudent": "Add student",
+    "editEvaluations": "Edit evaluations",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "cancel": "Cancel",
+    "confirm": "Add",
+    "enterResults": "Enter results",
+    "studentName": "Student name",
+    "studentsCount": "{{count}} students",
+    "exampleFirst": "Ex: Amélie",
+    "exampleLast": "Ex: Dubois",
+    "studentFirstName": "Student first name",
+    "studentLastName": "Last name",
+    "firstNamePlaceholder": "e.g., Amélie",
+    "lastNamePlaceholder": "e.g., Dubois",
+    "addStudentButton": "Add student",
+    "errors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required"
+    },
+    "legend": {
+      "success": "Success (Good)",
+      "adequate": "Adequate",
+      "needsImprovement": "Needs improvement"
+    },
+    "exportPdf": "Export PDF",
+    "evaluation": "Evaluation"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "forgotPassword": "Forgot password?"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you are looking for does not exist or has been moved.",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "backToDashboard": "Back to dashboard"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "empty": "No notifications",
+    "viewAll": "View all notifications",
+    "items": {
+      "evalCompleted": { "title": "Evaluation completed", "message": "All evaluations for the week have been entered", "time": "2 hours ago" },
+      "newReport": { "title": "New report available", "message": "The monthly progress report is ready", "time": "5 hours ago" },
+      "evalReminder": { "title": "Evaluation reminder", "message": "3 students do not yet have evaluation 8", "time": "1 day ago" },
+      "systemUpdate": { "title": "System update", "message": "A new version of the application is available", "time": "2 days ago" },
+      "studentAdded": { "title": "Student added", "message": "Amélie Dubois has been added to your class", "time": "3 days ago" }
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "removeStudent": "Remove Student",
+    "confirmDelete": "Are you sure?"
+  }
+}
