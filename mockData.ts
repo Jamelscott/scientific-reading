@@ -38,6 +38,7 @@ export type TeacherUser = {
   name: string;
   email: string;
   school: string;
+  boardName: string;
   subjects: string[];
   phoneNumber?: string;
   startDate?: string;
@@ -257,6 +258,7 @@ export const mockApiData = {
       name: "Madame Gisèle Tremblay",
       email: "gisele.tremblay@ecole.qc.ca",
       school: "École Primaire Saint-Laurent",
+      boardName: "Commission scolaire de Montréal",
       subjects: ["Français", "Mathématiques", "Sciences"],
       phoneNumber: "(514) 555-0123",
       startDate: "Septembre 2018",

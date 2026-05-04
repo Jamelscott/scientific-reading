@@ -3,12 +3,13 @@ import { Sidebar } from "../components/Sidebar";
 import { Initials } from "../components/Initials";
 import { TeacherDetailsForm } from "../components/ProfilePage/TeacherDetailsForm";
 import { useTranslation } from "react-i18next";
-import { useStudentStore, useClassStore } from "../../stores";
+import { useStudentStore, useClassStore, useAuthStore } from "../../stores";
 
 export function ProfilePage() {
   const { t } = useTranslation();
   const students = useStudentStore((state) => state.students);
   const classes = useClassStore((state) => state.classes);
+  const currentUser = useAuthStore((state) => state.currentUser);
 
   return (
     <div
@@ -64,6 +65,19 @@ export function ProfilePage() {
                   {students.length}
                 </p>
               </div>
+              {currentUser?.type === "teacher" && currentUser.boardName && (
+                <div
+                  className="p-6 rounded-xl"
+                  style={{ background: "#dff3ff" }}
+                >
+                  <p className="text-sm mb-2" style={{ color: "#000000" }}>
+                    {t("profile.board")}
+                  </p>
+                  <p className="text-lg" style={{ color: "#004aad" }}>
+                    {currentUser.boardName}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

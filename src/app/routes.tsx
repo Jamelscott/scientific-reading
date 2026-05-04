@@ -7,6 +7,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { UnderConstructionPage } from "./pages/UnderConstructionPage";
 import { useAuthStore } from "../stores";
 
 function RequireAuth({
@@ -83,6 +84,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth allowedTypes={["teacher"]}>
         <ReportsPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/evaluations",
+    element: (
+      <RequireAuth>
+        <UnderConstructionPage />
       </RequireAuth>
     ),
   },

@@ -7,6 +7,7 @@ export type TeacherUser = {
   name: string;
   email: string;
   school: string;
+  boardName: string;
   subjects: string[];
   phoneNumber?: string;
   startDate?: string;

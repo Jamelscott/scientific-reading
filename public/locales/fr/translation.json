@@ -52,6 +52,7 @@
     "school": "École",
     "startDate": "Date de début",
     "teachingInfo": "Informations d'enseignement",
+    "board": "Commission scolaire",
     "level": "Niveau",
     "classes": "Nombre de classes",
     "students": "Élèves",
@@ -176,6 +177,10 @@
     "submit": "Se connecter",
     "or": "ou",
     "googleSignIn": "Se connecter avec Google"
+  },
+  "underConstruction": {
+    "title": "En construction",
+    "description": "Cette page arrive bientôt. Nous travaillons dur pour vous la proposer !"
   },
   "notFound": {
     "title": "Page introuvable",

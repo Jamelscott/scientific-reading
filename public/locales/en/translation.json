@@ -52,6 +52,7 @@
     "school": "School",
     "startDate": "Start date",
     "teachingInfo": "Teaching information",
+    "board": "School Board",
     "level": "Level",
     "classes": "Number of classes",
     "students": "Students",
@@ -176,6 +177,10 @@
     "submit": "Sign in",
     "or": "or",
     "googleSignIn": "Sign in with Google"
+  },
+  "underConstruction": {
+    "title": "Under Construction",
+    "description": "This page is coming soon. We're working hard to bring it to you!"
   },
   "notFound": {
     "title": "Page not found",
