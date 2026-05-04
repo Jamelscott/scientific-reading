@@ -2,7 +2,8 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
-import { useStudentStore } from "../../stores";
+import { useStudentStore } from "../../stores/useStudentStore";
+import { useSchoolStore } from "../../stores/useSchoolStore";
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function AddStudentModal({
 }: AddStudentModalProps) {
   const { t } = useTranslation();
   const addStudent = useStudentStore((state) => state.addStudent);
+  const activeSchoolId = useSchoolStore((state) => state.activeSchoolId);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [errors, setErrors] = useState({
@@ -43,7 +45,12 @@ export function AddStudentModal({
       return;
     }
 
-    addStudent(firstName.trim(), lastName.trim(), classId ? [classId] : []);
+    addStudent(
+      firstName.trim(),
+      lastName.trim(),
+      classId ? [classId] : [],
+      activeSchoolId,
+    );
     setFirstName("");
     setLastName("");
     setErrors({ firstName: "", lastName: "" });

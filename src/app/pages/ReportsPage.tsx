@@ -3,8 +3,6 @@ import { NotificationDropdown } from "../components/NotificationDropdown";
 import { Sidebar } from "../components/Sidebar";
 import { Initials } from "../components/Initials";
 import {
-  BarChart3,
-  PieChart,
   BookOpen,
   Users,
   TrendingUp,
@@ -24,7 +22,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   Cell,
 } from "recharts";
@@ -323,183 +320,105 @@ export function ReportsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Class Performance Report */}
           <div
-            className="p-8 rounded-2xl shadow-lg flex flex-col"
+            className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <BarChart3 className="w-6 h-6" style={{ color: "#004aad" }} />
-              <h2
-                className="text-xl font-semibold"
-                style={{ color: "#004aad" }}
-              >
-                {t("reports.classPerformance")}
-              </h2>
-            </div>
-            <div
-              className="rounded-xl p-6 flex flex-col items-start"
-              style={{
-                background: "#f0f9ff",
-                height: "450px",
-                paddingRight: "100px",
-              }}
-            >
+            <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
+              {t("reports.classPerformance")}
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
               {calculateClassPerformance().length > 0 ? (
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart
-                    data={calculateClassPerformance()}
-                    layout="vertical"
-                    barSize={20}
-                    barCategoryGap="1%"
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
-                    <XAxis type="number" domain={[0, 3]} stroke="#004aad" />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      stroke="#004aad"
-                      width={90}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "#ffffff",
-                        border: "1px solid #dff3ff",
-                        borderRadius: "8px",
-                        padding: "4px 8px",
-                      }}
-                      formatter={(value: number) => value.toFixed(2)}
-                      labelFormatter={(label: string) => {
-                        const data = calculateClassPerformance();
-                        const item = data.find((d) => d.name === label);
-                        return item?.fullName || label;
-                      }}
-                      cursor={{ fill: "rgba(0, 74, 173, 0.05)" }}
-                    />
-                    <Bar dataKey="score" name="Average Score">
-                      {calculateClassPerformance().map((entry, index) => {
-                        let color = "#ff5757"; // needs-improvement (< 1.5)
-                        if (entry.score >= 2.5) {
-                          color = "#c9e265"; // success
-                        } else if (entry.score >= 1.5) {
-                          color = "#ffde59"; // adequate
-                        }
-                        return <Cell key={`cell-${index}`} fill={color} />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <BarChart data={calculateClassPerformance()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#000000", fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis tick={{ fill: "#000000" }} domain={[0, 3]} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#ffffff",
+                      border: "1px solid #dff3ff",
+                      borderRadius: "8px",
+                      padding: "4px 8px",
+                    }}
+                    formatter={(value: number) => value.toFixed(2)}
+                    labelFormatter={(label: string) => {
+                      const data = calculateClassPerformance();
+                      const item = data.find((d) => d.name === label);
+                      return item?.fullName || label;
+                    }}
+                  />
+                  <Bar dataKey="score" radius={[8, 8, 0, 0]}>
+                    {calculateClassPerformance().map((entry, index) => {
+                      let color = "#ff5757";
+                      if (entry.score >= 2.5) color = "#c9e265";
+                      else if (entry.score >= 1.5) color = "#ffde59";
+                      return <Cell key={`cell-${index}`} fill={color} />;
+                    })}
+                  </Bar>
+                </BarChart>
               ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p style={{ color: "#6b7280" }}>
+                <BarChart data={[]}>
+                  <text x="50%" y="50%" textAnchor="middle" fill="#6b7280">
                     {t("reports.chartPlaceholder")}
-                  </p>
-                </div>
+                  </text>
+                </BarChart>
               )}
-            </div>
+            </ResponsiveContainer>
           </div>
 
           {/* Student Progress Report */}
           <div
-            className="p-8 rounded-2xl shadow-lg flex flex-col"
+            className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <PieChart className="w-6 h-6" style={{ color: "#004aad" }} />
-              <h2
-                className="text-xl font-semibold"
-                style={{ color: "#004aad" }}
-              >
-                {t("reports.studentProgress")}
-              </h2>
-            </div>
-            <div
-              className="rounded-xl p-6 flex"
-              style={{
-                background: "#f0f9ff",
-                height: "400px",
-                gap: "12px",
-                flex: 1,
-              }}
-            >
-              {calculateStudentDistribution().some((item) => item.value > 0) ? (
-                <>
+            <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
+              {t("reports.studentProgress")}
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPieChart>
+                <Pie
+                  data={calculateStudentDistribution()}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {calculateStudentDistribution().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: "#ffffff",
+                    border: "1px solid #dff3ff",
+                    borderRadius: "8px",
+                    padding: "4px 8px",
+                  }}
+                  formatter={(value: number) =>
+                    `${value} student${value !== 1 ? "s" : ""}`
+                  }
+                />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-6 mt-4">
+              {calculateStudentDistribution().map((item) => (
+                <div key={item.name} className="flex items-center gap-2">
                   <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      minWidth: "300px",
-                    }}
-                  >
-                    <ResponsiveContainer width="100%" height={350}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={calculateStudentDistribution()}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          innerRadius={60}
-                          outerRadius={110}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {calculateStudentDistribution().map(
-                            (entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ),
-                          )}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            background: "#ffffff",
-                            border: "1px solid #dff3ff",
-                            borderRadius: "8px",
-                            padding: "4px 8px",
-                          }}
-                          formatter={(value: number) =>
-                            `${value} student${value !== 1 ? "s" : ""}`
-                          }
-                        />
-                      </RechartsPieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      gap: "16px",
-                    }}
-                  >
-                    {calculateStudentDistribution().map((item, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderRadius: "4px",
-                            backgroundColor: item.color,
-                          }}
-                        />
-                        <div>
-                          <p style={{ color: "#004aad", fontWeight: "500" }}>
-                            {t(`reports.legend.${item.name}`)}
-                          </p>
-                          <p style={{ color: "#6b7280", fontSize: "14px" }}>
-                            {item.value} student{item.value !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full w-full">
-                  <p style={{ color: "#6b7280" }}>
-                    {t("reports.chartPlaceholder")}
-                  </p>
+                    className="w-4 h-4 rounded"
+                    style={{ background: item.color }}
+                  />
+                  <span style={{ color: "#000000" }}>
+                    {t(`reports.legend.${item.name}`)} ({item.value})
+                  </span>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>

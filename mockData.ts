@@ -4,6 +4,7 @@ export interface MockStudent {
   id: number;
   name: string;
   classIds: number[]; // Array of class IDs the student belongs to
+  schoolId: number; // School ID the student is associated with
 }
 
 export interface MockClass {
@@ -31,6 +32,35 @@ export interface MockTeacher {
   yearsExperience?: number;
 }
 
+export type TeacherUser = {
+  type: "teacher";
+  id: string;
+  name: string;
+  email: string;
+  school: string;
+  subjects: string[];
+  phoneNumber?: string;
+  startDate?: string;
+  yearsExperience?: number;
+};
+
+export type BoardUser = {
+  type: "board";
+  id: string;
+  name: string;
+  email: string;
+  schools: string[];
+};
+
+export type AdminUser = {
+  type: "admin";
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type User = TeacherUser | BoardUser | AdminUser;
+
 type NotificationType = "evalCompleted" | "newStudent" | "reportReady" | "meetingScheduled";
 
 export interface MockNotification {
@@ -42,22 +72,25 @@ export interface MockNotification {
 
 // Mock API responses
 export const mockApiData = {
+  schools: [
+    { id: 1, name: "École Primaire Saint-Laurent" },
+  ],
   students: [
-    { id: 1, name: "Amélie Dubois", classIds: [1, 2] },
-    { id: 2, name: "Benjamin Tremblay", classIds: [1] },
-    { id: 3, name: "Charlotte Gagnon", classIds: [1] },
-    { id: 4, name: "David Roy", classIds: [1, 3] },
-    { id: 5, name: "Émilie Côté", classIds: [1] },
-    { id: 6, name: "François Bouchard", classIds: [1] },
-    { id: 7, name: "Gabrielle Gauthier", classIds: [1, 2] },
-    { id: 8, name: "Hugo Morin", classIds: [1] },
-    { id: 9, name: "Isabelle Fortin", classIds: [1] },
-    { id: 10, name: "Julien Cloutier", classIds: [1] },
-    { id: 11, name: "Léa Bergeron", classIds: [2] },
-    { id: 12, name: "Marc Lefebvre", classIds: [2, 3] },
-    { id: 13, name: "Sophie Martin", classIds: [2] },
-    { id: 14, name: "Thomas Lavoie", classIds: [3] },
-    { id: 15, name: "Valérie Beaulieu", classIds: [3] },
+    { id: 1, name: "Amélie Dubois", classIds: [1, 2], schoolId: 1 },
+    { id: 2, name: "Benjamin Tremblay", classIds: [1], schoolId: 1 },
+    { id: 3, name: "Charlotte Gagnon", classIds: [1], schoolId: 1 },
+    { id: 4, name: "David Roy", classIds: [1, 3], schoolId: 1 },
+    { id: 5, name: "Émilie Côté", classIds: [1], schoolId: 1 },
+    { id: 6, name: "François Bouchard", classIds: [1], schoolId: 1 },
+    { id: 7, name: "Gabrielle Gauthier", classIds: [1, 2], schoolId: 1 },
+    { id: 8, name: "Hugo Morin", classIds: [1], schoolId: 1 },
+    { id: 9, name: "Isabelle Fortin", classIds: [1], schoolId: 1 },
+    { id: 10, name: "Julien Cloutier", classIds: [1], schoolId: 1 },
+    { id: 11, name: "Léa Bergeron", classIds: [2], schoolId: 1 },
+    { id: 12, name: "Marc Lefebvre", classIds: [2, 3], schoolId: 1 },
+    { id: 13, name: "Sophie Martin", classIds: [2], schoolId: 1 },
+    { id: 14, name: "Thomas Lavoie", classIds: [3], schoolId: 1 },
+    { id: 15, name: "Valérie Beaulieu", classIds: [3], schoolId: 1 },
   ] as MockStudent[],
 
   classes: [
@@ -217,6 +250,33 @@ export const mockApiData = {
     yearsExperience: 12,
   } as MockTeacher,
 
+  users: [
+    {
+      type: "teacher" as const,
+      id: "t-1",
+      name: "Madame Gisèle Tremblay",
+      email: "gisele.tremblay@ecole.qc.ca",
+      school: "École Primaire Saint-Laurent",
+      subjects: ["Français", "Mathématiques", "Sciences"],
+      phoneNumber: "(514) 555-0123",
+      startDate: "Septembre 2018",
+      yearsExperience: 12,
+    },
+    {
+      type: "board" as const,
+      id: "b-1",
+      name: "Jean-Luc Bouchard",
+      email: "jean-luc.bouchard@ecole.qc.ca",
+      schools: ["École Primaire Saint-Laurent", "École Secondaire Mont-Royal"],
+    },
+    {
+      type: "admin" as const,
+      id: "a-1",
+      name: "Admin",
+      email: "admin@ecole.qc.ca",
+    },
+  ] as User[],
+
   notifications: [
     {
       id: 1,
@@ -271,12 +331,14 @@ export const mockApi = {
   createStudent: async (
     name: string,
     classIds: number[] = [],
+    schoolId: number = 1,
   ): Promise<MockStudent> => {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
     const newStudent: MockStudent = {
       id: mockApiData.students.length + 1,
       name,
       classIds,
+      schoolId,
     };
     mockApiData.students.push(newStudent);
     
@@ -390,5 +452,11 @@ export const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
     mockApiData.notifications.forEach((n) => (n.read = true));
     return mockApiData.notifications;
+  },
+
+  // Auth
+  getUserByType: async (type: User["type"]): Promise<User | null> => {
+    await new Promise((resolve) => setTimeout(resolve, API_DELAY / 2));
+    return mockApiData.users.find((u) => u.type === type) || null;
   },
 };

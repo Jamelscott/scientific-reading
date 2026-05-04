@@ -12,3 +12,9 @@ export { useAppStore } from "./useAppStore";
 
 export { useEvaluationsStore } from "./useEvaluationsStore";
 export type { Evaluation } from "./useEvaluationsStore";
+
+export { useAuthStore } from "./useAuthStore";
+export type { AuthUser, TeacherUser, BoardUser, AdminUser } from "./useAuthStore";
+
+export { useSchoolStore } from "./useSchoolStore";
+export type { School } from "./useSchoolStore";

@@ -8,7 +8,11 @@
     "reports": "Rapports",
     "profile": "Profil",
     "settings": "Paramètres",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "overview": "Aperçu",
+    "schools": "Écoles",
+    "students": "Élèves",
+    "analytics": "Analytique"
   },
   "dashboard": {
     "welcome": "Bon retour, Mme Gisèle!",
@@ -75,13 +79,35 @@
     "deleteAccount": "Supprimer le compte"
   },
   "schoolBoard": {
-    "title": "Aperçu",
-    "schoolYear": "Année scolaire",
-    "schools": "Écoles",
-    "students": "Élèves",
-    "teachers": "Enseignants",
-    "successRate": "Taux de réussite",
-    "analytique": "Analytique"
+    "dashboard": {
+      "title": "Aperçu du conseil scolaire",
+      "schoolYear": "Année scolaire",
+      "schools": "Écoles",
+      "students": "Élèves",
+      "teachers": "Enseignants",
+      "successRate": "Taux de réussite",
+      "analytique": "Analytique",
+      "numberOfSchools": "Nombre d'écoles",
+      "numberOfStudents": "Nombre d'élèves",
+      "successPercent": "% réussite",
+      "adequatePercent": "% adéquat",
+      "failurePercent": "% échec",
+      "avgSuccessRateBySchool": "Taux de réussite moyen par école",
+      "performanceDistribution": "Répartition de la performance",
+      "recentActivity": "Activité récente",
+      "performance": {
+        "success": "Réussite",
+        "adequate": "Adéquat",
+        "failure": "Échec"
+      },
+      "activity": {
+        "newEvaluation": "Nouvelle évaluation complétée",
+        "monthlyReport": "Rapport mensuel généré",
+        "resultsUpdate": "Mise à jour des résultats",
+        "hoursAgo": "Il y a {{count}} heures",
+        "dayAgo": "Il y a {{count}} jour"
+      }
+    }
   },
   "reports": {
     "subtitle": "Consultez l'analytique de performance et les aperçus",

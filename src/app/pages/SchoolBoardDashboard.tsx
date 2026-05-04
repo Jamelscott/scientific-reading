@@ -1,13 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  BookOpen,
-  School,
-  Users,
   BarChart3,
-  FileText,
-  TrendingUp,
-  Settings,
   ChevronDown,
+  School,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 import {
   BarChart,
@@ -21,6 +19,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { Sidebar } from "../components/Sidebar";
 
 const schoolData = [
   { name: "École Laurier", rate: 78 },
@@ -30,69 +29,34 @@ const schoolData = [
   { name: "École Riverside", rate: 80 },
 ];
 
-const performanceData = [
-  { name: "Réussite", value: 68, color: "#c9e265" },
-  { name: "Adéquat", value: 22, color: "#ffde59" },
-  { name: "Échec", value: 10, color: "#ff5757" },
+const performanceKeys = [
+  { key: "schoolBoard.dashboard.performance.success", value: 68, color: "#c9e265" },
+  { key: "schoolBoard.dashboard.performance.adequate", value: 22, color: "#ffde59" },
+  { key: "schoolBoard.dashboard.performance.failure", value: 10, color: "#ff5757" },
 ];
 
 export function SchoolBoardDashboard() {
+  const { t } = useTranslation();
   const [selectedYear, setSelectedYear] = useState("2023-2024");
 
-  const menuItems = [
-    { icon: TrendingUp, label: "Aperçu", active: true },
-    { icon: School, label: "Écoles", active: false },
-    { icon: Users, label: "Élèves", active: false },
-    { icon: BarChart3, label: "Rapports", active: false },
-    { icon: FileText, label: "Évaluations", active: false },
-    { icon: BarChart3, label: "Analytique", active: false },
-    { icon: Settings, label: "Paramètres", active: false },
-  ];
+  const performanceData = performanceKeys.map((item) => ({
+    ...item,
+    name: t(item.key),
+  }));
 
   return (
     <div
       className="h-screen flex overflow-hidden"
       style={{ background: "#dff3ff" }}
     >
-      <div
-        className="w-64 p-6 flex flex-col overflow-y-auto"
-        style={{ background: "#ffffff", borderRight: "1px solid #dff3ff" }}
-      >
-        <div className="flex items-center gap-3 mb-12">
-          <BookOpen className="w-8 h-8" style={{ color: "#004aad" }} />
-          <div>
-            <h1 className="text-xl" style={{ color: "#004aad" }}>
-              Lecture scientifique
-            </h1>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all"
-                style={{
-                  background: item.active ? "#dff3ff" : "transparent",
-                  color: item.active ? "#004aad" : "#000000",
-                }}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-12 overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl" style={{ color: "#004aad" }}>
-            Aperçu du conseil scolaire
+            {t("schoolBoard.dashboard.title")}
           </h1>
           <div className="relative">
             <select
@@ -105,9 +69,15 @@ export function SchoolBoardDashboard() {
                 color: "#004aad",
               }}
             >
-              <option value="2023-2024">2023-2024 Année scolaire</option>
-              <option value="2022-2023">2022-2023 Année scolaire</option>
-              <option value="2021-2022">2021-2022 Année scolaire</option>
+              <option value="2023-2024">
+                2023-2024 {t("schoolBoard.dashboard.schoolYear")}
+              </option>
+              <option value="2022-2023">
+                2022-2023 {t("schoolBoard.dashboard.schoolYear")}
+              </option>
+              <option value="2021-2022">
+                2021-2022 {t("schoolBoard.dashboard.schoolYear")}
+              </option>
             </select>
             <ChevronDown
               className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
@@ -129,7 +99,7 @@ export function SchoolBoardDashboard() {
               <School className="w-6 h-6" style={{ color: "#004aad" }} />
             </div>
             <p className="text-sm mb-2" style={{ color: "#000000" }}>
-              Nombre d'écoles
+              {t("schoolBoard.dashboard.numberOfSchools")}
             </p>
             <p className="text-3xl" style={{ color: "#004aad" }}>
               25
@@ -147,7 +117,7 @@ export function SchoolBoardDashboard() {
               <Users className="w-6 h-6" style={{ color: "#004aad" }} />
             </div>
             <p className="text-sm mb-2" style={{ color: "#000000" }}>
-              Nombre d'élèves
+              {t("schoolBoard.dashboard.numberOfStudents")}
             </p>
             <p className="text-3xl" style={{ color: "#004aad" }}>
               3,245
@@ -165,7 +135,7 @@ export function SchoolBoardDashboard() {
               <TrendingUp className="w-6 h-6" style={{ color: "#000000" }} />
             </div>
             <p className="text-sm mb-2" style={{ color: "#000000" }}>
-              % réussite
+              {t("schoolBoard.dashboard.successPercent")}
             </p>
             <p className="text-3xl" style={{ color: "#004aad" }}>
               68%
@@ -183,7 +153,7 @@ export function SchoolBoardDashboard() {
               <BarChart3 className="w-6 h-6" style={{ color: "#000000" }} />
             </div>
             <p className="text-sm mb-2" style={{ color: "#000000" }}>
-              % adéquat
+              {t("schoolBoard.dashboard.adequatePercent")}
             </p>
             <p className="text-3xl" style={{ color: "#004aad" }}>
               22%
@@ -201,7 +171,7 @@ export function SchoolBoardDashboard() {
               <TrendingUp className="w-6 h-6" style={{ color: "#ffffff" }} />
             </div>
             <p className="text-sm mb-2" style={{ color: "#000000" }}>
-              % échec
+              {t("schoolBoard.dashboard.failurePercent")}
             </p>
             <p className="text-3xl" style={{ color: "#004aad" }}>
               10%
@@ -217,7 +187,7 @@ export function SchoolBoardDashboard() {
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
-              Taux de réussite moyen par école
+              {t("schoolBoard.dashboard.avgSuccessRateBySchool")}
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={schoolData}>
@@ -242,7 +212,7 @@ export function SchoolBoardDashboard() {
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
-              Répartition de la performance
+              {t("schoolBoard.dashboard.performanceDistribution")}
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -284,24 +254,24 @@ export function SchoolBoardDashboard() {
           style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
         >
           <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
-            Activité récente
+            {t("schoolBoard.dashboard.recentActivity")}
           </h2>
           <div className="space-y-4">
             {[
               {
                 school: "École Laurier",
-                action: "Nouvelle évaluation complétée",
-                time: "Il y a 2 heures",
+                action: t("schoolBoard.dashboard.activity.newEvaluation"),
+                time: t("schoolBoard.dashboard.activity.hoursAgo", { count: 2 }),
               },
               {
                 school: "École Saint-Jean",
-                action: "Rapport mensuel généré",
-                time: "Il y a 5 heures",
+                action: t("schoolBoard.dashboard.activity.monthlyReport"),
+                time: t("schoolBoard.dashboard.activity.hoursAgo", { count: 5 }),
               },
               {
                 school: "École Montcalm",
-                action: "Mise à jour des résultats",
-                time: "Il y a 1 jour",
+                action: t("schoolBoard.dashboard.activity.resultsUpdate"),
+                time: t("schoolBoard.dashboard.activity.dayAgo", { count: 1 }),
               },
             ].map((activity, idx) => (
               <div

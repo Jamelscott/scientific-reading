@@ -7,11 +7,12 @@ export interface Student {
   id: number;
   name: string;
   classIds: number[];
+  schoolId: number;
 }
 
 interface StudentStore {
   students: Student[];
-  addStudent: (firstName: string, lastName: string, classIds?: number[]) => void;
+  addStudent: (firstName: string, lastName: string, classIds?: number[], schoolId?: number) => void;
   removeClassFromStudent: (studentId: number, classId: number) => void;
 }
 
@@ -19,19 +20,17 @@ export const useStudentStore = create<StudentStore>()(
   persist(
     (set) => ({
       students: mockApiData.students,
-      addStudent: (firstName: string, lastName: string, classIds = []) =>
+      addStudent: (firstName: string, lastName: string, classIds = [], schoolId = 1) =>
         set((state) => {
           const maxId = state.students.reduce(
             (max, student) => Math.max(max, student.id),
             0
           );
           const newStudentId = maxId + 1;
-          
           // Update class store for each classId
           classIds.forEach((classId) => {
             useClassStore.getState().addStudentToClass(classId, newStudentId);
           });
-          
           return {
             students: [
               ...state.students,
@@ -39,6 +38,7 @@ export const useStudentStore = create<StudentStore>()(
                 id: newStudentId,
                 name: `${firstName} ${lastName}`,
                 classIds: classIds,
+                schoolId: schoolId,
               },
             ],
           };

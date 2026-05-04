@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, GraduationCap, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "../../stores";
+import { mockApiData, type User } from "../../../mockData";
 
 export function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -17,7 +20,14 @@ export function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    navigate("/teacher-dashboard");
+  };
+
+  const handleQuickLogin = (type: "teacher" | "board") => {
+    const user = mockApiData.users.find((u: User) => u.type === type);
+    if (!user) return;
+    login(user);
+    navigate(type === "teacher" ? "/teacher-dashboard" : "/board-dashboard");
   };
 
   return (
@@ -299,6 +309,44 @@ export function LoginPage() {
                 </svg>
                 {t("login.googleSignIn")}
               </button>
+
+              {/* Dev Quick Login */}
+              <div className="pt-2">
+                <p
+                  className="text-xs text-center mb-3"
+                  style={{ color: "#aaaaaa" }}
+                >
+                  Quick login (beta only)
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin("teacher")}
+                    className="flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 text-sm"
+                    style={{
+                      background: "#dff3ff",
+                      borderColor: "#38b6ff",
+                      color: "#004aad",
+                    }}
+                  >
+                    <GraduationCap className="w-4 h-4" />
+                    Teacher
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin("board")}
+                    className="flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 text-sm"
+                    style={{
+                      background: "#f8ffdb",
+                      borderColor: "#c9e265",
+                      color: "#004aad",
+                    }}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    Board Member
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
         </div>

@@ -8,7 +8,11 @@
     "reports": "Reports",
     "profile": "Profile",
     "settings": "Settings",
-    "logout": "Log out"
+    "logout": "Log out",
+    "overview": "Overview",
+    "schools": "Schools",
+    "students": "Students",
+    "analytics": "Analytics"
   },
   "dashboard": {
     "welcome": "Welcome back, Ms. Gisèle!",
@@ -75,13 +79,35 @@
     "deleteAccount": "Delete account"
   },
   "schoolBoard": {
-    "title": "Overview",
-    "schoolYear": "School year",
-    "schools": "Schools",
-    "students": "Students",
-    "teachers": "Teachers",
-    "successRate": "Success rate",
-    "analytique": "Analytics"
+    "dashboard": {
+      "title": "School Board Overview",
+      "schoolYear": "School year",
+      "schools": "Schools",
+      "students": "Students",
+      "teachers": "Teachers",
+      "successRate": "Success rate",
+      "analytique": "Analytics",
+      "numberOfSchools": "Number of schools",
+      "numberOfStudents": "Number of students",
+      "successPercent": "% success",
+      "adequatePercent": "% adequate",
+      "failurePercent": "% failure",
+      "avgSuccessRateBySchool": "Average success rate by school",
+      "performanceDistribution": "Performance distribution",
+      "recentActivity": "Recent activity",
+      "performance": {
+        "success": "Success",
+        "adequate": "Adequate",
+        "failure": "Failure"
+      },
+      "activity": {
+        "newEvaluation": "New evaluation completed",
+        "monthlyReport": "Monthly report generated",
+        "resultsUpdate": "Results updated",
+        "hoursAgo": "{{count}} hours ago",
+        "dayAgo": "{{count}} day ago"
+      }
+    }
   },
   "reports": {
     "subtitle": "View performance analytics and insights",

@@ -102,7 +102,7 @@ export function ClassPage() {
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/teacher-dashboard")}
             className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all"
           >
             <ArrowLeft className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { LoginPage } from "./pages/LoginPage";
 import { TeacherDashboard } from "./pages/TeacherDashboard";
 import { ClassPage } from "./pages/ClassPage";
@@ -7,6 +7,31 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { useAuthStore } from "../stores";
+
+function RequireAuth({
+  children,
+  allowedTypes,
+}: {
+  children: React.ReactNode;
+  allowedTypes?: string[];
+}) {
+  const currentUser = useAuthStore.getState().currentUser;
+  if (!currentUser) return <Navigate to="/" replace />;
+  if (allowedTypes && !allowedTypes.includes(currentUser.type)) {
+    return (
+      <Navigate
+        to={
+          currentUser.type === "board"
+            ? "/board-dashboard"
+            : "/teacher-dashboard"
+        }
+        replace
+      />
+    );
+  }
+  return <>{children}</>;
+}
 
 export const router = createBrowserRouter([
   {
@@ -14,28 +39,52 @@ export const router = createBrowserRouter([
     Component: LoginPage,
   },
   {
-    path: "/dashboard",
-    Component: TeacherDashboard,
+    path: "/teacher-dashboard",
+    element: (
+      <RequireAuth allowedTypes={["teacher"]}>
+        <TeacherDashboard />
+      </RequireAuth>
+    ),
   },
   {
     path: "/class/:classId",
-    Component: ClassPage,
+    element: (
+      <RequireAuth allowedTypes={["teacher"]}>
+        <ClassPage />
+      </RequireAuth>
+    ),
   },
   {
-    path: "/board",
-    Component: SchoolBoardDashboard,
+    path: "/board-dashboard",
+    element: (
+      <RequireAuth allowedTypes={["board"]}>
+        <SchoolBoardDashboard />
+      </RequireAuth>
+    ),
   },
   {
     path: "/profile",
-    Component: ProfilePage,
+    element: (
+      <RequireAuth allowedTypes={["teacher"]}>
+        <ProfilePage />
+      </RequireAuth>
+    ),
   },
   {
     path: "/settings",
-    Component: SettingsPage,
+    element: (
+      <RequireAuth>
+        <SettingsPage />
+      </RequireAuth>
+    ),
   },
   {
     path: "/rapports",
-    Component: ReportsPage,
+    element: (
+      <RequireAuth allowedTypes={["teacher"]}>
+        <ReportsPage />
+      </RequireAuth>
+    ),
   },
   {
     path: "*",
