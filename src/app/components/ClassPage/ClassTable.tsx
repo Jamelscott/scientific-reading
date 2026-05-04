@@ -46,7 +46,19 @@ export function ClassTable({
                   >
                     {t("studentTracking.studentName")}
                   </th>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <th
+                    className="px-4 py-4 text-center"
+                    style={{ color: "#004aad", minWidth: "80px" }}
+                  >
+                    {t("studentTracking.evaluation")} 1A
+                  </th>
+                  <th
+                    className="px-4 py-4 text-center"
+                    style={{ color: "#004aad", minWidth: "80px" }}
+                  >
+                    {t("studentTracking.evaluation")} 1B
+                  </th>
+                  {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <th
                       key={num}
                       className="px-4 py-4 text-center"
@@ -61,7 +73,7 @@ export function ClassTable({
                 {students.map((student, idx) => {
                   const studentEvaluation = evaluationMap.get(student.id);
                   const studentEvaluations =
-                    studentEvaluation?.evaluations || Array(10).fill(null);
+                    studentEvaluation?.evaluations || Array(11).fill(null);
 
                   return (
                     <tr
@@ -90,33 +102,46 @@ export function ClassTable({
                           key={evalIdx}
                           className="px-4 py-4 text-center"
                           style={{
-                            background: idx % 2 === 0 ? "#ffffff" : "#dff3ff",
+                            background:
+                              evalIdx === studentEvaluations.length
+                                ? "#dff3ff"
+                                : idx % 2 === 0
+                                  ? "#ffffff"
+                                  : "#dff3ff",
                           }}
                         >
-                          {status ? (
-                            <EvaluationButton
-                              status={status}
-                              onClick={() =>
-                                onStudentClick(
-                                  student.id,
-                                  student.name,
-                                  studentEvaluations,
-                                )
-                              }
-                            />
-                          ) : (
-                            <EvaluationButton
-                              status={status}
-                              onClick={() =>
-                                onStudentClick(
-                                  student.id,
-                                  student.name,
-                                  studentEvaluations,
-                                )
-                              }
-                              empty
-                            />
-                          )}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            {status ? (
+                              <EvaluationButton
+                                status={status}
+                                onClick={() =>
+                                  onStudentClick(
+                                    student.id,
+                                    student.name,
+                                    studentEvaluations,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <EvaluationButton
+                                status={status}
+                                onClick={() =>
+                                  onStudentClick(
+                                    student.id,
+                                    student.name,
+                                    studentEvaluations,
+                                  )
+                                }
+                                empty
+                              />
+                            )}
+                          </div>
                         </td>
                       ))}
                     </tr>

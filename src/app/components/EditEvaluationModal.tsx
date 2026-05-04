@@ -39,15 +39,18 @@ export function EditEvaluationModal({
   const removeClassFromStudent = useStudentStore(
     (state) => state.removeClassFromStudent,
   );
-  const [evaluations, setEvaluations] =
-    useState<("success" | "adequate" | "needs-improvement" | null)[]>(
-      currentEvaluations,
-    );
+  const [evaluations, setEvaluations] = useState<
+    ("success" | "adequate" | "needs-improvement" | null)[]
+  >([...currentEvaluations, ...Array(11)].slice(0, 11).map((v) => v ?? null));
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setEvaluations(currentEvaluations);
+      setEvaluations(
+        [...currentEvaluations, ...Array(11)]
+          .slice(0, 11)
+          .map((v) => v ?? null),
+      );
     } else {
       setEvaluations([]);
     }
@@ -127,93 +130,101 @@ export function EditEvaluationModal({
 
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <div className="grid grid-cols-5 gap-4">
-              {evaluations.map((status, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <label className="text-sm" style={{ color: "#000000" }}>
-                    {t("studentTracking.evaluation")} {index + 1}
-                  </label>
-                  <div className="flex flex-col gap-2 w-full">
-                    <button
-                      type="button"
-                      onClick={() => handleEvaluationClick(index, "success")}
-                      className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
-                      style={{
-                        background:
-                          status === "success" ? "#c9e265" : "#f8ffdb",
-                        border:
-                          status === "success"
-                            ? "2px solid #004aad"
-                            : "1px solid #ddd",
-                        color: "#000000",
-                      }}
-                    >
-                      ✓
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEvaluationClick(index, "adequate")}
-                      className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
-                      style={{
-                        background:
-                          status === "adequate" ? "#ffde59" : "#f8ffdb",
-                        border:
-                          status === "adequate"
-                            ? "2px solid #004aad"
-                            : "1px solid #ddd",
-                        color: status === "adequate" ? "#ffffff" : "#000000",
-                      }}
-                    >
-                      ~
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleEvaluationClick(index, "needs-improvement")
-                      }
-                      className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
-                      style={{
-                        background:
-                          status === "needs-improvement"
-                            ? "#ff5757"
-                            : "#f8ffdb",
-                        border:
-                          status === "needs-improvement"
-                            ? "2px solid #004aad"
-                            : "1px solid #ddd",
-                        color:
-                          status === "needs-improvement"
-                            ? "#ffffff"
-                            : "#000000",
-                      }}
-                    >
-                      !
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEvaluations((prev) => {
-                          const newEvals = [...prev];
-                          newEvals[index] = null;
-                          return newEvals;
-                        })
-                      }
-                      className="w-full h-10 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
-                      style={{
-                        background: status === null ? "#e0e0e0" : "#ffffff",
-                        border:
-                          status === null
-                            ? "2px solid #004aad"
-                            : "1px solid #ddd",
-                        color: "#666666",
-                        fontSize: "0.75rem",
-                      }}
-                    >
-                      Clear
-                    </button>
+            <div className="grid grid-cols-6 gap-4">
+              {evaluations.map((status, index) => {
+                const getLabel = (idx: number) => {
+                  if (idx === 0) return "1A";
+                  if (idx === 1) return "1B";
+                  return `${idx}`;
+                };
+
+                return (
+                  <div key={index} className="flex flex-col items-center gap-2">
+                    <label className="text-sm" style={{ color: "#000000" }}>
+                      {t("studentTracking.evaluation")} {getLabel(index)}
+                    </label>
+                    <div className="flex flex-col gap-2 w-full">
+                      <button
+                        type="button"
+                        onClick={() => handleEvaluationClick(index, "success")}
+                        className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
+                        style={{
+                          background:
+                            status === "success" ? "#c9e265" : "#f8ffdb",
+                          border:
+                            status === "success"
+                              ? "2px solid #004aad"
+                              : "1px solid #ddd",
+                          color: "#000000",
+                        }}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleEvaluationClick(index, "adequate")}
+                        className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
+                        style={{
+                          background:
+                            status === "adequate" ? "#ffde59" : "#f8ffdb",
+                          border:
+                            status === "adequate"
+                              ? "2px solid #004aad"
+                              : "1px solid #ddd",
+                          color: status === "adequate" ? "#ffffff" : "#000000",
+                        }}
+                      >
+                        ~
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleEvaluationClick(index, "needs-improvement")
+                        }
+                        className="w-full h-12 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
+                        style={{
+                          background:
+                            status === "needs-improvement"
+                              ? "#ff5757"
+                              : "#f8ffdb",
+                          border:
+                            status === "needs-improvement"
+                              ? "2px solid #004aad"
+                              : "1px solid #ddd",
+                          color:
+                            status === "needs-improvement"
+                              ? "#ffffff"
+                              : "#000000",
+                        }}
+                      >
+                        !
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEvaluations((prev) => {
+                            const newEvals = [...prev];
+                            newEvals[index] = null;
+                            return newEvals;
+                          })
+                        }
+                        className="w-full h-10 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
+                        style={{
+                          background: status === null ? "#e0e0e0" : "#ffffff",
+                          border:
+                            status === null
+                              ? "2px solid #004aad"
+                              : "1px solid #ddd",
+                          color: "#666666",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

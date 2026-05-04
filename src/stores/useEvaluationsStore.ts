@@ -55,7 +55,7 @@ export const useEvaluationsStore = create<EvaluationsStore>()(
               id: Date.now(), // temporary ID
               studentId,
               classId,
-              evaluations: Array(10).fill(null),
+              evaluations: Array(11).fill(null),
             };
             newEval.evaluations[evaluationIndex] = status;
             evaluations.push(newEval);

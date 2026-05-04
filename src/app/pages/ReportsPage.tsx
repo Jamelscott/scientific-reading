@@ -157,9 +157,9 @@ export function ReportsPage() {
     });
 
     return [
-      { name: "good", value: goodStudents, color: "#c9e265" },
-      { name: "satisfactory", value: satisfactoryStudents, color: "#ffde59" },
-      { name: "failing", value: failingStudents, color: "#ff5757" },
+      { name: "success", value: goodStudents, color: "#c9e265" },
+      { name: "adequate", value: satisfactoryStudents, color: "#ffde59" },
+      { name: "needsImprovement", value: failingStudents, color: "#ff5757" },
     ];
   };
 

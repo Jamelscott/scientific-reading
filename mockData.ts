@@ -19,7 +19,7 @@ export interface MockEvaluation {
   id: number;
   studentId: number;
   classId: number;
-  evaluations: ("success" | "adequate" | "needs-improvement" | null)[]; // Always 10 evaluations
+  evaluations: ("success" | "adequate" | "needs-improvement" | null)[]; // 11 evaluations: Unit 1A, 1B, 2-10
 }
 
 export interface MockTeacher {
@@ -92,117 +92,117 @@ export const mockApiData = {
       id: 1,
       studentId: 1,
       classId: 1,
-      evaluations: ["success", "success", "adequate", "success", "success", "adequate", "success", "success", null, null],
+      evaluations: ["success", "success", "success", "adequate", "success", "success", "adequate", "success", "success", null, null],
     },
     {
       id: 2,
       studentId: 2,
       classId: 1,
-      evaluations: ["adequate", "success", "success", "adequate", "success", "success", "adequate", null, null, null],
+      evaluations: ["adequate", "adequate", "success", "success", "adequate", "success", "success", "adequate", null, null, null],
     },
     {
       id: 3,
       studentId: 3,
       classId: 1,
-      evaluations: ["success", "adequate", "adequate", "needs-improvement", "adequate", "success", null, null, null, null],
+      evaluations: ["success", "success", "adequate", "adequate", "needs-improvement", "adequate", "success", null, null, null, null],
     },
     {
       id: 4,
       studentId: 4,
       classId: 1,
-      evaluations: ["needs-improvement", "adequate", "adequate", "adequate", "success", null, null, null, null, null],
+      evaluations: ["needs-improvement", "adequate", "adequate", "adequate", "adequate", "success", null, null, null, null, null],
     },
     {
       id: 5,
       studentId: 5,
       classId: 1,
-      evaluations: ["success", "success", "success", "success", "success", "success", "success", "success", null, null],
+      evaluations: ["success", "success", "success", "success", "success", "success", "success", "success", "success", null, null],
     },
     {
       id: 6,
       studentId: 6,
       classId: 1,
-      evaluations: ["adequate", "adequate", "success", "adequate", "adequate", "success", "adequate", null, null, null],
+      evaluations: ["adequate", "success", "adequate", "success", "adequate", "adequate", "success", "adequate", null, null, null],
     },
     {
       id: 7,
       studentId: 7,
       classId: 1,
-      evaluations: ["success", "success", "adequate", "success", "success", "adequate", "success", null, null, null],
+      evaluations: ["success", "adequate", "success", "adequate", "success", "success", "adequate", "success", null, null, null],
     },
     {
       id: 8,
       studentId: 8,
       classId: 1,
-      evaluations: ["needs-improvement", "adequate", "needs-improvement", "adequate", "adequate", null, null, null, null, null],
+      evaluations: ["needs-improvement", "adequate", "adequate", "needs-improvement", "adequate", "adequate", null, null, null, null, null],
     },
     {
       id: 9,
       studentId: 9,
       classId: 1,
-      evaluations: ["success", "success", "success", "adequate", "success", "success", "success", "success", null, null],
+      evaluations: ["success", "success", "success", "success", "adequate", "success", "success", "success", "success", null, null],
     },
     {
       id: 10,
       studentId: 10,
       classId: 1,
-      evaluations: ["adequate", "adequate", "adequate", "success", "adequate", "adequate", null, null, null, null],
+      evaluations: ["adequate", "adequate", "adequate", "adequate", "success", "adequate", "adequate", null, null, null, null],
     },
     // Class 2 evaluations
     {
       id: 11,
       studentId: 1,
       classId: 2,
-      evaluations: ["success", "adequate", "success", "success", "adequate", "success", null, null, null, null],
+      evaluations: ["success", "success", "adequate", "success", "success", "adequate", "success", null, null, null, null],
     },
     {
       id: 12,
       studentId: 7,
       classId: 2,
-      evaluations: ["adequate", "success", "success", "adequate", "success", null, null, null, null, null],
+      evaluations: ["adequate", "adequate", "success", "success", "adequate", "success", null, null, null, null, null],
     },
     {
       id: 13,
       studentId: 11,
       classId: 2,
-      evaluations: ["success", "adequate", "success", "success", null, null, null, null, null, null],
+      evaluations: ["success", "success", "adequate", "success", "success", null, null, null, null, null, null],
     },
     {
       id: 14,
       studentId: 12,
       classId: 2,
-      evaluations: ["adequate", "needs-improvement", "adequate", "adequate", "adequate", null, null, null, null, null],
+      evaluations: ["adequate", "adequate", "needs-improvement", "adequate", "adequate", "adequate", null, null, null, null, null],
     },
     {
       id: 15,
       studentId: 13,
       classId: 2,
-      evaluations: ["success", "success", "adequate", "success", "success", null, null, null, null, null],
+      evaluations: ["success", "adequate", "success", "adequate", "success", "success", null, null, null, null, null],
     },
     // Class 3 evaluations
     {
       id: 16,
       studentId: 4,
       classId: 3,
-      evaluations: ["needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null, null],
+      evaluations: ["needs-improvement", "adequate", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null, null],
     },
     {
       id: 17,
       studentId: 12,
       classId: 3,
-      evaluations: ["needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null],
+      evaluations: ["needs-improvement", "needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null],
     },
     {
       id: 18,
       studentId: 14,
       classId: 3,
-      evaluations: ["needs-improvement", "needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null],
+      evaluations: ["needs-improvement", "adequate", "needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null],
     },
     {
       id: 19,
       studentId: 15,
       classId: 3,
-      evaluations: ["needs-improvement", "adequate", "needs-improvement", "needs-improvement", "needs-improvement", null, null, null, null, null],
+      evaluations: ["needs-improvement", "needs-improvement", "adequate", "needs-improvement", "needs-improvement", "needs-improvement", null, null, null, null, null],
     },
   ] as MockEvaluation[],
 
@@ -292,7 +292,7 @@ export const mockApi = {
           id: mockApiData.evaluations.length + 1,
           studentId: newStudent.id,
           classId: classId,
-          evaluations: Array(10).fill(null),
+          evaluations: Array(11).fill(null),
         });
       }
     });

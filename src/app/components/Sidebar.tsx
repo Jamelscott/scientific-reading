@@ -40,7 +40,7 @@ export function Sidebar() {
         <div className="flex items-center gap-3">
           <BookOpen className="w-8 h-8" style={{ color: "#004aad" }} />
           <h1 className="text-xl" style={{ color: "#004aad" }}>
-            {t("app.title")}
+            Lecture scientifique
           </h1>
         </div>
       </div>
