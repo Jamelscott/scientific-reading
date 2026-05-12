@@ -21,37 +21,37 @@ export interface SidebarItem {
 }
 
 const teacherNavItems: SidebarItem[] = [
-  { icon: Users, label: "nav.myClasses", path: "/teacher-dashboard" },
-  { icon: FileText, label: "nav.evaluations", path: "/evaluations" },
-  { icon: BarChart3, label: "nav.reports", path: "/rapports" },
-  { icon: User, label: "nav.profile", path: "/profile" },
-  { icon: Settings, label: "nav.settings", path: "/settings" },
+  { icon: Users, label: "nav.myClasses", path: "/teacher/dashboard" },
+  { icon: FileText, label: "nav.evaluations", path: "/teacher/evaluations" },
+  { icon: BarChart3, label: "nav.reports", path: "/teacher/reports" },
+  { icon: User, label: "nav.profile", path: "/teacher/profile" },
+  { icon: Settings, label: "nav.settings", path: "/teacher/settings" },
+];
+
+const schoolNavItems: SidebarItem[] = [
+  { icon: TrendingUp, label: "nav.overview", path: "/school/dashboard" },
+  { icon: Users, label: "nav.teachers", path: "/school/teachers" },
+  { icon: BarChart3, label: "nav.reports", path: "/school/reports" },
+  { icon: User, label: "nav.profile", path: "/school/profile" },
+  { icon: Settings, label: "nav.settings", path: "/school/settings" },
 ];
 
 const boardNavItems: SidebarItem[] = [
-  { icon: TrendingUp, label: "nav.overview", path: "/board-dashboard" },
-  { icon: School, label: "nav.schools", path: "/board-dashboard/schools" },
-  { icon: Users, label: "nav.students", path: "/board-dashboard/students" },
-  { icon: BarChart3, label: "nav.reports", path: "/board-dashboard/reports" },
-  {
-    icon: FileText,
-    label: "nav.evaluations",
-    path: "/board-dashboard/evaluations",
-  },
-  {
-    icon: BarChart3,
-    label: "nav.analytics",
-    path: "/board-dashboard/analytics",
-  },
-  { icon: Settings, label: "nav.settings", path: "/settings" },
+  { icon: TrendingUp, label: "nav.overview", path: "/board/dashboard" },
+  { icon: School, label: "nav.schools", path: "/board/schools" },
+  { icon: BarChart3, label: "nav.reports", path: "/board/reports" },
+  { icon: User, label: "nav.profile", path: "/board/profile" },
+  { icon: Settings, label: "nav.settings", path: "/board/settings" },
 ];
 
 function SidebarShell({
   items,
   useTranslationKey = false,
+  portalKey,
 }: {
   items: SidebarItem[];
   useTranslationKey?: boolean;
+  portalKey: string;
 }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -65,15 +65,38 @@ function SidebarShell({
 
   return (
     <div
-      className="w-64 p-6 flex flex-col overflow-y-auto flex-shrink-0"
+      className="w-72 p-6 flex flex-col overflow-y-auto flex-shrink-0"
       style={{ background: "#ffffff", borderRight: "1px solid #dff3ff" }}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 mb-6">
         <BookOpen className="w-8 h-8" style={{ color: "#004aad" }} />
-        <h1 className="text-xl" style={{ color: "#004aad" }}>
-          Lecture scientifique
-        </h1>
+        <div>
+          <h1 className="text-xl" style={{ color: "#004aad" }}>
+            Lecture Scientifique
+          </h1>
+          <p
+            className="text-xs mt-0.5 px-2 py-0.5 rounded-full inline-block"
+            style={{
+              background:
+                portalKey === "portal.board"
+                  ? "var(--portal-board-bg)"
+                  : portalKey === "portal.school"
+                    ? "var(--portal-school-bg)"
+                    : "var(--portal-teacher-bg)",
+              border: `1px solid ${
+                portalKey === "portal.board"
+                  ? "var(--portal-board-border)"
+                  : portalKey === "portal.school"
+                    ? "var(--portal-school-border)"
+                    : "var(--portal-teacher-border)"
+              }`,
+              color: "#004aad",
+            }}
+          >
+            {t(portalKey)}
+          </p>
+        </div>
       </div>
 
       {/* Nav Items */}
@@ -114,7 +137,28 @@ function SidebarShell({
 export function Sidebar() {
   const currentUser = useAuthStore((state) => state.currentUser);
   if (currentUser?.type === "board") {
-    return <SidebarShell items={boardNavItems} useTranslationKey />;
+    return (
+      <SidebarShell
+        items={boardNavItems}
+        useTranslationKey
+        portalKey="portal.board"
+      />
+    );
   }
-  return <SidebarShell items={teacherNavItems} useTranslationKey />;
+  if (currentUser?.type === "school") {
+    return (
+      <SidebarShell
+        items={schoolNavItems}
+        useTranslationKey
+        portalKey="portal.school"
+      />
+    );
+  }
+  return (
+    <SidebarShell
+      items={teacherNavItems}
+      useTranslationKey
+      portalKey="portal.teacher"
+    />
+  );
 }

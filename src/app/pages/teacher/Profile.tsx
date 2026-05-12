@@ -1,9 +1,12 @@
-import { NotificationDropdown } from "../components/NotificationDropdown";
-import { Sidebar } from "../components/Sidebar";
-import { Initials } from "../components/Initials";
-import { TeacherDetailsForm } from "../components/ProfilePage/TeacherDetailsForm";
 import { useTranslation } from "react-i18next";
-import { useStudentStore, useClassStore, useAuthStore } from "../../stores";
+
+import { Sidebar } from "../../components/Sidebar";
+import { NotificationDropdown } from "../../components/NotificationDropdown";
+import { Initials } from "../../components/Initials";
+import { useStudentStore } from "../../../stores/useStudentStore";
+import { useClassStore } from "../../../stores";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { TeacherDetailsForm } from "../../components/ProfilePage/TeacherDetailsForm";
 
 export function ProfilePage() {
   const { t } = useTranslation();

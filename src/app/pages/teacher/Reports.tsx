@@ -1,7 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { NotificationDropdown } from "../components/NotificationDropdown";
-import { Sidebar } from "../components/Sidebar";
-import { Initials } from "../components/Initials";
+import { useClassStore } from "../../../stores/useClassStore";
+import { useStudentStore } from "../../../stores/useStudentStore";
+import { useUnitsStore } from "../../../stores/useUnitsStore";
+import { Initials } from "../../components/Initials";
+import { NotificationDropdown } from "../../components/NotificationDropdown";
+import { Sidebar } from "../../components/Sidebar";
 import {
   BookOpen,
   Users,
@@ -9,10 +12,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import { useClassStore } from "../../stores";
-import { useStudentStore } from "../../stores";
-import { useEvaluationsStore } from "../../stores";
-import { EvaluationButton } from "../components/ClassPage/EvaluationButton";
+
 import {
   BarChart,
   Bar,
@@ -30,81 +30,48 @@ export function ReportsPage() {
   const { t } = useTranslation();
   const classes = useClassStore((state) => state.classes);
   const students = useStudentStore((state) => state.students);
-  const evaluations = useEvaluationsStore((state) => state.evaluations);
+  const evaluations = useUnitsStore((state) => state.evaluations);
 
-  // Calculate weighted average score and get status label
-  // Weights: success = 3, adequate = 2, needs-improvement = 1
+  // Calculate average score (0-100)
   const calculateAverageScore = () => {
-    if (evaluations.length === 0)
-      return { score: 0, label: "needsImprovement" };
-
-    const weights = {
-      success: 3,
-      adequate: 2,
-      "needs-improvement": 1,
-    };
-
-    let totalScore = 0;
-    let totalEvaluations = 0;
-
+    let total = 0;
+    let count = 0;
     evaluations.forEach((evaluation) => {
-      evaluation.evaluations.forEach((status) => {
-        if (status && status !== null) {
-          totalScore += weights[status as keyof typeof weights];
-          totalEvaluations += 1;
+      evaluation.responses.forEach((score) => {
+        if (score !== null) {
+          total += score;
+          count++;
         }
       });
     });
-
-    const average = totalEvaluations > 0 ? totalScore / totalEvaluations : 0;
-
+    const avg = count > 0 ? total / count : 0;
     let label: "success" | "adequate" | "needsImprovement" = "needsImprovement";
-    if (average >= 2.5) {
-      label = "success";
-    } else if (average >= 1.5) {
-      label = "adequate";
-    }
-
-    return {
-      score: average.toFixed(2),
-      label,
-    };
+    if (avg >= 75) label = "success";
+    else if (avg >= 50) label = "adequate";
+    return { score: avg.toFixed(1), label };
   };
 
   // Calculate grade distribution percentages
   const calculateGradeDistribution = () => {
-    if (evaluations.length === 0)
-      return { good: 0, satisfactory: 0, failing: 0 };
-
     let goodCount = 0;
     let satisfactoryCount = 0;
     let failingCount = 0;
-    let totalEvaluations = 0;
-
+    let total = 0;
     evaluations.forEach((evaluation) => {
-      evaluation.evaluations.forEach((status) => {
-        if (status && status !== null) {
-          if (status === "success") goodCount++;
-          else if (status === "adequate") satisfactoryCount++;
+      evaluation.evaluations.forEach((score) => {
+        if (score !== null) {
+          if (score >= 75) goodCount++;
+          else if (score >= 50) satisfactoryCount++;
           else failingCount++;
-          totalEvaluations++;
+          total++;
         }
       });
     });
-
     return {
-      good:
-        totalEvaluations > 0
-          ? ((goodCount / totalEvaluations) * 100).toFixed(1)
-          : 0,
+      good: total > 0 ? ((goodCount / total) * 100).toFixed(1) : 0,
       satisfactory:
-        totalEvaluations > 0
-          ? ((satisfactoryCount / totalEvaluations) * 100).toFixed(1)
-          : 0,
-      failing:
-        totalEvaluations > 0
-          ? ((failingCount / totalEvaluations) * 100).toFixed(1)
-          : 0,
+        total > 0 ? ((satisfactoryCount / total) * 100).toFixed(1) : 0,
+      failing: total > 0 ? ((failingCount / total) * 100).toFixed(1) : 0,
     };
   };
 
@@ -113,44 +80,28 @@ export function ReportsPage() {
 
   // Calculate student distribution by performance level
   const calculateStudentDistribution = () => {
-    if (students.length === 0) return [];
-
-    const weights = {
-      success: 3,
-      adequate: 2,
-      "needs-improvement": 1,
-    };
-
     let goodStudents = 0;
     let satisfactoryStudents = 0;
     let failingStudents = 0;
 
-    // Calculate average score for each student
     students.forEach((student) => {
       const studentEvals = evaluations.filter(
         (e) => e.studentId === student.id,
       );
-      let totalScore = 0;
-      let totalCount = 0;
-
+      let total = 0;
+      let count = 0;
       studentEvals.forEach((evaluation) => {
-        evaluation.evaluations.forEach((status) => {
-          if (status && status !== null) {
-            totalScore += weights[status as keyof typeof weights];
-            totalCount++;
+        evaluation.evaluations.forEach((score) => {
+          if (score !== null) {
+            total += score;
+            count++;
           }
         });
       });
-
-      const average = totalCount > 0 ? totalScore / totalCount : 0;
-
-      if (average >= 2.5) {
-        goodStudents++;
-      } else if (average >= 1.5) {
-        satisfactoryStudents++;
-      } else {
-        failingStudents++;
-      }
+      const avg = count > 0 ? total / count : 0;
+      if (avg >= 75) goodStudents++;
+      else if (avg >= 50) satisfactoryStudents++;
+      else failingStudents++;
     });
 
     return [
@@ -162,53 +113,32 @@ export function ReportsPage() {
 
   // Calculate average score by class
   const calculateClassPerformance = () => {
-    const classPerformance: Record<
-      number,
-      {
-        totalScore: number;
-        total: number;
-      }
-    > = {};
-
-    // Initialize counters for each class
+    const classPerformance: Record<number, { total: number; count: number }> =
+      {};
     classes.forEach((cls) => {
-      classPerformance[cls.id] = {
-        totalScore: 0,
-        total: 0,
-      };
+      classPerformance[cls.id] = { total: 0, count: 0 };
     });
 
-    const weights = {
-      success: 3,
-      adequate: 2,
-      "needs-improvement": 1,
-    };
-
-    // Count evaluations by class and calculate score
     evaluations.forEach((evaluation) => {
       const classId = evaluation.classId;
       if (classPerformance[classId]) {
-        evaluation.evaluations.forEach((status) => {
-          if (status && status !== null) {
-            classPerformance[classId].totalScore +=
-              weights[status as keyof typeof weights];
-            classPerformance[classId].total++;
+        evaluation.evaluations.forEach((score) => {
+          if (score !== null) {
+            classPerformance[classId].total += score;
+            classPerformance[classId].count++;
           }
         });
       }
     });
 
-    // Convert to chart data
     return classes.map((cls) => {
-      const performance = classPerformance[cls.id];
-      const average =
-        performance.total > 0 ? performance.totalScore / performance.total : 0;
-
+      const { total, count } = classPerformance[cls.id];
+      const avg = count > 0 ? total / count : 0;
       return {
         fullName: cls.name,
         name:
           cls.name.length > 15 ? cls.name.substring(0, 8) + "..." : cls.name,
-        score: parseFloat(average.toFixed(2)),
+        score: parseFloat(avg.toFixed(1)),
       };
     });
   };
@@ -337,7 +267,7 @@ export function ReportsPage() {
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis tick={{ fill: "#000000" }} domain={[0, 3]} />
+                  <YAxis tick={{ fill: "#000000" }} domain={[0, 100]} />
                   <Tooltip
                     contentStyle={{
                       background: "#ffffff",
@@ -345,7 +275,7 @@ export function ReportsPage() {
                       borderRadius: "8px",
                       padding: "4px 8px",
                     }}
-                    formatter={(value: number) => value.toFixed(2)}
+                    formatter={(value: number) => `${value}`}
                     labelFormatter={(label: string) => {
                       const data = calculateClassPerformance();
                       const item = data.find((d) => d.name === label);
@@ -355,8 +285,8 @@ export function ReportsPage() {
                   <Bar dataKey="score" radius={[8, 8, 0, 0]}>
                     {calculateClassPerformance().map((entry, index) => {
                       let color = "#ff5757";
-                      if (entry.score >= 2.5) color = "#c9e265";
-                      else if (entry.score >= 1.5) color = "#ffde59";
+                      if (entry.score >= 75) color = "#c9e265";
+                      else if (entry.score >= 50) color = "#ffde59";
                       return <Cell key={`cell-${index}`} fill={color} />;
                     })}
                   </Bar>
@@ -447,7 +377,7 @@ export function ReportsPage() {
               {t("reports.averageScore")}
             </p>
             <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
-              {calculateAverageScore().score}
+              {calculateAverageScore().score} / 100
             </p>
             <p style={{ color: "#6b7280" }} className="text-xs mt-2">
               {t(`reports.legend.${calculateAverageScore().label}`)}

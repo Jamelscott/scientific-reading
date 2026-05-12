@@ -1,10 +1,19 @@
 import { useNavigate } from "react-router";
 import { BookOpen, MoveLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "../../stores";
 
 export function NotFoundPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAuthStore((state) => state.currentUser);
+
+  const homePath =
+    currentUser?.type === "board"
+      ? "/board/dashboard"
+      : currentUser?.type === "school"
+        ? "/school/dashboard"
+        : "/teacher/dashboard";
 
   return (
     <div
@@ -33,7 +42,7 @@ export function NotFoundPage() {
         </p>
 
         <button
-          onClick={() => navigate("/teacher-dashboard")}
+          onClick={() => navigate(homePath)}
           className="mt-4 flex items-center gap-2 px-6 py-3 rounded-xl transition-all"
           style={{ background: "#004aad", color: "#ffffff" }}
         >

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Users, Plus, BookOpen, Edit, Trash2, Pencil } from "lucide-react";
-import { NotificationDropdown } from "../components/NotificationDropdown";
-import { Sidebar } from "../components/Sidebar";
-import { AddClassModal } from "../components/AddClassModal";
-import { EditClassesModal } from "../components/EditClassesModal";
-import { Initials } from "../components/Initials";
-import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { useClassStore } from "../../stores";
-import { Button } from "../components/ui/Button";
+import { useNavigate } from "react-router";
+import { useClassStore } from "../../../stores";
+import { Sidebar } from "../../components/Sidebar";
+import { NotificationDropdown } from "../../components/NotificationDropdown";
+import { Initials } from "../../components/Initials";
+import { Button } from "../../components/ui/Button";
+import { AddClassModal } from "../../components/AddClassModal";
+import { EditClassesModal } from "../../components/EditClassesModal";
 
 export function TeacherDashboard() {
   const { t } = useTranslation();
@@ -150,7 +150,7 @@ export function TeacherDashboard() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => navigate(`/class/${classItem.id}`)}
+                    onClick={() => navigate(`/teacher/class/${classItem.id}`)}
                     className="w-full py-3 rounded-xl transition-all"
                     style={{ background: "#004aad", color: "#ffffff" }}
                   >

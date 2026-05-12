@@ -10,8 +10,8 @@ export type { Teacher } from "./useTeacherStore";
 
 export { useAppStore } from "./useAppStore";
 
-export { useEvaluationsStore } from "./useEvaluationsStore";
-export type { Evaluation } from "./useEvaluationsStore";
+export { useUnitsStore } from "./useUnitsStore";
+export type { Unit } from "./useUnitsStore";
 
 export { useAuthStore } from "./useAuthStore";
 export type { AuthUser, TeacherUser, BoardUser, AdminUser } from "./useAuthStore";

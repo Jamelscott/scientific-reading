@@ -1,21 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export interface School {
-  id: number;
-  name: string;
-}
+import { mockApiData } from "../../mockData";
+import { MockSchool as School } from "../../mockData";
 
 interface SchoolStore {
-  activeSchoolId: number;
-  setActiveSchoolId: (id: number) => void;
+  activeSchool: School;
+  setActiveSchool: (school: School) => void;
 }
 
 export const useSchoolStore = create<SchoolStore>()(
   persist(
     (set) => ({
-      activeSchoolId: 1, // default to 1 for now
-      setActiveSchoolId: (id) => set({ activeSchoolId: id }),
+      activeSchool: mockApiData.schools[0] || null, // default to 1 for now
+      setActiveSchool: (school) => set({ activeSchool: school }),
     }),
     {
       name: "school-storage",

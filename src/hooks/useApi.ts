@@ -43,21 +43,20 @@ export function useCreateStudent() {
   });
 }
 
-export function useUpdateStudentEvaluation() {
+export function useUpdateStudentResponse() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      studentId,
-      classId,
-      evaluationIndex,
-      status,
+      id,
+      questionLabel,
+      correct,
+      note,
     }: {
-      studentId: number;
-      classId: number;
-      evaluationIndex: number;
-      status: "success" | "adequate" | "needs-improvement" | null;
-    }) =>
-      mockApi.updateStudentEvaluation(studentId, classId, evaluationIndex, status),
+      id: number;
+      questionLabel: string;
+      correct: boolean | null;
+      note?: string;
+    }) => mockApi.updateStudentResponse(id, questionLabel, correct, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["evaluations"] });
     },
@@ -90,37 +89,20 @@ export function useCreateClass() {
   });
 }
 
-// Teacher
-export function useTeacher() {
-  return useQuery({
-    queryKey: ["teacher"],
-    queryFn: mockApi.getTeacher,
-  });
-}
-
-export function useUpdateTeacher() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: mockApi.updateTeacher,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teacher"] });
-    },
-  });
-}
 
 // Evaluations
-export function useEvaluationsByClass(classId: number) {
+export function useStudentResponsesByClass(classId: number) {
   return useQuery({
     queryKey: ["evaluations", "class", classId],
-    queryFn: () => mockApi.getEvaluationsByClassId(classId),
+    queryFn: () => mockApi.getStudentResponsesByClassId(classId),
     enabled: !!classId,
   });
 }
 
-export function useEvaluationByStudentAndClass(studentId: number, classId: number) {
+export function useStudentResponsesByStudentAndClass(studentId: number, classId: number) {
   return useQuery({
     queryKey: ["evaluations", "student", studentId, "class", classId],
-    queryFn: () => mockApi.getEvaluationByStudentAndClass(studentId, classId),
+    queryFn: () => mockApi.getStudentResponsesByStudentAndClass(studentId, classId),
     enabled: !!studentId && !!classId,
   });
 }

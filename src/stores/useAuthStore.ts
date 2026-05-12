@@ -22,6 +22,14 @@ export type BoardUser = {
   schools: string[];
 };
 
+export type SchoolUser = {
+  type: "school";
+  id: string;
+  name: string;
+  email: string;
+  teachers: string[];
+};
+
 export type AdminUser = {
   type: "admin";
   id: string;
@@ -29,7 +37,7 @@ export type AdminUser = {
   email: string;
 };
 
-export type AuthUser = TeacherUser | BoardUser | AdminUser;
+export type AuthUser = TeacherUser | BoardUser | SchoolUser | AdminUser;
 
 interface AuthStore {
   currentUser: AuthUser | null;

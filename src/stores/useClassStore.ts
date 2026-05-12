@@ -8,13 +8,12 @@ export interface Class {
   grade: string;
   studentCount: number;
   studentIds: number[];
-  subject?: string;
+  schoolYear: string;
 }
 
 interface ClassStore {
   classes: Class[];
-  activeClassId: number | null;
-  setActiveClass: (classId: number) => void;
+  activeClass: Class | null;
   addClass: (classData: Omit<Class, "id">) => void;
   addStudentToClass: (classId: number, studentId: number) => void;
   removeStudentFromClass: (classId: number, studentId: number) => void;
@@ -26,8 +25,7 @@ export const useClassStore = create<ClassStore>()(
   persist(
     (set) => ({
       classes: mockApiData.classes,
-      activeClassId: 1,
-      setActiveClass: (classId) => set({ activeClassId: classId }),
+      activeClass: mockApiData.classes[0] || null,
       addClass: (classData) =>
         set((state) => {
           const maxId = state.classes.reduce(

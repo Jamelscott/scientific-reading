@@ -1,6 +1,6 @@
 interface EvaluationButtonProps {
   status: "success" | "adequate" | "needs-improvement" | null;
-  onClick: () => void;
+  onClick?: () => void;
   empty?: boolean;
 }
 
@@ -33,7 +33,7 @@ export function EvaluationButton({
         onClick={onClick}
         className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto transition-all hover:bg-gray-200 cursor-pointer"
         style={{
-          background: "#f8ffdb",
+          background: "lightgrey",
           border: "1px dashed #cccccc",
         }}
       />

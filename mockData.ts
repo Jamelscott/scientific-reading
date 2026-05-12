@@ -1,5 +1,8 @@
 // Mock API data - simulates backend responses
+export type MockEvalationQuestions = Record<string, Record<string, boolean | null>>;
+export type MockEvaluation = Record<string, MockEvalationQuestions>;
 
+export type MockQuestions = MockEvaluation
 export interface MockStudent {
   id: number;
   name: string;
@@ -11,16 +14,10 @@ export interface MockClass {
   id: number;
   name: string;
   grade: string;
-  studentCount: number;
   subject?: string;
+  studentCount:number;
+  schoolYear:string;
   studentIds: number[]; // Array of student IDs in this class
-}
-
-export interface MockEvaluation {
-  id: number;
-  studentId: number;
-  classId: number;
-  evaluations: ("success" | "adequate" | "needs-improvement" | null)[]; // 11 evaluations: Unit 1A, 1B, 2-10
 }
 
 export interface MockTeacher {
@@ -30,6 +27,29 @@ export interface MockTeacher {
   school: string;
   subjects: string[];
   yearsExperience?: number;
+}
+
+export interface MockSchool {
+  id: number;
+  name: string;
+}
+
+// A questionnaire assigned to a class on a given date.
+export interface UnitData {
+  id: number;
+  unit:number;
+  title: string;
+  evaluation:number;
+  questions: MockQuestions; // Object with categories (bigLetters, smallLetters, etc.)
+}
+export interface StudentAnswers {
+  id: number;
+  studentId: number;
+  classId: number;
+  unitDataId: number;
+  answers: MockQuestions;
+  comment:string;
+  required: boolean;
 }
 
 export type TeacherUser = {
@@ -53,6 +73,14 @@ export type BoardUser = {
   schools: string[];
 };
 
+export type SchoolUser = {
+  id: string;
+  type: "school";
+  name: string;
+  email: string;
+  teachers: string[];
+};
+
 export type AdminUser = {
   type: "admin";
   id: string;
@@ -60,7 +88,7 @@ export type AdminUser = {
   email: string;
 };
 
-export type User = TeacherUser | BoardUser | AdminUser;
+export type User = TeacherUser | BoardUser | SchoolUser | AdminUser;
 
 type NotificationType = "evalCompleted" | "newStudent" | "reportReady" | "meetingScheduled";
 
@@ -73,9 +101,17 @@ export interface MockNotification {
 
 // Mock API responses
 export const mockApiData = {
+  board: {
+    id: 1,
+    name: "Commission scolaire de Montréal",
+    contactEmail: "",
+  },
   schools: [
-    { id: 1, name: "École Primaire Saint-Laurent" },
-  ],
+    { 
+      id: 1, 
+      name: "École Primaire Saint-Laurent"
+    },
+  ] as MockSchool[],
   students: [
     { id: 1, name: "Amélie Dubois", classIds: [1, 2], schoolId: 1 },
     { id: 2, name: "Benjamin Tremblay", classIds: [1], schoolId: 1 },
@@ -99,6 +135,7 @@ export const mockApiData = {
       id: 1,
       name: "1re année",
       grade: "1",
+      schoolYear: "2023-2024",
       studentCount: 10,
       studentIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     },
@@ -106,150 +143,394 @@ export const mockApiData = {
       id: 2,
       name: "2e année",
       grade: "2",
-      studentCount: 5,
       subject: "Mathématiques",
+      schoolYear: "2023-2024",
+      studentCount: 6,
       studentIds: [1, 7, 11, 12, 13],
     },
     {
       id: 3,
       name: "3e année",
       grade: "3",
-      studentCount: 4,
+      schoolYear: "2023-2024",
       subject: "Sciences",
       studentIds: [4, 12, 14, 15],
     },
   ] as MockClass[],
 
-  evaluations: [
-    // Class 1 evaluations
-    {
-      id: 1,
-      studentId: 1,
-      classId: 1,
-      evaluations: ["success", "success", "success", "adequate", "success", "success", "adequate", "success", "success", null, null],
-    },
-    {
-      id: 2,
-      studentId: 2,
-      classId: 1,
-      evaluations: ["adequate", "adequate", "success", "success", "adequate", "success", "success", "adequate", null, null, null],
-    },
-    {
-      id: 3,
-      studentId: 3,
-      classId: 1,
-      evaluations: ["success", "success", "adequate", "adequate", "needs-improvement", "adequate", "success", null, null, null, null],
-    },
-    {
-      id: 4,
-      studentId: 4,
-      classId: 1,
-      evaluations: ["needs-improvement", "adequate", "adequate", "adequate", "adequate", "success", null, null, null, null, null],
-    },
-    {
-      id: 5,
-      studentId: 5,
-      classId: 1,
-      evaluations: ["success", "success", "success", "success", "success", "success", "success", "success", "success", null, null],
-    },
-    {
-      id: 6,
-      studentId: 6,
-      classId: 1,
-      evaluations: ["adequate", "success", "adequate", "success", "adequate", "adequate", "success", "adequate", null, null, null],
-    },
-    {
-      id: 7,
-      studentId: 7,
-      classId: 1,
-      evaluations: ["success", "adequate", "success", "adequate", "success", "success", "adequate", "success", null, null, null],
-    },
-    {
-      id: 8,
-      studentId: 8,
-      classId: 1,
-      evaluations: ["needs-improvement", "adequate", "adequate", "needs-improvement", "adequate", "adequate", null, null, null, null, null],
-    },
-    {
-      id: 9,
-      studentId: 9,
-      classId: 1,
-      evaluations: ["success", "success", "success", "success", "adequate", "success", "success", "success", "success", null, null],
-    },
-    {
-      id: 10,
-      studentId: 10,
-      classId: 1,
-      evaluations: ["adequate", "adequate", "adequate", "adequate", "success", "adequate", "adequate", null, null, null, null],
-    },
-    // Class 2 evaluations
-    {
-      id: 11,
-      studentId: 1,
-      classId: 2,
-      evaluations: ["success", "success", "adequate", "success", "success", "adequate", "success", null, null, null, null],
-    },
-    {
-      id: 12,
-      studentId: 7,
-      classId: 2,
-      evaluations: ["adequate", "adequate", "success", "success", "adequate", "success", null, null, null, null, null],
-    },
-    {
-      id: 13,
-      studentId: 11,
-      classId: 2,
-      evaluations: ["success", "success", "adequate", "success", "success", null, null, null, null, null, null],
-    },
-    {
-      id: 14,
-      studentId: 12,
-      classId: 2,
-      evaluations: ["adequate", "adequate", "needs-improvement", "adequate", "adequate", "adequate", null, null, null, null, null],
-    },
-    {
-      id: 15,
-      studentId: 13,
-      classId: 2,
-      evaluations: ["success", "adequate", "success", "adequate", "success", "success", null, null, null, null, null],
-    },
-    // Class 3 evaluations
-    {
-      id: 16,
-      studentId: 4,
-      classId: 3,
-      evaluations: ["needs-improvement", "adequate", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null, null],
-    },
-    {
-      id: 17,
-      studentId: 12,
-      classId: 3,
-      evaluations: ["needs-improvement", "needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null, null],
-    },
-    {
-      id: 18,
-      studentId: 14,
-      classId: 3,
-      evaluations: ["needs-improvement", "adequate", "needs-improvement", "needs-improvement", "needs-improvement", "adequate", "needs-improvement", null, null, null, null],
-    },
-    {
-      id: 19,
-      studentId: 15,
-      classId: 3,
-      evaluations: ["needs-improvement", "needs-improvement", "adequate", "needs-improvement", "needs-improvement", "needs-improvement", null, null, null, null, null],
-    },
-  ] as MockEvaluation[],
+  unitData: [
+        { 
+          id: 1, 
+          unit: 1,
+          evaluation:1, 
+          title:"units.unit1-1",
+          questions: {
+            bigLetters: {
+              "A": { name: true, sound: true },
+              "B": { name: true, sound: true },
+              "C": { name: true, sound: true },
+              "D": { name: true, sound: true },
+              "E": { name: true, sound: true },
+              "F": { name: true, sound: true },
+              "G": { name: true, sound: true },
+              "H": { name: true, sound: true },
+              "I": { name: true, sound: true },
+              "J": { name: true, sound: true },
+              "K": { name: true, sound: true },
+              "L": { name: true, sound: true },
+              "M": { name: true, sound: true },
+              "N": { name: true, sound: true },
+              "O": { name: true, sound: true },
+              "P": { name: true, sound: true },
+              "Q": { name: true, sound: true },
+              "R": { name: true, sound: true },
+              "S": { name: true, sound: true },
+              "T": { name: true, sound: true },
+              "U": { name: true, sound: true },
+              "V": { name: true, sound: true },
+              "W": { name: true, sound: true },
+              "X": { name: true, sound: true },
+              "Y": { name: true, sound: true },
+              "Z": { name: true, sound: true },
+            },
+            smallLetters: {
+              "A": { name: true, sound: true },
+              "B": { name: true, sound: true },
+              "C": { name: true, sound: true },
+              "D": { name: true, sound: true },
+              "E": { name: true, sound: true },
+              "F": { name: true, sound: true },
+              "G": { name: true, sound: true },
+              "H": { name: true, sound: true },
+              "I": { name: true, sound: true },
+              "J": { name: true, sound: true },
+              "K": { name: true, sound: true },
+              "L": { name: true, sound: true },
+              "M": { name: true, sound: true },
+              "N": { name: true, sound: true },
+              "O": { name: true, sound: true },
+              "P": { name: true, sound: true },
+              "Q": { name: true, sound: true },
+              "R": { name: true, sound: true },
+              "S": { name: true, sound: true },
+              "T": { name: true, sound: true },
+              "U": { name: true, sound: true },
+              "V": { name: true, sound: true },
+              "W": { name: true, sound: true },
+              "X": { name: true, sound: true },
+              "Y": { name: true, sound: true },
+              "Z": { name: true, sound: true },
+            },
+          },
+        },
+        { 
+          id: 2, 
+          unit: 1, 
+          evaluation:2,
+          title:"units.unit1-2",
+          questions: {
+            bigLetters: {
+              "A": { correct: true },
+              "B": { correct: true },
+              "C": { correct: true },
+              "D": { correct: true },
+              "E": { correct: true },
+              "F": { correct: true },
+              "G": { correct: true },
+              "H": { correct: true },
+              "I": { correct: true },
+              "J": { correct: true },
+              "K": { correct: true },
+              "L": { correct: true },
+              "M": { correct: true },
+              "N": { correct: true },
+              "O": { correct: true },
+              "P": { correct: true },
+              "Q": { correct: true },
+              "R": { correct: true },
+              "S": { correct: true },
+              "T": { correct: true },
+              "U": { correct: true },
+              "V": { correct: true },
+              "W": { correct: true },
+              "X": { correct: true },
+              "Y": { correct: true },
+              "Z": { correct: true },
+            },
+            smallLetters: {
+              "A": { correct: true },
+              "B": { correct: true },
+              "C": { correct: true },
+              "D": { correct: true },
+              "E": { correct: true },
+              "F": { correct: true },
+              "G": { correct: true },
+              "H": { correct: true },
+              "I": { correct: true },
+              "J": { correct: true },
+              "K": { correct: true },
+              "L": { correct: true },
+              "M": { correct: true },
+              "N": { correct: true },
+              "O": { correct: true },
+              "P": { correct: true },
+              "Q": { correct: true },
+              "R": { correct: true },
+              "S": { correct: true },
+              "T": { correct: true },
+              "U": { correct: true },
+              "V": { correct: true },
+              "W": { correct: true },
+              "X": { correct: true },
+              "Y": { correct: true },
+              "Z": { correct: true },
+            },
+          },
+        },
+        { 
+          id: 3, 
+          unit: 1,
+          evaluation:3,
+          title:"units.unit1-3",
+          questions: {
+            wordPairs: {
+              "chat/rat": { correct: true },
+              "fleur/table": { correct: true },
+              "bateau/chapeau": { correct: true },
+              "pain/main": { correct: true },
+              "lune/porte": { correct: true },
+            },
+            syllables: {
+              "ma-man": { correct: true },
+              "ta-ble": { correct: true },
+              "cha-peau": { correct: true },
+              "voi-ture": { correct: true },
+              "ba-na-ne": { correct: true },
+            },
+            numOfSyllables:{
+              "chat": { correct: true },
+              "livre": { correct: true },
+              "éléphant": { correct: true },
+              "chocolat": { correct: true },
+              "papillon": { correct: true },
+            }
+          },
+        },
+        { 
+          id: 4, 
+          unit: 1,
+          evaluation:4,
+          title:"units.unit1-4",
+          questions: {
+          },
+        },
+        { 
+          id: 5, 
+          unit: 2,
+          evaluation:5,
+          title:"units.unit2-1",
+          questions: {
+          },
+        },
+        { 
+          id: 6, 
+          unit: 3, 
+          evaluation:6,
+          title:"units.unit3-1",
+          questions: {
+          },
+        },
+        { 
+          id: 7, 
+          unit: 4, 
+          evaluation:7,
+          title:"units.unit4-1",
+          questions: {
+          },
+        },
+        { 
+          id: 8, 
+          unit: 5, 
+          evaluation:8,
+          title:"units.unit5-1",
+          questions: {
+          },
+        },
+        { 
+          id: 9, 
+          unit: 6, 
+          evaluation:9,
+          title:"units.unit6-1",
+          questions: {
+          },
+        },
+        { 
+          id: 10, 
+          unit: 7,
+          evaluation:10, 
+          title:"units.unit7-1",
+          questions: {
+          },
+        },
+        { 
+          id: 11, 
+          unit: 8,
+          evaluation:11, 
+          title:"units.unit8-1",
+          questions: {
+          },
+        },
+        { 
+          id: 12, 
+          unit: 9, 
+          evaluation:12,
+          title:"units.unit9-1",
+          questions: {
+          },
+        },
+        { 
+          id: 13, 
+          unit: 10, 
+          evaluation:13,
+          title:"units.unit10-1",
+          questions: {
+          },
+        }
+  ] as UnitData[],
 
-  teacher: {
-    id: 1,
-    name: "Madame Gisèle Tremblay",
-    email: "gisele.tremblay@ecole.qc.ca",
-    school: "École Primaire Saint-Laurent",
-    subjects: ["Français", "Mathématiques", "Sciences"],
-    phoneNumber: "(514) 555-0123",
-    startDate: "Septembre 2018",
-    yearsExperience: 12,
-  } as MockTeacher,
+  answers: [
+    { 
+      id: 1,  
+      studentId: 1,  
+      classId: 1, 
+      unitDataId: 1,
+      required:true,
+      answers: {
+        bigLetters: {
+          "A": { name: false, sound: false },
+          "B": { name: false, sound: false },
+          "C": { name: false, sound: false },
+          "D": { name: false, sound: false },
+          "E": { name: true, sound: true },
+          "F": { name: true, sound: true },
+          "G": { name: false, sound: false },
+          "H": { name: true, sound: true },
+          "I": { name: true, sound: true },
+          "J": { name: true, sound: true },
+          "K": { name: false, sound: true },
+          "L": { name: true, sound: true },
+          "M": { name: true, sound: true },
+          "N": { name: true, sound: true },
+          "O": { name: false, sound: false },
+          "P": { name: true, sound: true },
+          "Q": { name: false, sound: false },
+          "R": { name: true, sound: true },
+          "S": { name: true, sound: true },
+          "T": { name: true, sound: false },
+          "U": { name: true, sound: true },
+          "V": { name: true, sound: true },
+          "W": { name: true, sound: true },
+          "X": { name: true, sound: true },
+          "Y": { name: false, sound: true },
+          "Z": { name: true, sound: true },
+        },
+        smallLetters: {
+          "A": { name: true, sound: true },
+          "B": { name: true, sound: true },
+          "C": { name: true, sound: true },
+          "D": { name: true, sound: true },
+          "E": { name: true, sound: true },
+          "F": { name: true, sound: true },
+          "G": { name: true, sound: true },
+          "H": { name: true, sound: true },
+          "I": { name: true, sound: true },
+          "J": { name: true, sound: true },
+          "K": { name: true, sound: true },
+          "L": { name: true, sound: true },
+          "M": { name: true, sound: true },
+          "N": { name: true, sound: true },
+          "O": { name: true, sound: true },
+          "P": { name: true, sound: true },
+          "Q": { name: true, sound: true },
+          "R": { name: true, sound: true },
+          "S": { name: true, sound: true },
+          "T": { name: true, sound: true },
+          "U": { name: true, sound: true },
+          "V": { name: true, sound: true },
+          "W": { name: true, sound: true },
+          "X": { name: true, sound: true },
+          "Y": { name: true, sound: true },
+          "Z": { name: true, sound: true },
+        },
+      },
+      comment: "Great work on the uppercase letters! Let's focus a bit more on the sounds for B, C, K, T, and Y."
+    },
+    { 
+      id: 2,  
+      studentId: 2,  
+      classId: 1, 
+      unitDataId: 1,
+      answers: {
+        bigLetters: {
+          "A": { name: false, sound: false },
+          "B": { name: false, sound: false },
+          "C": { name: false, sound: false },
+          "D": { name: false, sound: false },
+          "E": { name: false, sound: false },
+          "F": { name: false, sound: false },
+          "G": { name: false, sound: false },
+          "H": { name: false, sound: false },
+          "I": { name: false, sound: false },
+          "J": { name: false, sound: false },
+          "K": { name: false, sound: false },
+          "L": { name: false, sound: false },
+          "M": { name: false, sound: false },
+          "N": { name: false, sound: false },
+          "O": { name: false, sound: false },
+          "P": { name: false, sound: false },
+          "Q": { name: false, sound: false },
+          "R": { name: false, sound: false },
+          "S": { name: false, sound: false },
+          "T": { name: false, sound: false },
+          "U": { name: false, sound: false },
+          "V": { name: false, sound: false },
+          "W": { name: false, sound: false },
+          "X": { name: false, sound: false },
+          "Y": { name: false, sound: false },
+          "Z": { name: false, sound: false },
+        },
+        smallLetters: {
+          "a": { name: false, sound: false },
+          "b": { name: false, sound: false },
+          "c": { name: false, sound: false },
+          "d": { name: false, sound: false },
+          "e": { name: false, sound: false },
+          "f": { name: false, sound: false },
+          "g": { name: false, sound: false },
+          "h": { name: false, sound: false },
+          "i": { name: false, sound: false },
+          "j": { name: false, sound: false },
+          "k": { name: false, sound: false },
+          "l": { name: false, sound: false },
+          "m": { name: false, sound: false },
+          "n": { name: false, sound: false },
+          "o": { name: false, sound: false },
+          "p": { name: false, sound: false },
+          "q": { name: false, sound: false },
+          "r": { name: false, sound: false },
+          "s": { name: false, sound: false },
+          "t": { name: false, sound: false },
+          "u": { name: false, sound: false },
+          "v": { name: false, sound: false },
+          "w": { name: false, sound: false },
+          "x": { name: false, sound: false },
+          "y": { name: false, sound: false },
+          "z": { name: false, sound: false },
+        },
+      },
+      comment: "It looks like we have some work to do on both letter recognition and sounds. Let's start with the uppercase letters and then move on to the lowercase ones."
+    },
+  ] as StudentAnswers[],
 
   users: [
     {
@@ -267,9 +548,16 @@ export const mockApiData = {
     {
       type: "board" as const,
       id: "b-1",
-      name: "Jean-Luc Bouchard",
+      name: "Commission scolaire de Montréal",
       email: "jean-luc.bouchard@ecole.qc.ca",
       schools: ["École Primaire Saint-Laurent", "École Secondaire Mont-Royal"],
+    },
+    {
+      type: "school" as const,
+      id: "s-1",
+      name: "École Primaire Saint-Laurent",
+      email: "direction@saint-laurent.qc.ca",
+      teachers: ["Madame Gisèle Tremblay"],
     },
     {
       type: "admin" as const,
@@ -344,59 +632,58 @@ export const mockApi = {
     };
     mockApiData.students.push(newStudent);
     
-    // Add student to classes and create evaluation records
+    // Add student to classes (responses are created individually per template completion)
     classIds.forEach(classId => {
       const classData = mockApiData.classes.find(c => c.id === classId);
       if (classData) {
         classData.studentIds.push(newStudent.id);
         classData.studentCount = classData.studentIds.length;
-        
-        // Create evaluation record for this student in this class
-        mockApiData.evaluations.push({
-          id: mockApiData.evaluations.length + 1,
-          studentId: newStudent.id,
-          classId: classId,
-          evaluations: Array(11).fill(null),
-        });
       }
     });
     
     return newStudent;
   },
 
-  // Evaluations
-  getEvaluationsByClassId: async (classId: number): Promise<MockEvaluation[]> => {
+  // Student Responses
+  // Fetch all responses for every student in a class (used to populate the class table).
+  getStudentResponsesByClassId: async (classId: number): Promise<StudentAnswers[]> => {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
-    return mockApiData.evaluations.filter((e) => e.classId === classId);
+    return mockApiData.answers.filter((answer) => answer.classId === classId);
   },
 
-  getEvaluationByStudentAndClass: async (
+  // Fetch all responses for one student across all templates in a class (used for the edit modal).
+  getStudentResponsesByStudentAndClass: async (
     studentId: number,
     classId: number,
-  ): Promise<MockEvaluation | null> => {
+  ): Promise<StudentAnswers[]> => {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
-    return (
-      mockApiData.evaluations.find(
-        (e) => e.studentId === studentId && e.classId === classId,
-      ) || null
+    return mockApiData.answers.filter(
+      (r) => r.studentId === studentId && r.classId === classId,
     );
   },
 
-  updateStudentEvaluation: async (
-    studentId: number,
-    classId: number,
-    evaluationIndex: number,
-    status: "success" | "adequate" | "needs-improvement" | null,
-  ): Promise<MockEvaluation | null> => {
+  // Update a single question's answer within a response record.
+  // category: e.g., "bigLetters", "smallLetters", "wordPairs"
+  // questionLabel: e.g., "A", "B", "chat/rat"
+  // property: e.g., "name", "sound", "correct"
+  // value: boolean value to set
+  updateStudentResponse: async (
+    id: number,
+    category: string,
+    questionLabel: string,
+    property: string,
+    value: boolean,
+  ): Promise<StudentAnswers | null> => {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
-    const evaluation = mockApiData.evaluations.find(
-      (e) => e.studentId === studentId && e.classId === classId,
-    );
-    if (evaluation && evaluation.evaluations[evaluationIndex] !== undefined) {
-      evaluation.evaluations[evaluationIndex] = status;
-      return evaluation;
+    const record = mockApiData.answers.find((answer) => answer.id === id);
+    if (!record) return null;
+    
+    // Navigate to the nested structure: answers[category][questionLabel][property]
+    if (record.answers[category] && record.answers[category][questionLabel]) {
+      record.answers[category][questionLabel][property] = value;
     }
-    return null;
+    
+    return record;
   },
 
   // Classes
@@ -418,20 +705,6 @@ export const mockApi = {
     };
     mockApiData.classes.push(newClass);
     return newClass;
-  },
-
-  // Teacher
-  getTeacher: async (): Promise<MockTeacher> => {
-    await new Promise((resolve) => setTimeout(resolve, API_DELAY));
-    return mockApiData.teacher;
-  },
-
-  updateTeacher: async (
-    updates: Partial<MockTeacher>,
-  ): Promise<MockTeacher> => {
-    await new Promise((resolve) => setTimeout(resolve, API_DELAY));
-    mockApiData.teacher = { ...mockApiData.teacher, ...updates };
-    return mockApiData.teacher;
   },
 
   // Notifications

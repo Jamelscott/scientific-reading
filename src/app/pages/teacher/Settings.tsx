@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Bell, Globe, Shield, User } from "lucide-react";
-import { Sidebar } from "../components/Sidebar";
-import { NotificationDropdown } from "../components/NotificationDropdown";
 import { useTranslation } from "react-i18next";
-import TranslationToggle from "../components/TranslationToggle";
+import { Sidebar } from "../../components/Sidebar";
+import { NotificationDropdown } from "../../components/NotificationDropdown";
+import TranslationToggle from "../../components/TranslationToggle";
 
 export function SettingsPage() {
   const { t } = useTranslation();

@@ -30,6 +30,12 @@
   --chart-3: #ff5757;
   --chart-4: #a7dfff;
   --chart-5: #dff3ff;
+  --portal-teacher-bg: #dff3ff;
+  --portal-school-bg: #f7ffd6;
+  --portal-board-bg: #fff0f0;
+  --portal-teacher-border: #b8e4ff;
+  --portal-school-border: #c9e265;
+  --portal-board-border: #ffd0d0;
   --radius: 0.75rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #000000;
@@ -48,6 +54,28 @@
   --color-bright-blue: #38b6ff;
   --color-accent-blue: #a7dfff;
   --color-cream: #f8ffdb;
+
+  /* Unit header colors */
+  --unit-1-bg: #3b82f6;
+  --unit-1-fg: #ffffff;
+  --unit-2-bg: #38bdf8;
+  --unit-2-fg: #000000;
+  --unit-3-bg: #22d3ee;
+  --unit-3-fg: #000000;
+  --unit-4-bg: #a3e635;
+  --unit-4-fg: #000000;
+  --unit-5-bg: #fbbf24;
+  --unit-5-fg: #000000;
+  --unit-6-bg: #fb923c;
+  --unit-6-fg: #000000;
+  --unit-7-bg: #fb7185;
+  --unit-7-fg: #000000;
+  --unit-8-bg: #a855f7;
+  --unit-8-fg: #ffffff;
+  --unit-9-bg: #0ea5e9;
+  --unit-9-fg: #ffffff;
+  --unit-10-bg: #ef4444;
+  --unit-10-fg: #ffffff;
 }
 
 .dark {

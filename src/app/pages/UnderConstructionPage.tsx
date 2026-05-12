@@ -9,7 +9,11 @@ export function UnderConstructionPage() {
   const currentUser = useAuthStore((state) => state.currentUser);
 
   const homePath =
-    currentUser?.type === "board" ? "/board-dashboard" : "/teacher-dashboard";
+    currentUser?.type === "board"
+      ? "/board/dashboard"
+      : currentUser?.type === "school"
+        ? "/school/dashboard"
+        : "/teacher/dashboard";
 
   return (
     <div

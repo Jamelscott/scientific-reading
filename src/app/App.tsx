@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router";
-import { router } from "./routes";
+import { router } from "./router";
 import { GlobalLoadingSpinner } from "./components/GlobalLoadingSpinner";
 
 export default function App() {

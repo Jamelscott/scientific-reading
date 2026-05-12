@@ -38,6 +38,15 @@
       "gradeRequired": "Grade is required"
     }
   },
+  "evaluation": {
+    "allSuccess": "✓ All successful",
+    "allFail": "✗ All failed",
+    "clear": "Clear all",
+    "confirmCheckAll": "Are you sure you want to mark all answers as correct?",
+    "confirmFailAll": "Are you sure you want to mark all answers as incorrect?",
+    "confirmClearAll": "Are you sure you want to clear all answers? This cannot be undone.",
+    "confirmNotRequired": "Marking this evaluation as 'Not Required' will clear all answers. Continue?"
+  },
   "profile": {
     "title": "My Profile",
     "subtitle": "Manage your personal information",
@@ -128,10 +137,13 @@
     "legend": {
       "success": "Success (Good)",
       "adequate": "Adequate",
-      "needsImprovement": "Needs improvement"
+      "needsImprovement": "Needs improvement",
+      "notRequired": "Not required",
+      "notComplete": "Not complete"
     }
   },
   "studentTracking": {
+    "student": "Student",
     "backToDashboard": "Back to dashboard",
     "addStudent": "Add student",
     "editEvaluations": "Edit evaluations",
@@ -156,12 +168,17 @@
     "legend": {
       "success": "Success (Good)",
       "adequate": "Adequate",
-      "needsImprovement": "Needs improvement"
+      "needsImprovement": "Needs improvement",
+      "notRequired": "Not required",
+      "notComplete": "Not complete"
     },
     "exportPdf": "Export PDF",
     "evaluation": "Unit"
   },
   "login": {
+    "loginTitle": "Login",
+    "changePortal":"Change portal",
+    "signIn": "Sign in",
     "appName": "Scientific Reading",
     "appSubtitle": "Learning Progress Tracking",
     "tagline": "Teach. Track. Transform.",
@@ -176,18 +193,29 @@
     "forgotPassword": "Forgot password?",
     "submit": "Sign in",
     "or": "or",
-    "googleSignIn": "Sign in with Google"
+    "googleSignIn": "Sign in with Google",
+    "choosePortal": "Choose your portal to continue",
+    "welcome": "Welcome!",
+    "teacherPortal": "Teacher Portal",
+    "teacherDesc": "Track students, access resources and reports",
+    "schoolPortal": "School Portal",
+    "schoolDesc": "Overview of classes and results by school",
+    "boardPortal": "School Board Portal",
+    "boardDesc": "Aggregated data and tracking at the board level"
   },
+
   "underConstruction": {
     "title": "Under Construction",
     "description": "This page is coming soon. We're working hard to bring it to you!"
   },
+
   "notFound": {
     "title": "Page not found",
     "subtitle": "The page you are looking for does not exist or has been moved.",
     "description": "The page you are looking for does not exist or has been moved.",
     "backToDashboard": "Back to dashboard"
   },
+
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",
@@ -202,15 +230,238 @@
       "studentAdded": { "title": "Student added", "message": "Amélie Dubois has been added to your class", "time": "3 days ago" }
     }
   },
+
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
     "save": "Save",
+    "saved": "Saved!",
     "cancel": "Cancel",
     "delete": "Delete",
     "confirm": "Confirm",
     "close": "Close",
     "removeStudent": "Remove Student",
-    "confirmDelete": "Are you sure?"
+    "confirmDelete": "Are you sure?",
+    "or":"or",
+    "notRequired": "Not required",
+    "notComplete": "Not complete",
+    "pdfLabel": "Click here to download the supporting PDF for this evaluation"
+   },
+
+  "unitOne": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Present each letter to the student and ask: \"What is the name of this letter?\" then \"What sound does this letter make?\""
+    },
+    "uppercase": "Uppercase letters",
+    "lowercase": "Lowercase letters",
+    "labels": {
+      "letter": "Letter",
+      "name": "Name",
+      "sound": "Sound"
+    }
+  },
+
+  "unitTwo": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Say the name of each letter to the student and ask them to write it."
+    },
+    "uppercase": "Write uppercase letters",
+    "lowercase": "Write lowercase letters"
+  },
+
+  "unitThree": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Assess the student's ability to identify rhymes, segment/blend, and count syllables. For each section, ask the student to listen carefully and respond."
+    },
+    "rhyming": {
+      "title": "Identify rhyming words",
+      "prompt": "Ask the student: \"Do these words rhyme?\"",
+      "labels": {
+        "wordPair": "Word pair",
+        "correctAnswer": "Correct answer",
+        "success": "Success"
+      }
+    },
+    "segmenting": {
+      "title": "Segment and blend syllables",
+      "prompt": "Read the segmented word. Ask the student: \"What word does that make?\"",
+      "labels": {
+        "segmentedWord": "Segmented word",
+        "fullWord": "Full word",
+        "success": "Success"
+      }
+    },
+    "syllableCounting": {
+      "title": "Count syllables in a word",
+      "prompt": "Say the word to the student. Ask: \"How many syllables do you hear in this word?\" The student should tell you the number.",
+      "labels": {
+        "word": "Word",
+        "syllableCount": "Number of syllables",
+        "success": "Success"
+      }
+    }
+  },
+
+  "unitFive": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Assess reading simple syllables and sound-letter correspondence. For the correspondence section, show 3 letters to the student and ask them to point to the letter that makes the indicated sound."
+    },
+    "syllableReading": {
+      "title": "Read CV, VC and CVC syllables",
+      "prompt": "Ask the student to read each syllable."
+    },
+    "soundCorrespondence": {
+      "title": "Match sounds to corresponding graphemes",
+      "prompt": "Show 3 letters to the student. Say: \"Point to the letter that makes the sound /___/.\" For example, show \"b – f – l\" and ask: \"Point to the letter that makes the sound /f/.\"",
+      "labels": {
+        "lettersShown": "Letters shown",
+        "soundRequested": "Sound requested",
+        "correctLetter": "Correct letter",
+        "success": "Success"
+      }
+    }
+  },
+
+  "unitThreeEval": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Evaluate the student's ability to read open/closed syllables, complex syllables, and high-frequency words."
+    },
+    "openClosedSyllables": {
+      "title": "Read open and closed syllables",
+      "prompt": "Ask the student to read each syllable aloud."
+    },
+    "complexSyllables": {
+      "title": "Read complex syllables - CVCC, CCVC",
+      "prompt": "Ask the student to read each complex syllable aloud."
+    },
+    "frequentWords": {
+      "title": "Read 5 high-frequency words",
+      "prompt": "These words should be recognized instantly. Ask the student to read each word quickly."
+    }
+  },
+
+  "unitFour": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Ask the student to identify sounds at the beginning and end of words. Say the word clearly and ask: 'What sound do you hear at the beginning/end?'"
+    },
+    "beginningSound": {
+      "title": "Identify the sound at the beginning of a word",
+      "successLabel": "Success"
+    },
+    "endingSound": {
+      "title": "Identify the sound at the end of a word",
+      "successLabel": "Success"
+    }
+  },
+
+  "unitSix": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Evaluate the student's ability to read word families (word variations), words with frequent endings, and high-frequency words."
+    },
+    "wordFamilies": {
+      "title": "Read and recognize word families",
+      "prompt": "Ask the student to read all words in each family and observe if they recognize the connection between them."
+    },
+    "frequentEndings": {
+      "title": "Read words with frequent endings: -s, -es, -er, -ez, -ait, -aient",
+      "prompt": "The student must read each word pronouncing the ending correctly."
+    },
+    "frequentWords": {
+      "title": "Read 5 high-frequency words",
+      "prompt": "Ask the student to read each word aloud."
+    }
+  },
+
+  "unitSeven": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Ask the student to read sentences aloud respecting punctuation and intonation, then read pseudo-words to assess decoding skills."
+    },
+    "sentenceReading": {
+      "title": "Read 3 repeated sentences with fluency",
+      "prompt": "Ask the student to read each sentence several times to improve fluency."
+    },
+    "pseudoWords": {
+      "title": "Improve speed and accuracy",
+      "prompt": "Ask the student to read these pseudo-words (invented words) to assess their decoding skills."
+    }
+  },
+
+  "unitEight": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Evaluate the student's ability to read words containing advanced graphemes (ail, eil, euil, ouil). Ask the student to read each word aloud identifying the target sound."
+    },
+    "advancedGraphemes": {
+      "title": "Read 10 words containing: ail, eil, euil, ouil",
+      "prompt": "Each grapheme must be read correctly within the context of the word."
+    }
+  },
+
+  "unitNine": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Ask the student to visualize the story. Say: \"Close your eyes and imagine what you hear while I read.\" Read the text aloud, then ask the 5 comprehension questions."
+    },
+    "comprehension": {
+      "title": "Answer 5 comprehension questions",
+      "prompt": "After listening to the story, have the student answer these questions to assess their understanding."
+    }
+  },
+
+  "unitTen": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Ask the student to read a short 4-5 sentence text independently, then ask 5 comprehension questions."
+    },
+    "readingFluency": {
+      "title": "Read text independently",
+      "prompt": "Ask the student to read the text aloud on their own."
+    },
+    "comprehension": {
+      "title": "Answer 5 comprehension questions",
+      "prompt": "After reading, have the student answer these questions to assess their understanding."
+    }
+  },
+
+  "units": {
+    "actions": {
+      "allSuccess": "✓ All successful",
+      "allFail": "✗ All failed",
+      "clear": "Clear all",
+      "pdf": "📄 Supporting PDF"
+    },
+    "notRequired": {
+      "title":"Unit marked as not required",
+      "description": "This unit has been excluded based on the teacher's professional judgment and will not affect reports."
+    },
+    "evaluation": "Evaluation {{number}}",
+    "comments": "Comments",
+    "addComments": "Add comments",
+    "evaluationNotRequired": "Evaluation not required",
+    "measurmentSystem":"Reading Measurement System (RMS)",
+    "backToTracking": "Back to tracking",
+    "history": "History",
+    "unit": "Unit {{number}}",
+    "unit1-1": "Evaluation 1: Letter and sound knowledge",
+    "unit1-2": "Evaluation 2: Letter formation",
+    "unit1-3": "Evaluation 3: Phonological awareness — rhymes and syllables",
+    "unit1-4": "Evaluation 4: Initial and final sound identification",
+    "unit2-1": "Evaluation 5: Reading simple syllables and letter/sound correspondence",
+    "unit3-1": "Evaluation 6: Reading open, closed, and complex syllables",
+    "unit4-1": "Evaluation 7: Reading high-frequency words",
+    "unit5-1": "Evaluation 8: Reading complex graphemes",
+    "unit6-1": "Evaluation 9: Word families and common endings",
+    "unit7-1": "Evaluation 10: Repeated reading of sentences",
+    "unit8-1": "Evaluation 11: Advanced grapheme reading",
+    "unit9-1": "Evaluation 12: Short text reading and comprehension",
+    "unit10-1": "Evaluation 13: Independent reading and comprehension"
   }
 }

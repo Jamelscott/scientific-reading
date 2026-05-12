@@ -1,77 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, FileText, Download, Plus } from "lucide-react";
+import { ArrowLeft, Download, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  useClassStore,
-  useEvaluationsStore,
-  useStudentStore,
-  useTeacherStore,
-} from "../../stores";
-import { AddStudentModal } from "../components/AddStudentModal";
-import { EditEvaluationModal } from "../components/EditEvaluationModal";
-import { EvaluationLegend } from "../components/EvaluationLegend";
-import { Button } from "../components/ui/Button";
-import { ClassTable } from "../components/ClassPage/ClassTable";
-import { exportTableToPdf } from "../components/utils/exportToPdf";
+import { useClassStore } from "../../../stores/useClassStore";
+import { useStudentStore } from "../../../stores/useStudentStore";
+import { useUnitsStore } from "../../../stores/useUnitsStore";
+import { useTeacherStore } from "../../../stores/useTeacherStore";
+import { AddStudentModal } from "../../components/AddStudentModal";
+import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
+import { exportTableToPdf } from "../../components/utils/exportToPdf";
+import { Button } from "../../components/ui/Button";
 
 export function ClassPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
   const classes = useClassStore((state) => state.classes);
-  const setActiveClass = useClassStore((state) => state.setActiveClass);
   const updateClass = useClassStore((state) => state.updateClass);
   const teacher = useTeacherStore((state) => state.teacher);
 
   // Parse classId from URL and set it as active
-  const activeClassId = classId ? parseInt(classId, 10) : 1;
-
-  // Update store when URL param changes
-  useEffect(() => {
-    if (activeClassId) {
-      setActiveClass(activeClassId);
-    }
-  }, [activeClassId, setActiveClass]);
-
-  const activeClass = classes.find((c) => c.id === activeClassId);
+  const currentClassId = parseInt(classId || "", 10);
+  const currentClass = classes.find((c) => c?.id === currentClassId);
 
   const allStudents = useStudentStore((state) => state.students);
   const students = allStudents.filter((student) =>
-    student.classIds.includes(activeClassId),
+    student.classIds.includes(currentClassId),
   );
-  const allEvaluations = useEvaluationsStore((state) => state.evaluations);
-  const evaluations = allEvaluations.filter((e) => e.classId === activeClassId);
+  const answers = useUnitsStore((state) => state.getAnswersByClass);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
-  const [showEditEvaluationModal, setShowEditEvaluationModal] = useState(false);
   const [isEditingClassName, setIsEditingClassName] = useState(false);
   const [editedClassName, setEditedClassName] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-  const [selectedEvaluations, setSelectedEvaluations] = useState<
-    ("success" | "adequate" | "needs-improvement" | null)[]
-  >([]);
-
-  const handleOpenEditModal = (
-    studentId: number,
-    studentName: string,
-    evals: ("success" | "adequate" | "needs-improvement" | null)[],
-  ) => {
-    setSelectedStudent({ id: studentId, name: studentName });
-    setSelectedEvaluations(evals);
-    setShowEditEvaluationModal(true);
-  };
 
   const handleClassNameClick = () => {
-    setEditedClassName(activeClass?.name || "");
+    setEditedClassName(currentClass?.name || "");
     setIsEditingClassName(true);
   };
 
   const handleClassNameSave = () => {
-    if (editedClassName.trim() && activeClassId) {
-      updateClass(activeClassId, { name: editedClassName.trim() });
+    if (editedClassName.trim() && currentClassId) {
+      updateClass(currentClassId, { name: editedClassName.trim() });
     }
     setIsEditingClassName(false);
   };
@@ -85,9 +53,9 @@ export function ClassPage() {
   };
 
   const handleExportPDF = async () => {
-    if (!activeClass?.name) return;
+    if (!currentClass?.name) return;
     const teacherName = teacher?.name || "Teacher";
-    await exportTableToPdf(activeClass.name, teacherName);
+    await exportTableToPdf(currentClass.name, teacherName);
   };
 
   return (
@@ -102,7 +70,7 @@ export function ClassPage() {
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate("/teacher-dashboard")}
+            onClick={() => navigate("/teacher/dashboard")}
             className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -132,15 +100,14 @@ export function ClassPage() {
                   className="text-3xl mb-2 cursor-pointer hover:opacity-70 transition-opacity"
                   style={{ color: "#004aad" }}
                 >
-                  {activeClass?.name || "1re année Mme Gisèle"}
+                  {currentClass?.name || "1re année Mme Gisèle"}
                 </h1>
               )}
               <p className="text-lg" style={{ color: "#000000" }}>
                 {t("studentTracking.studentsCount", {
-                  count: activeClass?.studentCount || students.length,
+                  count: currentClass?.studentCount || students.length,
                 })}
               </p>
-              <EvaluationLegend />
             </div>
 
             <div className="flex gap-3">
@@ -162,29 +129,17 @@ export function ClassPage() {
         </div>
       </div>
 
-      {/* Table */}
       <ClassTable
         students={students}
-        evaluations={evaluations}
-        onStudentClick={handleOpenEditModal}
+        classAnswers={answers(currentClassId)}
+        classId={String(currentClassId)}
       />
 
       <AddStudentModal
         isOpen={showAddStudentModal}
         onClose={() => setShowAddStudentModal(false)}
-        classId={activeClassId}
+        classId={currentClassId}
       />
-
-      {selectedStudent && (
-        <EditEvaluationModal
-          isOpen={showEditEvaluationModal}
-          onClose={() => setShowEditEvaluationModal(false)}
-          studentId={selectedStudent.id}
-          studentName={selectedStudent.name}
-          classId={activeClassId}
-          currentEvaluations={selectedEvaluations}
-        />
-      )}
     </div>
   );
 }

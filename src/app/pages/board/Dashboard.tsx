@@ -19,7 +19,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { Sidebar } from "../components/Sidebar";
+import { Sidebar } from "../../components/Sidebar";
 
 const schoolData = [
   { name: "École Laurier", rate: 78 },
@@ -30,12 +30,24 @@ const schoolData = [
 ];
 
 const performanceKeys = [
-  { key: "schoolBoard.dashboard.performance.success", value: 68, color: "#c9e265" },
-  { key: "schoolBoard.dashboard.performance.adequate", value: 22, color: "#ffde59" },
-  { key: "schoolBoard.dashboard.performance.failure", value: 10, color: "#ff5757" },
+  {
+    key: "schoolBoard.dashboard.performance.success",
+    value: 68,
+    color: "#c9e265",
+  },
+  {
+    key: "schoolBoard.dashboard.performance.adequate",
+    value: 22,
+    color: "#ffde59",
+  },
+  {
+    key: "schoolBoard.dashboard.performance.failure",
+    value: 10,
+    color: "#ff5757",
+  },
 ];
 
-export function SchoolBoardDashboard() {
+export function BoardDashboard() {
   const { t } = useTranslation();
   const [selectedYear, setSelectedYear] = useState("2023-2024");
 
@@ -261,12 +273,16 @@ export function SchoolBoardDashboard() {
               {
                 school: "École Laurier",
                 action: t("schoolBoard.dashboard.activity.newEvaluation"),
-                time: t("schoolBoard.dashboard.activity.hoursAgo", { count: 2 }),
+                time: t("schoolBoard.dashboard.activity.hoursAgo", {
+                  count: 2,
+                }),
               },
               {
                 school: "École Saint-Jean",
                 action: t("schoolBoard.dashboard.activity.monthlyReport"),
-                time: t("schoolBoard.dashboard.activity.hoursAgo", { count: 5 }),
+                time: t("schoolBoard.dashboard.activity.hoursAgo", {
+                  count: 5,
+                }),
               },
               {
                 school: "École Montcalm",

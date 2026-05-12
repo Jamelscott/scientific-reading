@@ -2,6 +2,11 @@
   "app": {
     "title": "Lecture scientifique"
   },
+  "portal": {
+    "teacher": "Portail enseignant",
+    "school": "Portail école",
+    "board": "Portail conseil"
+  },
   "nav": {
     "myClasses": "Mes classes",
     "evaluations": "Évaluations",
@@ -11,6 +16,7 @@
     "logout": "Se déconnecter",
     "overview": "Aperçu",
     "schools": "Écoles",
+    "teachers": "Enseignants",
     "students": "Élèves",
     "analytics": "Analytique"
   },
@@ -37,6 +43,15 @@
       "classNameRequired": "Le nom de la classe est requis",
       "gradeRequired": "Le niveau est requis"
     }
+  },
+  "evaluation": {
+    "allSuccess": "✓ Tout réussi",
+    "allFail": "✗ Tout échoué",
+    "clear": "Tout effacer",
+    "confirmCheckAll": "Êtes-vous sûr de vouloir marquer toutes les réponses comme correctes?",
+    "confirmFailAll": "Êtes-vous sûr de vouloir marquer toutes les réponses comme incorrectes?",
+    "confirmClearAll": "Êtes-vous sûr de vouloir effacer toutes les réponses? Cette action est irréversible.",
+    "confirmNotRequired": "Marquer cette évaluation comme 'Non requis' effacera toutes les réponses. Continuer?"
   },
   "profile": {
     "title": "Mon Profil",
@@ -111,6 +126,7 @@
     }
   },
   "reports": {
+    "title": "Rapports et Analyses",
     "subtitle": "Consultez l'analytique de performance et les aperçus",
     "metrics": {
       "numberOfClasses": "Nombre de classes",
@@ -124,14 +140,46 @@
     "chartPlaceholder": "Espace réservé au graphique",
     "totalStudents": "Total d'élèves",
     "averageScore": "Note moyenne",
+    "successRate": "Taux de réussite",
+    "workshopsCompleted": "Ateliers complétés",
+    "studentsAtRisk": "Élèves à risque",
+    "performanceByRange": "Performance par plage d'ateliers",
+    "progressOverTime": "Progression moyenne au fil du temps",
+    "gradeLevelBenchmarks": "Attentes par niveau scolaire",
+    "endOfKindergarten": "Fin de maternelle",
+    "endOfPreK": "Fin de jardin",
+    "endOfGrade1": "Fin de 1re année",
+    "endOfGrade2": "Fin de 2e année",
+    "workshops1to2": "Ateliers 1-2",
+    "workshops1to9": "Ateliers 1-9",
+    "workshops10to18": "Ateliers 10-18",
+    "workshops19to27": "Ateliers 19-27",
+    "foundationsComplete": "Fondations complètes",
+    "decodingInProgress": "Décodage en cours",
+    "fullMastery": "Maîtrise complète",
+    "studentsOnTrack": "Élèves sur la bonne voie",
+    "studentsProgressing": "Élèves en progression",
+    "topPerformers": "Élèves engagés",
+    "classDistribution": "Répartition de la classe",
+    "studentsNeedingSupport": "Élèves nécessitant un soutien",
+    "individualReports": "Rapports individuels",
+    "viewDetailedReport": "Consultez le rapport détaillé de chaque élève incluant l'historique complet des ateliers et les commentaires",
+    "exportReports": "Exporter les rapports",
+    "fullReportPDF": "Rapport complet (PDF)",
+    "dataExcel": "Données (Excel)",
+    "workshopsCount": "{{count}} atelier complété",
+    "workshopsCount_other": "{{count}} ateliers complétés",
     "classes": "Classes",
     "legend": {
       "success": "Réussite (Bien)",
       "adequate": "Adéquat",
-      "needsImprovement": "À améliorer"
+      "needsImprovement": "À améliorer",
+      "notRequired": "Non requis",
+      "notComplete": "Non complété"
     }
   },
   "studentTracking": {
+    "student":"Élève",
     "backToDashboard": "Retour au tableau de bord",
     "addStudent": "Ajouter un élève",
     "editEvaluations": "Modifier les évaluations",
@@ -156,12 +204,17 @@
     "legend": {
       "success": "Réussite (Bien)",
       "adequate": "Adéquat",
-      "needsImprovement": "À améliorer"
+      "needsImprovement": "À améliorer",
+      "notRequired": "Non requis",
+      "notComplete": "Non complété"
     },
     "exportPdf": "Exporter PDF",
     "evaluation": "Unité"
   },
   "login": {
+    "loginTitle": "Connexion",
+    "changePortal":"Change portal",
+    "signIn": "Se connecter",
     "appName": "Lecture scientifique",
     "appSubtitle": "Suivi des apprentissages",
     "tagline": "Enseigner. Suivre. Transformer.",
@@ -176,7 +229,15 @@
     "forgotPassword": "Mot de passe oublié?",
     "submit": "Se connecter",
     "or": "ou",
-    "googleSignIn": "Se connecter avec Google"
+    "googleSignIn": "Se connecter avec Google",
+    "choosePortal": "Choisissez votre portail pour continuer",
+    "welcome": "Bienvenue!",
+    "teacherPortal": "Portail enseignant",
+    "teacherDesc": "Suivre les élèves, accéder aux ressources et aux rapports",
+    "schoolPortal": "Portail école",
+    "schoolDesc": "Vue d'ensemble des classes et des résultats par école",
+    "boardPortal": "Portail conseil scolaire",
+    "boardDesc": "Données agrégées et suivi à l'échelle du conseil"
   },
   "underConstruction": {
     "title": "En construction",
@@ -205,12 +266,232 @@
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
-    "save": "Enregistrer",
-    "cancel": "Annuler",
+    "save": "Enregistrer",    "saved": "Enregistré!",    "cancel": "Annuler",
     "delete": "Supprimer",
     "confirm": "Confirmer",
     "close": "Fermer",
     "removeStudent": "Retirer l'élève",
-    "confirmDelete": "Êtes-vous sûr?"
+    "confirmDelete": "Êtes-vous sûr?",
+    "or":"ou",
+    "notRequired": "Non requis",
+    "notComplete": "Non complété",
+    "pdfLabel": "Cliquez ici pour télécharger le PDF d'accompagnement pour cette évaluation"
+  },
+
+  "unitOne": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Présenter chaque lettre à l'élève et demander : \"Quel est le nom de cette lettre ?\" puis \"Quel son fait cette lettre ?\""
+   },
+    "uppercase": "Lettres majuscules",
+    "lowercase": "Lettres minuscules",
+    "labels": {
+      "letter": "Lettre",
+      "name": "Nom",
+      "sound": "Son"
+    }
+  },
+
+  "unitTwo": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Dire le nom de chaque lettre à l'élève et lui demander de l'écrire."
+    },
+    "uppercase": "Écrire les lettres majuscules",
+    "lowercase": "Écrire les lettres minuscules"
+  },
+
+  "unitThree": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Évaluer la capacité de l'élève à identifier les rimes, segmenter/fusionner et compter les syllabes. Pour chaque section, demander à l'élève d'écouter attentivement et de répondre."
+    },
+    "rhyming": {
+      "title": "Identifier des mots qui riment",
+      "prompt": "Demander à l'élève : « Est-ce que ces mots riment? »",
+      "labels": {
+        "wordPair": "Paire de mots",
+        "correctAnswer": "Réponse correcte",
+        "success": "Réussi"
+      }
+    },
+    "segmenting": {
+      "title": "Segmenter et fusionner des syllabes",
+      "prompt": "Lire le mot segmenté. Demander à l'élève : « Quel mot est-ce que ça fait? »",
+      "labels": {
+        "segmentedWord": "Mot segmenté",
+        "fullWord": "Mot complet",
+        "success": "Réussi"
+      }
+    },
+    "syllableCounting": {
+      "title": "Compter les syllabes dans un mot",
+      "prompt": "Dire le mot à l'élève. Demander : « Combien de syllabes entends-tu dans ce mot? » L'élève doit vous dire le nombre.",
+      "labels": {
+        "word": "Mot",
+        "syllableCount": "Nombre de syllabes",
+        "success": "Réussi"
+      }
+    }
+  },
+
+  "unitFive": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Évaluer la lecture de syllabes simples et la correspondance son-lettre. Pour la section correspondance, montrer 3 lettres à l'élève et demander de pointer la lettre qui fait le son indiqué."
+    },
+    "syllableReading": {
+      "title": "Lire des syllabes CV, VC et CVC",
+      "prompt": "Demander à l'élève de lire chaque syllabe."
+    },
+    "soundCorrespondence": {
+      "title": "Associer les sons aux graphèmes correspondants",
+      "prompt": "Montrer 3 lettres à l'élève. Dire : « Pointe la lettre qui fait le son /___/. » Par exemple, montrer « b – f – l » et demander : « Pointe la lettre qui fait le son /f/. »",
+      "labels": {
+        "lettersShown": "Lettres montrées",
+        "soundRequested": "Son demandé",
+        "correctLetter": "Lettre correcte",
+        "success": "Réussi"
+      }
+    }
+  },
+
+  "unitThreeEval": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Évaluer la capacité de l'élève à lire des syllabes ouvertes et fermées, des syllabes complexes, et des mots usuels."
+    },
+    "openClosedSyllables": {
+      "title": "Lire des syllabes ouvertes et fermées",
+      "prompt": "Demander à l'élève de lire chaque syllabe à voix haute."
+    },
+    "complexSyllables": {
+      "title": "Lire des syllabes complexes - CVCC, CCVC",
+      "prompt": "Demander à l'élève de lire chaque syllabe complexe à voix haute."
+    },
+    "frequentWords": {
+      "title": "Lire 5 mots usuels",
+      "prompt": "Ces mots doivent être reconnus instantanément. Demander à l'élève de lire chaque mot rapidement."
+    }
+  },
+
+  "unitFour": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Demander à l'élève d'identifier les sons au début et à la fin des mots. Dire le mot clairement et demander : « Quel son entends-tu au début/à la fin? »"
+    },
+    "beginningSound": {
+      "title": "Identifier le son au début d'un mot",
+      "successLabel": "Réussi"
+    },
+    "endingSound": {
+      "title": "Identifier le son à la fin d'un mot",
+      "successLabel": "Réussi"
+    }
+  },
+
+  "unitSix": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Évaluer la capacité de l'élève à lire des familles de mots (variations d'un même mot), des mots avec des terminaisons fréquentes et des mots usuels."
+    },
+    "wordFamilies": {
+      "title": "Lire et reconnaître des familles de mots",
+      "prompt": "Demander à l'élève de lire tous les mots de chaque famille et observer s'il reconnaît le lien entre eux."
+    },
+    "frequentEndings": {
+      "title": "Lire des mots avec les terminaisons fréquentes: -s, -es, -er, -ez, -ait, -aient",
+      "prompt": "L'élève doit lire chaque mot en prononçant correctement la terminaison."
+    },
+    "frequentWords": {
+      "title": "Lire 5 mots usuels",
+      "prompt": "Demander à l'élève de lire chaque mot à voix haute."
+    }
+  },
+
+  "unitSeven": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Demander à l'élève de lire les phrases à voix haute en respectant la ponctuation et l'intonation, puis de lire les pseudo-mots pour évaluer le décodage."
+    },
+    "sentenceReading": {
+      "title": "Lire 3 phrases répétées avec fluidité",
+      "prompt": "Demander à l'élève de lire chaque phrase plusieurs fois pour améliorer la fluidité."
+    },
+    "pseudoWords": {
+      "title": "Amélioration du débit et de l'exactitude",
+      "prompt": "Demander à l'élève de lire ces pseudo-mots (mots inventés) pour évaluer ses compétences en décodage."
+    }
+  },
+
+  "unitEight": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Évaluer la lecture de mots contenant des graphèmes avancés (ail, eil, euil, ouil). Demander à l'élève de lire chaque mot à voix haute en identifiant le son cible."
+    },
+    "advancedGraphemes": {
+      "title": "Lire 10 mots contenant: ail, eil, euil, ouil",
+      "prompt": "Chaque graphème doit être lu correctement dans le contexte du mot."
+    }
+  },
+
+  "unitNine": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Demander à l'élève de visualiser l'histoire. Dire : « Ferme les yeux et imagine ce que tu entends pendant que je lis. » Lire le texte à voix haute, puis poser les 5 questions de compréhension."
+    },
+    "comprehension": {
+      "title": "Répondre à 5 questions de compréhension",
+      "prompt": "Après avoir écouté l'histoire, l'élève doit répondre à ces questions pour évaluer sa compréhension."
+    }
+  },
+
+  "unitTen": {
+    "instructions": {
+      "title": "Instructions:",
+      "body": "Demander à l'élève de lire un court texte de 4-5 phrases de façon autonome, puis poser 5 questions de compréhension."
+    },
+    "readingFluency": {
+      "title": "Lire un texte de façon autonome",
+      "prompt": "Demander à l'élève de lire le texte à voix haute de lui-même."
+    },
+    "comprehension": {
+      "title": "Répondre à 5 questions de compréhension",
+      "prompt": "Après la lecture, l'élève doit répondre à ces questions pour évaluer sa compréhension."
+    }
+  },
+
+  "units": {
+    "actions": {
+      "allSuccess": "✓ Tout réussi",
+      "allFail": "✗ Tout échoué",
+      "clear": "Tout effacer",
+      "pdf": "📄 PDF d'accompagnement"
+    },
+        "notRequired": {
+      "title":"Atelier marqué comme non requis",
+      "description": "Cet atelier a été exclu selon le jugement professionnel de l'enseignant(e) et n'affectera pas les rapports."
+    },
+    "evaluation": "Atelier {{number}}",
+    "comments": "Commentaires",
+    "addComments": "Ajouter des commentaires",
+    "evaluationNotRequired": "Évaluation non requise",
+    "measurmentSystem":"Système de mesure en lecture (SML)",
+    "history": "historique",
+    "backToTracking": "Retour au suivi",
+    "unit": "Unité {{number}}",
+    "unit1-1":"Atelier 1 : Connaissance des lettres et des sons",
+    "unit1-2":"Atelier 2 : Formation des lettres",
+    "unit1-3":"Atelier 3 : Conscience phonologique - rimes et syllabes",
+    "unit1-4":"Atelier 4 : Identification des sons initiaux et finaux",
+    "unit2-1":"Atelier 5 : Lecture de syllabes simples et correspondance son-lettre",
+    "unit3-1":"Atelier 6 : Lecture de syllabes ouvertes, fermées et complexes",
+    "unit4-1":"Atelier 7 : Lecture de mots fréquents",
+    "unit5-1":"Atelier 8 : Lecture de graphèmes complexes",
+    "unit6-1":"Atelier 9 : Familles de mots et terminaisons fréquentes",
+    "unit7-1":"Atelier 10 : Lecture répétée de phrases",
+    "unit8-1":"Atelier 11 : Lecture de graphèmes avancés",
+    "unit9-1":"Atelier 12 : Lecture et compréhension de texte court",
+    "unit10-1":"Atelier 13 : Lecture autonome et compréhension"
   }
 }
