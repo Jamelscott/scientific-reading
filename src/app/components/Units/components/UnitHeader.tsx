@@ -1,7 +1,7 @@
 import { ArrowLeft, History, ChevronDown, Save, Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useClassStore, useStudentStore } from "../../../../stores";
 import { GlobalLoadingSpinner } from "../../GlobalLoadingSpinner";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
@@ -32,9 +32,10 @@ export function UnitHeader({
   const [isSaved, setIsSaved] = useState(false);
   const [showNotRequiredModal, setShowNotRequiredModal] = useState(false);
 
-  const { classId, studentId } = useParams<{
+  const { classId, studentId, teacherId } = useParams<{
     classId: string;
     studentId: string;
+    teacherId: string;
   }>();
   const classes = useClassStore((state) => state.classes);
 
@@ -55,7 +56,9 @@ export function UnitHeader({
     >
       <div className="max-w-7xl mx-auto">
         <button
-          onClick={() => navigate(`/teacher/class/${classData.id}`)}
+          onClick={() =>
+            navigate(`/teacher/${teacherId}/class/${classData.id}`)
+          }
           className="flex items-center gap-2 mb-4 text-sm"
           style={{ color: "#38b6ff" }}
         >
@@ -75,7 +78,12 @@ export function UnitHeader({
               {t(title)}
             </h1>
             <p className="text-lg" style={{ color: "#000000" }}>
-              {studentData.name}
+              <Link
+                to={`/teacher/${teacherId}/class/${classData.id}/student/${studentData.id}`}
+                className="text-blue-600 underline"
+              >
+                {studentData.name}
+              </Link>
             </p>
             <p className="text-sm" style={{ color: "#000000", opacity: 0.7 }}>
               {classData.schoolYear}
@@ -100,7 +108,7 @@ export function UnitHeader({
                 value={evaluationNumber}
                 onChange={(e) =>
                   navigate(
-                    `/teacher/class/${classData.id}/student/${studentId}/evaluation/${e.target.value}`,
+                    `/teacher/${teacherId}/class/${classData.id}/student/${studentId}/evaluation/${e.target.value}`,
                   )
                 }
                 className="px-6 py-3 rounded-xl appearance-none pr-12"

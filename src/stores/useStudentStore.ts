@@ -8,19 +8,21 @@ export interface Student {
   name: string;
   classIds: number[];
   schoolId: number;
+  grade: "Maternelle" | "Jardin" | "1re année" | "2e année";
 }
 
 interface StudentStore {
   students: Student[];
-  addStudent: (firstName: string, lastName: string, classIds?: number[], schoolId?: number) => void;
+  addStudent: (firstName: string, lastName: string, classIds?: number[], schoolId?: number, grade?: "Maternelle" | "Jardin" | "1re année" | "2e année") => void;
   removeClassFromStudent: (studentId: number, classId: number) => void;
+  getStudentById: (studentId: string) => Student | undefined;
 }
 
 export const useStudentStore = create<StudentStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       students: mockApiData.students,
-      addStudent: (firstName: string, lastName: string, classIds = [], schoolId = 1) =>
+      addStudent: (firstName: string, lastName: string, classIds = [], schoolId = 1, grade) =>
         set((state) => {
           const maxId = state.students.reduce(
             (max, student) => Math.max(max, student.id),
@@ -39,6 +41,7 @@ export const useStudentStore = create<StudentStore>()(
                 name: `${firstName} ${lastName}`,
                 classIds: classIds,
                 schoolId: schoolId,
+                grade: grade || "1re année"
               },
             ],
           };
@@ -54,6 +57,10 @@ export const useStudentStore = create<StudentStore>()(
               : student
           ),
         })),
+        getStudentById(studentId: string): Student | undefined {
+          const student = get().students.find((s: Student) => s.id === parseInt(studentId));
+          return student;
+        }
     }),
     {
       name: "student-storage",

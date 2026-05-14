@@ -8,6 +8,7 @@ export interface MockStudent {
   name: string;
   classIds: number[]; // Array of class IDs the student belongs to
   schoolId: number; // School ID the student is associated with
+  grade: "Maternelle" | "Jardin" | "1re année" | "2e année";
 }
 
 export interface MockClass {
@@ -50,6 +51,8 @@ export interface StudentAnswers {
   answers: MockQuestions;
   comment:string;
   required: boolean;
+  lastModified: string,
+  status?: "success" | "adequate" | "needs-improvement" | null;
 }
 
 export type TeacherUser = {
@@ -113,21 +116,21 @@ export const mockApiData = {
     },
   ] as MockSchool[],
   students: [
-    { id: 1, name: "Amélie Dubois", classIds: [1, 2], schoolId: 1 },
-    { id: 2, name: "Benjamin Tremblay", classIds: [1], schoolId: 1 },
-    { id: 3, name: "Charlotte Gagnon", classIds: [1], schoolId: 1 },
-    { id: 4, name: "David Roy", classIds: [1, 3], schoolId: 1 },
-    { id: 5, name: "Émilie Côté", classIds: [1], schoolId: 1 },
-    { id: 6, name: "François Bouchard", classIds: [1], schoolId: 1 },
-    { id: 7, name: "Gabrielle Gauthier", classIds: [1, 2], schoolId: 1 },
-    { id: 8, name: "Hugo Morin", classIds: [1], schoolId: 1 },
-    { id: 9, name: "Isabelle Fortin", classIds: [1], schoolId: 1 },
-    { id: 10, name: "Julien Cloutier", classIds: [1], schoolId: 1 },
-    { id: 11, name: "Léa Bergeron", classIds: [2], schoolId: 1 },
-    { id: 12, name: "Marc Lefebvre", classIds: [2, 3], schoolId: 1 },
-    { id: 13, name: "Sophie Martin", classIds: [2], schoolId: 1 },
-    { id: 14, name: "Thomas Lavoie", classIds: [3], schoolId: 1 },
-    { id: 15, name: "Valérie Beaulieu", classIds: [3], schoolId: 1 },
+    { id: 1, name: "Amélie Dubois", classIds: [1, 2], schoolId: 1, grade: '1re année' },
+    { id: 2, name: "Benjamin Tremblay", classIds: [1], schoolId: 1, grade: '1re année'},
+    { id: 3, name: "Charlotte Gagnon", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 4, name: "David Roy", classIds: [1, 3], schoolId: 1, grade: '1re année' },
+    { id: 5, name: "Émilie Côté", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 6, name: "François Bouchard", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 7, name: "Gabrielle Gauthier", classIds: [1, 2], schoolId: 1, grade: '1re année' },
+    { id: 8, name: "Hugo Morin", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 9, name: "Isabelle Fortin", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 10, name: "Julien Cloutier", classIds: [1], schoolId: 1, grade: '1re année' },
+    { id: 11, name: "Léa Bergeron", classIds: [2], schoolId: 1, grade: '1re année' },
+    { id: 12, name: "Marc Lefebvre", classIds: [2, 3], schoolId: 1, grade: '1re année' },
+    { id: 13, name: "Sophie Martin", classIds: [2], schoolId: 1, grade: '1re année' },
+    { id: 14, name: "Thomas Lavoie", classIds: [3], schoolId: 1, grade: '1re année' },
+    { id: 15, name: "Valérie Beaulieu", classIds: [3], schoolId: 1, grade: '1re année' },
   ] as MockStudent[],
 
   classes: [
@@ -400,7 +403,8 @@ export const mockApiData = {
 
   answers: [
     { 
-      id: 1,  
+      id: 1,
+      lastModified: "2024-05-01T10:00:00Z",
       studentId: 1,  
       classId: 1, 
       unitDataId: 1,
@@ -470,6 +474,73 @@ export const mockApiData = {
       studentId: 2,  
       classId: 1, 
       unitDataId: 1,
+      lastModified: "2024-05-01T10:00:00Z",
+      answers: {
+        bigLetters: {
+          "A": { name: false, sound: false },
+          "B": { name: false, sound: false },
+          "C": { name: false, sound: false },
+          "D": { name: false, sound: false },
+          "E": { name: false, sound: false },
+          "F": { name: false, sound: false },
+          "G": { name: false, sound: false },
+          "H": { name: false, sound: false },
+          "I": { name: false, sound: false },
+          "J": { name: false, sound: false },
+          "K": { name: false, sound: false },
+          "L": { name: false, sound: false },
+          "M": { name: false, sound: false },
+          "N": { name: false, sound: false },
+          "O": { name: false, sound: false },
+          "P": { name: false, sound: false },
+          "Q": { name: false, sound: false },
+          "R": { name: false, sound: false },
+          "S": { name: false, sound: false },
+          "T": { name: false, sound: false },
+          "U": { name: false, sound: false },
+          "V": { name: false, sound: false },
+          "W": { name: false, sound: false },
+          "X": { name: false, sound: false },
+          "Y": { name: false, sound: false },
+          "Z": { name: false, sound: false },
+        },
+        smallLetters: {
+          "a": { name: false, sound: false },
+          "b": { name: false, sound: false },
+          "c": { name: false, sound: false },
+          "d": { name: false, sound: false },
+          "e": { name: false, sound: false },
+          "f": { name: false, sound: false },
+          "g": { name: false, sound: false },
+          "h": { name: false, sound: false },
+          "i": { name: false, sound: false },
+          "j": { name: false, sound: false },
+          "k": { name: false, sound: false },
+          "l": { name: false, sound: false },
+          "m": { name: false, sound: false },
+          "n": { name: false, sound: false },
+          "o": { name: false, sound: false },
+          "p": { name: false, sound: false },
+          "q": { name: false, sound: false },
+          "r": { name: false, sound: false },
+          "s": { name: false, sound: false },
+          "t": { name: false, sound: false },
+          "u": { name: false, sound: false },
+          "v": { name: false, sound: false },
+          "w": { name: false, sound: false },
+          "x": { name: false, sound: false },
+          "y": { name: false, sound: false },
+          "z": { name: false, sound: false },
+        },
+      },
+      comment: "It looks like we have some work to do on both letter recognition and sounds. Let's start with the uppercase letters and then move on to the lowercase ones."
+    },
+        { 
+      id: 3,  
+      studentId: 3,  
+      classId: 1, 
+      unitDataId: 1,
+      lastModified: "2024-05-01T10:00:00Z",
       answers: {
         bigLetters: {
           "A": { name: false, sound: false },
@@ -622,6 +693,7 @@ export const mockApi = {
     name: string,
     classIds: number[] = [],
     schoolId: number = 1,
+    grade: MockStudent["grade"] = "1re année"
   ): Promise<MockStudent> => {
     await new Promise((resolve) => setTimeout(resolve, API_DELAY));
     const newStudent: MockStudent = {
@@ -629,6 +701,7 @@ export const mockApi = {
       name,
       classIds,
       schoolId,
+      grade
     };
     mockApiData.students.push(newStudent);
     

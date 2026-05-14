@@ -7,7 +7,7 @@ import {
   Users,
   User,
   BarChart3,
-  FileText,
+  Book,
   TrendingUp,
   School,
 } from "lucide-react";
@@ -22,10 +22,30 @@ export interface SidebarItem {
 
 const teacherNavItems: SidebarItem[] = [
   { icon: Users, label: "nav.myClasses", path: "/teacher/dashboard" },
-  { icon: FileText, label: "nav.evaluations", path: "/teacher/evaluations" },
+  { icon: Book, label: "nav.library", path: "/teacher/library" },
   { icon: BarChart3, label: "nav.reports", path: "/teacher/reports" },
   { icon: User, label: "nav.profile", path: "/teacher/profile" },
   { icon: Settings, label: "nav.settings", path: "/teacher/settings" },
+];
+
+const getTeacherNavItems = (teacherId: string): SidebarItem[] => [
+  {
+    icon: Users,
+    label: "nav.myClasses",
+    path: `/teacher/${teacherId}/dashboard`,
+  },
+  { icon: Book, label: "nav.library", path: `/teacher/${teacherId}/library` },
+  {
+    icon: BarChart3,
+    label: "nav.reports",
+    path: `/teacher/${teacherId}/reports`,
+  },
+  { icon: User, label: "nav.profile", path: `/teacher/${teacherId}/profile` },
+  {
+    icon: Settings,
+    label: "nav.settings",
+    path: `/teacher/${teacherId}/settings`,
+  },
 ];
 
 const schoolNavItems: SidebarItem[] = [
@@ -154,9 +174,10 @@ export function Sidebar() {
       />
     );
   }
+  if (!currentUser) return null; // Or handle loading/error state
   return (
     <SidebarShell
-      items={teacherNavItems}
+      items={getTeacherNavItems(currentUser.id)}
       useTranslationKey
       portalKey="portal.teacher"
     />

@@ -43,14 +43,16 @@ interface AuthStore {
   currentUser: AuthUser | null;
   login: (user: AuthUser) => void;
   logout: () => void;
+  getCurrentUser: () => AuthUser | null;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentUser: null,
       login: (user) => set({ currentUser: user }),
       logout: () => set({ currentUser: null }),
+      getCurrentUser: () => get().currentUser,
     }),
     {
       name: "auth-storage",

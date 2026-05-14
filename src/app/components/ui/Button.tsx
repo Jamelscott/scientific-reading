@@ -23,7 +23,8 @@ export function Button({
   leadingIcon,
 }: ButtonProps) {
   const { t } = useTranslation();
-  const baseStyles = "inline-flex items-center justify-center transition-all";
+  const baseStyles =
+    "inline-flex items-center justify-center transition-all active:scale-95";
 
   const sizeStyles = {
     small: "py-2 px-4 text-sm rounded-lg",
@@ -32,12 +33,14 @@ export function Button({
   };
 
   const variantStyles = {
-    primary: "hover:bg-[#003a86] bg-[#004aad] text-white",
-    secondary: "hover:bg-gray-50 hover:border-gray-200 border text-black",
-    caution: "bg-yellow-500 hover:bg-yellow-600 text-white",
-    error: "bg-[#d32f2f] hover:bg-[#b71c1c] text-white hover:bg-[#b71c1c]",
-    success: "bg-[#2e7d32] hover:bg-[#1b5e20] text-white",
-    clear: "bg-[#666] hover:bg-[#555] text-white",
+    primary: "hover:bg-[#003a86] active:bg-[#00275a] bg-[#004aad] text-white",
+    secondary:
+      "hover:bg-gray-50 hover:border-gray-200 active:bg-gray-100 border text-black",
+    caution:
+      "bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white",
+    error: "bg-[#d32f2f] hover:bg-[#b71c1c] active:bg-[#7f1d1d] text-white",
+    success: "bg-[#2e7d32] hover:bg-[#1b5e20] active:bg-[#17451a] text-white",
+    clear: "bg-[#666] hover:bg-[#555] active:bg-[#444] text-white",
   };
 
   return (

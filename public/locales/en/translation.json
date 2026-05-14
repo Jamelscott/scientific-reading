@@ -12,10 +12,15 @@
     "overview": "Overview",
     "schools": "Schools",
     "students": "Students",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "library": "Library"
+  },
+  "library": {
+    "library": "Library",
+    "subtitle": "Access teaching resources and guides to support your instruction"
   },
   "dashboard": {
-    "welcome": "Welcome back, Ms. Gisèle!",
+    "welcome": "Welcome!",
     "subtitle": "Access your class and track student progress.",
     "addClass": "Add a class",
     "editClasses": "Edit Classes",
@@ -120,13 +125,15 @@
     }
   },
   "reports": {
+    "selectClass": "Select class",
     "subtitle": "View performance analytics and insights",
     "metrics": {
       "numberOfClasses": "Number of Classes",
       "numberOfStudents": "Number of Students",
       "goodGrades": "Good Grades",
       "satisfactoryGrades": "Satisfactory Grades",
-      "failingGrades": "Failing Grades"
+      "failingGrades": "Failing Grades",
+      "notSubmitted": "Not Submitted"
     },
     "classPerformance": "Class Performance",
     "studentProgress": "Student Progress",
@@ -138,6 +145,7 @@
       "success": "Success (Good)",
       "adequate": "Adequate",
       "needsImprovement": "Needs improvement",
+      "needs-improvement": "Needs improvement",
       "notRequired": "Not required",
       "notComplete": "Not complete"
     }
@@ -245,7 +253,8 @@
     "or":"or",
     "notRequired": "Not required",
     "notComplete": "Not complete",
-    "pdfLabel": "Click here to download the supporting PDF for this evaluation"
+    "pdfLabel": "Click here to download the supporting PDF for this evaluation",
+    "downloadPdf": "Download PDF"
    },
 
   "unitOne": {
@@ -463,5 +472,28 @@
     "unit8-1": "Evaluation 11: Advanced grapheme reading",
     "unit9-1": "Evaluation 12: Short text reading and comprehension",
     "unit10-1": "Evaluation 13: Independent reading and comprehension"
+  },
+  "studentPage": {
+    "studentNotFound": "Student not found",
+    "backToClassList": "Back to class list",
+    "smlTitle": "Student Performance Dashboard",
+    "exportReport": "Export Report",
+    "benchmarkTitle": "Benchmarks",
+    "expectedWorkshops": "Expected workshops: {{label}} ({{count}})",
+    "ahead": "Ahead",
+    "onTrack": "On Track",
+    "needsSupport": "Needs Support",
+    "workshopsCompleted": "Workshops Completed",
+    "successRate": "Success Rate",
+    "lastWorkshop": "Last Workshop",
+    "skillsProfile": "Skills Profile",
+    "resultsDistribution": "Results Distribution",
+    "results": "Results",
+    "score": "Score",
+    "reading": "Reading",
+    "writing": "Writing",
+    "comprehension": "Comprehension",
+    "vocabulary": "Vocabulary",
+    "phonics": "Phonics"
   }
 }

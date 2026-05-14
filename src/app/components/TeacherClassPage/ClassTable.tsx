@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Student } from "../../../stores/useStudentStore";
 import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { EvaluationButton } from "./EvaluationButton";
-import { useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { StudentAnswers } from "../../../../mockData";
 import { EvaluationLegend } from "../EvaluationLegend";
 import { Tooltip } from "../ui/Tooltip";
@@ -18,6 +18,7 @@ interface ClassTableProps {
 export function ClassTable({ students, classId }: ClassTableProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { teacherId } = useParams();
   const getUnitsData = useUnitsStore((state) => state.getUnitsData);
   const getUnitAnswers = useUnitsStore((state) => state.getAnswersByClass);
   const getAnswersByStudent = useUnitsStore(
@@ -203,12 +204,21 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                           color: "#000000",
                         }}
                       >
-                        {student.name}
+                        <Link
+                          className="hover:underline text-blue-500"
+                          to={`/teacher/${teacherId}/class/${classId}/student/${student.id}`}
+                        >
+                          {student.name}
+                        </Link>
                       </td>
                       {evaluationsData.map((evaluation) => {
                         const singleAnswer = getAnswersByEvaluation(
                           evaluation.id,
-                        ).find((answer) => answer.studentId === student.id);
+                        ).find(
+                          (answer) =>
+                            answer.studentId === student.id &&
+                            answer.classId === Number(classId),
+                        );
                         console.log(singleAnswer);
                         const status = singleAnswer
                           ? getScoreFromEvaluations(singleAnswer.answers)
@@ -232,7 +242,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                                 status={status}
                                 onClick={() => {
                                   navigate(
-                                    `/teacher/class/${classId}/student/${student.id}/evaluation/${evaluation.id}`,
+                                    `/teacher/${teacherId}/class/${classId}/student/${student.id}/evaluation/${evaluation.id}`,
                                   );
                                 }}
                                 empty={status === null}

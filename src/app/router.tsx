@@ -11,6 +11,7 @@ import { TeacherDashboard } from "./pages/teacher/Dashboard";
 import { ClassPage } from "./pages/teacher/ClassPage";
 import { ProfilePage as TeacherProfile } from "./pages/teacher/Profile";
 import { SettingsPage as TeacherSettings } from "./pages/teacher/Settings";
+import { ReportsPage as TeacherReports } from "./pages/teacher/Reports";
 
 // School pages
 import { SchoolDashboard } from "./pages/school/Dashboard";
@@ -25,6 +26,8 @@ import { BoardProfile } from "./pages/board/Profile";
 import { BoardReports } from "./pages/board/Reports";
 import { BoardSchools } from "./pages/board/Schools";
 import { Settings as BoardSettings } from "./pages/board/Settings";
+import { LibraryPage } from "./pages/teacher/LibriaryPage";
+import { StudentPage } from "./pages/teacher/StudentPage";
 
 function RequireAuth({
   children,
@@ -41,7 +44,7 @@ function RequireAuth({
         ? "/board/dashboard"
         : currentUser.type === "school"
           ? "/school/dashboard"
-          : "/teacher/dashboard";
+          : `/teacher/${currentUser.id}/dashboard`;
     return <Navigate to={home} replace />;
   }
   return <>{children}</>;
@@ -64,17 +67,31 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <Navigate to="dashboard" replace /> },
-      { path: "dashboard", Component: TeacherDashboard },
-      { path: "class/:classId", Component: ClassPage },
+      { index: true, element: <Navigate to="1" replace /> },
       {
-        path: "class/:classId/student/:studentId/evaluation/:evaluationId",
-        Component: UnitEvaluationRouter,
-        errorElement: <ErrorBoundary />,
+        path: ":teacherId",
+        element: <Outlet />,
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", Component: TeacherDashboard },
+          { path: "class/:classId", Component: ClassPage },
+          {
+            path: "class/:classId/student/:studentId/evaluation/:evaluationId",
+            Component: UnitEvaluationRouter,
+            errorElement: <ErrorBoundary />,
+          },
+          {
+            path: "class/:classId/student/:studentId",
+            Component: StudentPage,
+            errorElement: <ErrorBoundary />,
+          },
+          { path: "library", Component: LibraryPage },
+          { path: "profile", Component: TeacherProfile },
+          { path: "reports", Component: TeacherReports },
+          { path: "settings", Component: TeacherSettings },
+          { path: "units", Component: UnderConstructionPage },
+        ],
       },
-      { path: "profile", Component: TeacherProfile },
-      { path: "settings", Component: TeacherSettings },
-      { path: "units", Component: UnderConstructionPage },
     ],
   },
 
@@ -115,7 +132,6 @@ export const router = createBrowserRouter([
       { path: "settings", Component: BoardSettings },
     ],
   },
-
   {
     path: "*",
     Component: NotFoundPage,

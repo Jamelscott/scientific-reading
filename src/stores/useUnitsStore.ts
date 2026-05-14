@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { mockApiData, StudentAnswers, UnitData } from "../../mockData";
+import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
 
 /** Derive a 0–100 score from per-question answers. Null/unanswered counts as wrong. */
 export function computeScore(evaluation: StudentAnswers): number {
@@ -32,15 +33,18 @@ export function computeScore(evaluation: StudentAnswers): number {
   return Math.round((correctChecks / totalChecks) * 100);
 }
 
-function fromMockResponse(r: StudentAnswers): StudentAnswers {
+function fromMockResponse(r: StudentAnswers): StudentAnswers & { status: "success" | "adequate" | "needs-improvement" | null } {
+  const status = getScoreFromEvaluations(r.answers);
   return {
     id: r.id,
+    lastModified: r.lastModified,
     studentId: r.studentId,
     classId: r.classId,
     unitDataId: r.unitDataId,
     answers: { ...r.answers },
     comment: r.comment || "",
     required: r.required ?? true,
+    status: status,
   };
 }
 
@@ -71,56 +75,109 @@ interface UnitsStore {
 
 export const useUnitsStore = create<UnitsStore>()(
   persist(
-    (set, get) => ({
-      getAllAnswers: mockApiData.answers.map(fromMockResponse),
-      getStudentAnswers: (classId:number) => mockApiData.answers.filter(answer => answer.classId === classId),
+    (set, get) => {
+      // Memoization cache for filtered results
+      let lastAllAnswers: StudentAnswers[] | null = null;
+      const memoCache = new Map<number, StudentAnswers[]>();
+      const studentAnswersCache = new Map<number, StudentAnswers[]>();
 
-      updateAnswer: (studentId, classId, unitDataId, answers, comment, required) =>
-        set((state) => {
-          const existing = state.getAllAnswers.find(
-            (a) => a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
-          );
-
-          if (existing) {
-            // Update existing answer
-            return {
-              getAllAnswers: state.getAllAnswers.map((a) =>
-                a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
-                  ? { ...a, answers, comment, required }
-                  : a
-              ),
-            };
-          } else {
-            // Create new answer
-            const newAnswer: StudentAnswers = {
-              id: Math.max(0, ...state.getAllAnswers.map((a) => a.id)) + 1,
-              studentId,
-              classId,
-              unitDataId,
-              answers,
-              comment,
-              required,
-            };
-            return {
-              getAllAnswers: [...state.getAllAnswers, newAnswer],
-            };
+      return {
+        getAllAnswers: mockApiData.answers.map(fromMockResponse),
+        getStudentAnswers: (classId:number) => {
+          const currentAnswers = get().getAllAnswers;
+          
+          // If the underlying data changed, clear cache
+          if (lastAllAnswers !== currentAnswers) {
+            lastAllAnswers = currentAnswers;
+            studentAnswersCache.clear();
           }
-        }),
-      getAnswersByClass: (classId) =>
-        get().getAllAnswers.filter(
-          (e) => e.classId === classId,
-        ),
-      getAnswersByStudent: (studentId) =>
-        get().getAllAnswers.filter(
-          (e) => e.studentId === studentId,
-        ),
-      getAnswersByEvaluation: (evaluationId) =>
-        get().getAllAnswers.filter(
-          (e) => e.unitDataId === evaluationId,
-        ),
-      getUnitsData: mockApiData.unitData,
-      getUnitAnswers: (classId:number) => mockApiData.answers.filter(answer => answer.classId === classId),
-    }),
+
+          // Return cached result if available
+          if (studentAnswersCache.has(classId)) {
+            return studentAnswersCache.get(classId)!;
+          }
+
+          // Filter answers by class and enrich with student data
+          const filtered = currentAnswers.filter(answer => answer.classId === classId);
+          
+          // Enrich with student info from mockApiData
+          const enriched = filtered.map(answer => {
+            const student = mockApiData.students.find(s => s.id === answer.studentId);
+            return {
+              ...answer,
+              studentName: student?.name || "Unknown",
+            };
+          });
+          
+          studentAnswersCache.set(classId, enriched as any);
+          return enriched as any;
+        },
+
+        updateAnswer: (studentId, classId, unitDataId, answers, comment, required) =>
+          set((state) => {
+            const status = getScoreFromEvaluations(answers);
+            const existing = state.getAllAnswers.find(
+              (a) => a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
+            );
+
+            if (existing) {
+              // Update existing answer
+              return {
+                getAllAnswers: state.getAllAnswers.map((a) =>
+                  a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
+                    ? { ...a, answers, comment, required, lastModified: new Date().toISOString(), status }
+                    : a
+                ),
+              };
+            } else {
+              // Create new answer
+              const newAnswer: StudentAnswers & { status: "success" | "adequate" | "needs-improvement" | null } = {
+                id: Math.max(0, ...state.getAllAnswers.map((a) => a.id)) + 1,
+                lastModified: new Date().toISOString(),
+                studentId,
+                classId,
+                unitDataId,
+                answers,
+                comment,
+                required,
+                status,
+              };
+              return {
+                getAllAnswers: [...state.getAllAnswers, newAnswer as any],
+              };
+            }
+          }),
+        getAnswersByClass: (classId) =>
+          get().getAllAnswers.filter(
+            (e) => e.classId === classId,
+          ),
+        getAnswersByStudent: (studentId) => {
+          const currentAnswers = get().getAllAnswers;
+          
+          // If the underlying data changed, clear cache
+          if (lastAllAnswers !== currentAnswers) {
+            lastAllAnswers = currentAnswers;
+            memoCache.clear();
+          }
+
+          // Return cached result if available
+          if (memoCache.has(studentId)) {
+            return memoCache.get(studentId)!;
+          }
+
+          // Filter and cache the result
+          const filtered = currentAnswers.filter((e) => e.studentId === studentId);
+          memoCache.set(studentId, filtered);
+          return filtered;
+        },
+        getAnswersByEvaluation: (evaluationId) =>
+          get().getAllAnswers.filter(
+            (e) => e.unitDataId === evaluationId,
+          ),
+        getUnitsData: mockApiData.unitData,
+        getUnitAnswers: (classId:number) => mockApiData.answers.filter(answer => answer.classId === classId),
+      };
+    },
     {
       name: "units-storage",
     },

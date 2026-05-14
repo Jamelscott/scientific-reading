@@ -18,7 +18,12 @@
     "schools": "Écoles",
     "teachers": "Enseignants",
     "students": "Élèves",
-    "analytics": "Analytique"
+    "analytics": "Analytique",
+    "library": "Bibliothèque"
+  },
+  "library": {
+    "library": "Bibliothèque",
+    "subtitle": "Accédez aux ressources pédagogiques et aux guides pour soutenir votre enseignement"
   },
   "dashboard": {
     "welcome": "Bon retour, Mme Gisèle!",
@@ -126,6 +131,7 @@
     }
   },
   "reports": {
+    "selectClass": "Sélectionner la classe",
     "title": "Rapports et Analyses",
     "subtitle": "Consultez l'analytique de performance et les aperçus",
     "metrics": {
@@ -133,7 +139,8 @@
       "numberOfStudents": "Nombre d'élèves",
       "goodGrades": "Bonnes notes",
       "satisfactoryGrades": "Notes satisfaisantes",
-      "failingGrades": "Notes insuffisantes"
+      "failingGrades": "Notes insuffisantes",
+      "notSubmitted": "Non soumis"
     },
     "classPerformance": "Performance de la classe",
     "studentProgress": "Progrès des élèves",
@@ -174,6 +181,7 @@
       "success": "Réussite (Bien)",
       "adequate": "Adéquat",
       "needsImprovement": "À améliorer",
+      "needs-improvement": "À améliorer",
       "notRequired": "Non requis",
       "notComplete": "Non complété"
     }
@@ -275,7 +283,8 @@
     "or":"ou",
     "notRequired": "Non requis",
     "notComplete": "Non complété",
-    "pdfLabel": "Cliquez ici pour télécharger le PDF d'accompagnement pour cette évaluation"
+    "pdfLabel": "Cliquez ici pour télécharger le PDF d'accompagnement pour cette évaluation",
+    "downloadPdf": "Télécharger le PDF"
   },
 
   "unitOne": {
@@ -493,5 +502,28 @@
     "unit8-1":"Atelier 11 : Lecture de graphèmes avancés",
     "unit9-1":"Atelier 12 : Lecture et compréhension de texte court",
     "unit10-1":"Atelier 13 : Lecture autonome et compréhension"
+  },
+  "studentPage": {
+    "studentNotFound": "Élève non trouvé",
+    "backToClassList": "Retour à la liste de classe",
+    "smlTitle": "Système de mesure en lecture (SML)",
+    "exportReport": "Exporter le rapport",
+    "benchmarkTitle": "Progression par rapport aux attentes de niveau",
+    "expectedWorkshops": "Attendu pour {{label}} : {{count}} ateliers",
+    "ahead": "En avance",
+    "onTrack": "Sur la bonne voie",
+    "needsSupport": "Besoin de soutien",
+    "workshopsCompleted": "Ateliers complétés",
+    "successRate": "Taux de réussite",
+    "lastWorkshop": "Dernier atelier",
+    "skillsProfile": "Profil de compétences",
+    "resultsDistribution": "Répartition des résultats",
+    "results": "Résultats",
+    "score": "Score",
+    "reading": "Lecture",
+    "writing": "Écriture",
+    "comprehension": "Compréhension",
+    "vocabulary": "Vocabulaire",
+    "phonics": "Phonétique"
   }
 }

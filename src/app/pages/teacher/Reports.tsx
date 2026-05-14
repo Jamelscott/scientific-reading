@@ -5,13 +5,17 @@ import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { Initials } from "../../components/Initials";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
 import { Sidebar } from "../../components/Sidebar";
+import getScoreFromEvaluations from "../../utils/getScoreFromEvaluations";
 import {
   BookOpen,
   Users,
   TrendingUp,
   AlertCircle,
   CheckCircle,
+  LineChart as LineChartIcon,
+  Download,
 } from "lucide-react";
+import { useState } from "react";
 
 import {
   BarChart,
@@ -24,90 +28,153 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  Line,
+  LineChart,
 } from "recharts";
+
+function scoreStatusToNumber(
+  status: "success" | "adequate" | "needs-improvement" | null,
+): number {
+  if (status === "success") return 85;
+  if (status === "adequate") return 70;
+  if (status === "needs-improvement") return 40;
+  return 0;
+}
 
 export function ReportsPage() {
   const { t } = useTranslation();
   const classes = useClassStore((state) => state.classes);
   const students = useStudentStore((state) => state.students);
-  const evaluations = useUnitsStore((state) => state.evaluations);
+  const getAllAnswers = useUnitsStore((state) => state.getAllAnswers);
+  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(
+    classes.length > 0 ? classes[0].id : null,
+  );
 
   // Calculate average score (0-100)
   const calculateAverageScore = () => {
+    const classAnswers = getAllAnswers.filter(
+      (answer) => answer.classId === selectedClassId,
+    );
+
+    if (classAnswers.length === 0)
+      return { score: "0.0", label: "needs-improvement" as const };
+
     let total = 0;
     let count = 0;
-    evaluations.forEach((evaluation) => {
-      evaluation.responses.forEach((score) => {
-        if (score !== null) {
-          total += score;
-          count++;
-        }
-      });
+    classAnswers.forEach((answer) => {
+      const status = getScoreFromEvaluations(answer.answers);
+      if (status) {
+        total += scoreStatusToNumber(status);
+        count++;
+      }
     });
     const avg = count > 0 ? total / count : 0;
-    let label: "success" | "adequate" | "needsImprovement" = "needsImprovement";
-    if (avg >= 75) label = "success";
-    else if (avg >= 50) label = "adequate";
+    let label: "success" | "adequate" | "needs-improvement" =
+      "needs-improvement";
+    if (avg >= 85) label = "success";
+    else if (avg >= 70) label = "adequate";
     return { score: avg.toFixed(1), label };
   };
 
   // Calculate grade distribution percentages
+  const selectedClass = classes.find((c) => c.id === selectedClassId);
+  const classStudentCount = selectedClass?.studentIds?.length || 0;
+
   const calculateGradeDistribution = () => {
-    let goodCount = 0;
-    let satisfactoryCount = 0;
-    let failingCount = 0;
-    let total = 0;
-    evaluations.forEach((evaluation) => {
-      evaluation.evaluations.forEach((score) => {
-        if (score !== null) {
-          if (score >= 75) goodCount++;
-          else if (score >= 50) satisfactoryCount++;
-          else failingCount++;
-          total++;
-        }
+    // Use unitsData to compute expected total evaluations (units x students in selected class)
+    const unitCount = unitsData.length || 0;
+    const expectedTotal = unitCount * classStudentCount;
+
+    let successCount = 0;
+    let adequateCount = 0;
+    let needsImprovementCount = 0;
+
+    // Count submitted (non-null) scores for the selected class only
+    getAllAnswers
+      .filter((answer) => answer.classId === selectedClassId)
+      .forEach((answer) => {
+        const status = getScoreFromEvaluations(answer.answers);
+        if (status === "success") successCount++;
+        else if (status === "adequate") adequateCount++;
+        else if (status === "needs-improvement") needsImprovementCount++;
       });
-    });
+
+    const submittedCount = successCount + adequateCount + needsImprovementCount;
+    const notSubmittedCount = Math.max(0, expectedTotal - submittedCount);
+
     return {
-      good: total > 0 ? ((goodCount / total) * 100).toFixed(1) : 0,
+      good:
+        submittedCount > 0
+          ? ((successCount / submittedCount) * 100).toFixed(1)
+          : "0",
       satisfactory:
-        total > 0 ? ((satisfactoryCount / total) * 100).toFixed(1) : 0,
-      failing: total > 0 ? ((failingCount / total) * 100).toFixed(1) : 0,
+        submittedCount > 0
+          ? ((adequateCount / submittedCount) * 100).toFixed(1)
+          : "0",
+      failing:
+        submittedCount > 0
+          ? ((needsImprovementCount / submittedCount) * 100).toFixed(1)
+          : "0",
+      notSubmitted:
+        expectedTotal > 0
+          ? ((notSubmittedCount / expectedTotal) * 100).toFixed(1)
+          : "0",
     };
   };
 
-  // Get unique student IDs
-  const uniqueStudentCount = new Set(students.map((s) => s.id)).size;
-
-  // Calculate student distribution by performance level
   const calculateStudentDistribution = () => {
-    let goodStudents = 0;
-    let satisfactoryStudents = 0;
-    let failingStudents = 0;
+    let successStudents = 0;
+    let adequateStudents = 0;
+    let needsImprovementStudents = 0;
 
-    students.forEach((student) => {
-      const studentEvals = evaluations.filter(
-        (e) => e.studentId === student.id,
+    // Get students in the selected class
+    const classStudentIds = new Set(selectedClass?.studentIds || []);
+
+    if (classStudentIds.size === 0) {
+      return [
+        { name: "success", value: 0, color: "#c9e265" },
+        { name: "adequate", value: 0, color: "#ffde59" },
+        { name: "needs-improvement", value: 0, color: "#ff5757" },
+      ];
+    }
+
+    // Calculate average progress for each student in the selected class
+    classStudentIds.forEach((studentId) => {
+      const studentAnswers = getAllAnswers.filter(
+        (a) => a.studentId === studentId && a.classId === selectedClassId,
       );
+
+      // Only count students who have submitted evaluations
       let total = 0;
       let count = 0;
-      studentEvals.forEach((evaluation) => {
-        evaluation.evaluations.forEach((score) => {
-          if (score !== null) {
-            total += score;
-            count++;
-          }
-        });
+      studentAnswers.forEach((answer) => {
+        const status = getScoreFromEvaluations(answer.answers);
+        if (status) {
+          total += scoreStatusToNumber(status);
+          count++;
+        }
       });
-      const avg = count > 0 ? total / count : 0;
-      if (avg >= 75) goodStudents++;
-      else if (avg >= 50) satisfactoryStudents++;
-      else failingStudents++;
+
+      // Skip students with no submitted evaluations
+      if (count === 0) {
+        return;
+      }
+
+      const avg = total / count;
+      if (avg >= 85) successStudents++;
+      else if (avg >= 70) adequateStudents++;
+      else needsImprovementStudents++;
     });
 
     return [
-      { name: "success", value: goodStudents, color: "#c9e265" },
-      { name: "adequate", value: satisfactoryStudents, color: "#ffde59" },
-      { name: "needsImprovement", value: failingStudents, color: "#ff5757" },
+      { name: "success", value: successStudents, color: "#c9e265" },
+      { name: "adequate", value: adequateStudents, color: "#ffde59" },
+      {
+        name: "needs-improvement",
+        value: needsImprovementStudents,
+        color: "#ff5757",
+      },
     ];
   };
 
@@ -119,15 +186,14 @@ export function ReportsPage() {
       classPerformance[cls.id] = { total: 0, count: 0 };
     });
 
-    evaluations.forEach((evaluation) => {
-      const classId = evaluation.classId;
+    getAllAnswers.forEach((answer) => {
+      const classId = answer.classId;
       if (classPerformance[classId]) {
-        evaluation.evaluations.forEach((score) => {
-          if (score !== null) {
-            classPerformance[classId].total += score;
-            classPerformance[classId].count++;
-          }
-        });
+        const status = getScoreFromEvaluations(answer.answers);
+        if (status) {
+          classPerformance[classId].total += scoreStatusToNumber(status);
+          classPerformance[classId].count++;
+        }
       }
     });
 
@@ -142,6 +208,160 @@ export function ReportsPage() {
       };
     });
   };
+
+  // Build classPerformanceData: counts students by class and their evaluation status
+  const buildClassPerformanceData = () => {
+    interface ClassPerf {
+      name: string;
+      success: number;
+      adequate: number;
+      atRisk: number;
+    }
+    const classPerfMap: Record<number, ClassPerf> = {};
+
+    // Initialize each class
+    classes.forEach((cls) => {
+      classPerfMap[cls.id] = {
+        name: cls.name,
+        success: 0,
+        adequate: 0,
+        atRisk: 0,
+      };
+    });
+
+    // Group students by class and count their statuses
+    const studentStatusByClass: Record<
+      number,
+      Record<number, string | null>
+    > = {};
+
+    classes.forEach((cls) => {
+      studentStatusByClass[cls.id] = {};
+      (cls.studentIds || []).forEach((studentId) => {
+        const studentAnswers = getAllAnswers.filter(
+          (a) => a.studentId === studentId && a.classId === cls.id,
+        );
+
+        if (studentAnswers.length === 0) {
+          studentStatusByClass[cls.id][studentId] = null;
+          return;
+        }
+
+        let total = 0;
+        let count = 0;
+        studentAnswers.forEach((answer) => {
+          const status = getScoreFromEvaluations(answer.answers);
+          if (status) {
+            total += scoreStatusToNumber(status);
+            count++;
+          }
+        });
+
+        if (count === 0) {
+          studentStatusByClass[cls.id][studentId] = null;
+          return;
+        }
+
+        const avg = total / count;
+        if (avg >= 85) {
+          studentStatusByClass[cls.id][studentId] = "success";
+        } else if (avg >= 70) {
+          studentStatusByClass[cls.id][studentId] = "adequate";
+        } else {
+          studentStatusByClass[cls.id][studentId] = "atRisk";
+        }
+      });
+    });
+
+    // Count statuses for each class
+    classes.forEach((cls) => {
+      const statusMap = studentStatusByClass[cls.id];
+      Object.values(statusMap).forEach((status) => {
+        if (status === "success") classPerfMap[cls.id].success++;
+        else if (status === "adequate") classPerfMap[cls.id].adequate++;
+        else if (status === "atRisk") classPerfMap[cls.id].atRisk++;
+      });
+    });
+
+    return Object.values(classPerfMap);
+  };
+
+  // Build progressOverTime: average performance by month based on unit evaluations
+  const buildProgressOverTime = () => {
+    // Map months to unit/evaluation IDs (assuming sequential order)
+    const monthMap: Record<number, string> = {
+      1: "Sept",
+      2: "Oct",
+      3: "Nov",
+      4: "Déc",
+      5: "Jan",
+      6: "Fév",
+      7: "Mar",
+      8: "Avr",
+      9: "Mai",
+      10: "Juin",
+    };
+
+    interface MonthProgress {
+      month: string;
+      total: number;
+      count: number;
+    }
+    const progressMap: Record<string, MonthProgress> = {};
+
+    // Initialize months
+    Object.values(monthMap).forEach((month) => {
+      progressMap[month] = { month, total: 0, count: 0 };
+    });
+
+    // Group answers by unit (evaluation) and calculate average
+    const answersByUnit: Record<number, string[]> = {};
+
+    getAllAnswers.forEach((answer) => {
+      if (!answersByUnit[answer.unitDataId]) {
+        answersByUnit[answer.unitDataId] = [];
+      }
+      const status = getScoreFromEvaluations(answer.answers);
+      if (status) {
+        answersByUnit[answer.unitDataId].push(status);
+      }
+    });
+
+    // Calculate average for each unit and map to month
+    Object.entries(answersByUnit).forEach(([unitDataIdStr, statuses]) => {
+      const unitDataId = parseInt(unitDataIdStr);
+      // Map unit ID to evaluation number to get month (1-10 units = Sept-Juin)
+      const monthIndex = ((unitDataId - 1) % 10) + 1;
+      const month = monthMap[monthIndex];
+
+      if (month && statuses.length > 0) {
+        const avg =
+          statuses.reduce((sum, status) => {
+            return sum + scoreStatusToNumber(status as any);
+          }, 0) / statuses.length;
+
+        progressMap[month].total += avg;
+        progressMap[month].count += 1;
+      }
+    });
+
+    // Convert to final format and calculate averages
+    return Object.values(monthMap)
+      .map((month) => {
+        const data = progressMap[month];
+        return {
+          month,
+          average: data.count > 0 ? Math.round(data.total / data.count) : 0,
+        };
+      })
+      .filter(
+        (item) =>
+          item.average > 0 || Object.keys(progressMap).indexOf(item.month) <= 4,
+      );
+  };
+
+  const classPerformanceData = buildClassPerformanceData();
+  const progressOverTime = buildProgressOverTime();
 
   return (
     <div
@@ -160,6 +380,26 @@ export function ReportsPage() {
             <p className="text-lg" style={{ color: "#000000" }}>
               {t("reports.subtitle")}
             </p>
+            <div className="mt-4">
+              <label className="text-sm mr-2" style={{ color: "#6b7280" }}>
+                {t("reports.selectClass")}
+              </label>
+              <select
+                value={selectedClassId ?? ""}
+                onChange={(e) =>
+                  setSelectedClassId(
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                className="border px-2 py-1 rounded"
+              >
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <NotificationDropdown />
@@ -168,7 +408,7 @@ export function ReportsPage() {
         </div>
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
           {/* Number of Classes */}
           <div
             className="p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center"
@@ -193,7 +433,7 @@ export function ReportsPage() {
               {t("reports.metrics.numberOfStudents")}
             </p>
             <p className="text-2xl font-semibold" style={{ color: "#004aad" }}>
-              {uniqueStudentCount}
+              {classStudentCount}
             </p>
           </div>
 
@@ -244,6 +484,23 @@ export function ReportsPage() {
               {calculateGradeDistribution().failing}%
             </p>
           </div>
+
+          {/* Not Submitted */}
+          <div
+            className="p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center"
+            style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
+          >
+            <div
+              className="w-8 h-8 mb-3 rounded-full"
+              style={{ background: "#9e9e9e" }}
+            />
+            <p style={{ color: "#6b7280" }} className="text-xs mb-2">
+              {t("reports.metrics.notSubmitted")}
+            </p>
+            <p className="text-2xl font-semibold" style={{ color: "#6b7280" }}>
+              {calculateGradeDistribution().notSubmitted}%
+            </p>
+          </div>
         </div>
 
         {/* Reports Grid */}
@@ -253,103 +510,83 @@ export function ReportsPage() {
             className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
-              {t("reports.classPerformance")}
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl" style={{ color: "#004aad" }}>
+                Performance par plage d'ateliers
+              </h2>
+              <button
+                className="p-2 rounded-xl transition-all"
+                style={{ background: "#dff3ff" }}
+              >
+                <Download className="w-5 h-5" style={{ color: "#004aad" }} />
+              </button>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
-              {calculateClassPerformance().length > 0 ? (
-                <BarChart data={calculateClassPerformance()}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fill: "#000000", fontSize: 12 }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis tick={{ fill: "#000000" }} domain={[0, 100]} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#ffffff",
-                      border: "1px solid #dff3ff",
-                      borderRadius: "8px",
-                      padding: "4px 8px",
-                    }}
-                    formatter={(value: number) => `${value}`}
-                    labelFormatter={(label: string) => {
-                      const data = calculateClassPerformance();
-                      const item = data.find((d) => d.name === label);
-                      return item?.fullName || label;
-                    }}
-                  />
-                  <Bar dataKey="score" radius={[8, 8, 0, 0]}>
-                    {calculateClassPerformance().map((entry, index) => {
-                      let color = "#ff5757";
-                      if (entry.score >= 75) color = "#c9e265";
-                      else if (entry.score >= 50) color = "#ffde59";
-                      return <Cell key={`cell-${index}`} fill={color} />;
-                    })}
-                  </Bar>
-                </BarChart>
-              ) : (
-                <BarChart data={[]}>
-                  <text x="50%" y="50%" textAnchor="middle" fill="#6b7280">
-                    {t("reports.chartPlaceholder")}
-                  </text>
-                </BarChart>
-              )}
+              <BarChart data={classPerformanceData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "#000000", fontSize: 12 }}
+                />
+                <YAxis tick={{ fill: "#000000" }} />
+                <Tooltip />
+                <Bar
+                  key="success-bar"
+                  dataKey="success"
+                  stackId="a"
+                  fill="#c9e265"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  key="adequate-bar"
+                  dataKey="adequate"
+                  stackId="a"
+                  fill="#ffde59"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  key="atRisk-bar"
+                  dataKey="atRisk"
+                  stackId="a"
+                  fill="#ff5757"
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Student Progress Report */}
+          {/* Progress Over Time */}
           <div
             className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <h2 className="text-xl mb-6" style={{ color: "#004aad" }}>
-              {t("reports.studentProgress")}
-            </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={calculateStudentDistribution()}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {calculateStudentDistribution().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "#ffffff",
-                    border: "1px solid #dff3ff",
-                    borderRadius: "8px",
-                    padding: "4px 8px",
-                  }}
-                  formatter={(value: number) =>
-                    `${value} student${value !== 1 ? "s" : ""}`
-                  }
-                />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-            <div className="flex justify-center gap-6 mt-4">
-              {calculateStudentDistribution().map((item) => (
-                <div key={item.name} className="flex items-center gap-2">
-                  <div
-                    className="w-4 h-4 rounded"
-                    style={{ background: item.color }}
-                  />
-                  <span style={{ color: "#000000" }}>
-                    {t(`reports.legend.${item.name}`)} ({item.value})
-                  </span>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl" style={{ color: "#004aad" }}>
+                Progression moyenne au fil du temps
+              </h2>
+              <button
+                className="p-2 rounded-xl transition-all"
+                style={{ background: "#dff3ff" }}
+              >
+                <Download className="w-5 h-5" style={{ color: "#004aad" }} />
+              </button>
             </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={progressOverTime}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
+                <XAxis dataKey="month" tick={{ fill: "#000000" }} />
+                <YAxis tick={{ fill: "#000000" }} />
+                <Tooltip />
+                <Line
+                  key="average-line"
+                  type="monotone"
+                  dataKey="average"
+                  stroke="#38b6ff"
+                  strokeWidth={3}
+                  dot={{ fill: "#004aad", r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -364,7 +601,7 @@ export function ReportsPage() {
               {t("reports.totalStudents")}
             </p>
             <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
-              {students.length}
+              {classStudentCount}
             </p>
           </div>
 
