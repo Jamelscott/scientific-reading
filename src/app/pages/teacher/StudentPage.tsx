@@ -26,6 +26,7 @@ import {
   PolarGrid,
 } from "recharts";
 import { useTranslation } from "react-i18next";
+import { exportStudentPageToPdf } from "../../components/utils/exportStudentPageToPdf";
 
 const getStatusColor = (
   status: "success" | "adequate" | "needs-improvement" | "not-required" | null,
@@ -94,6 +95,7 @@ export function StudentPage() {
     >
       {/* Header */}
       <div
+        id="student-page-header"
         className="p-6 border-b flex-shrink-0"
         style={{ background: "#ffffff", borderColor: "#dff3ff" }}
       >
@@ -129,6 +131,9 @@ export function StudentPage() {
                 background: "#004aad",
                 color: "#ffffff",
               }}
+              onClick={() =>
+                exportStudentPageToPdf(student.name, teacher?.name || "")
+              }
             >
               <Download className="w-5 h-5" />
               {t("studentPage.exportReport")}
@@ -138,7 +143,10 @@ export function StudentPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div
+        id="student-page-main-content"
+        className="flex-1 p-6 overflow-y-auto"
+      >
         <div className="max-w-7xl mx-auto">
           {/* Grade-Level Benchmark */}
           <div
@@ -269,8 +277,6 @@ export function StudentPage() {
                 )}
               </p>
             </div>
-
-            {/* Charts and Progress */}
           </div>
 
           {/* Charts Grid - Full Width */}
@@ -355,9 +361,9 @@ export function StudentPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {/* Evaluations List */}
           </div>
 
+          {/* Evaluations List */}
           <div
             className="rounded-2xl p-8 shadow-lg mb-8"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
