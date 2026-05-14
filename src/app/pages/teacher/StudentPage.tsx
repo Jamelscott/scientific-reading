@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { useTranslation } from "react-i18next";
 import { exportStudentPageToPdf } from "../../components/utils/exportStudentPageToPdf";
+import { Button } from "../../components/ui/Button";
 
 const getStatusColor = (
   status: "success" | "adequate" | "needs-improvement" | "not-required" | null,
@@ -125,19 +126,14 @@ export function StudentPage() {
               </p>
             </div>
 
-            <button
-              className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
-              style={{
-                background: "#004aad",
-                color: "#ffffff",
-              }}
+            <Button
+              variant="primary"
               onClick={() =>
                 exportStudentPageToPdf(student.name, teacher?.name || "")
               }
-            >
-              <Download className="w-5 h-5" />
-              {t("studentPage.exportReport")}
-            </button>
+              label={t("studentPage.exportReport")}
+              leadingIcon={<Download className="w-5 h-5" />}
+            />
           </div>
         </div>
       </div>
