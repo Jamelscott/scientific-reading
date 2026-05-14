@@ -161,6 +161,7 @@ export function UnitFiveEvaluationEight() {
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
+          evaluationId={evaluationId!}
         />
         <div
           className="mb-6 p-4 rounded-xl"

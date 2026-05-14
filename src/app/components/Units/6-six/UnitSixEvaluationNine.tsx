@@ -201,6 +201,7 @@ export function UnitSixEvaluationNine() {
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
+          evaluationId={evaluationId!}
         />
 
         <div

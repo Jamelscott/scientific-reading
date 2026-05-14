@@ -195,6 +195,7 @@ export function UnitOneEvaluationTwo() {
           handleCheckAll={handleCheckAll}
           handleFailAll={handleFailAll}
           handleClearAll={handleClearAll}
+          evaluationId={evaluationId!}
         />
         <div
           className="mb-6 p-4 rounded-xl"
