@@ -2,7 +2,11 @@ import { ArrowLeft, History, ChevronDown, Save, Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
-import { useClassStore, useStudentStore } from "../../../../stores";
+import {
+  useClassStore,
+  useStudentStore,
+  useTeacherStore,
+} from "../../../../stores";
 import { GlobalLoadingSpinner } from "../../GlobalLoadingSpinner";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
 
@@ -38,6 +42,9 @@ export function UnitHeader({
     teacherId: string;
   }>();
   const classes = useClassStore((state) => state.classes);
+  const teacher = useTeacherStore((state) =>
+    state.getTeacherById(teacherId || ""),
+  );
 
   const classData = useMemo(() => {
     const id = parseInt(classId || "", 10);
@@ -59,7 +66,7 @@ export function UnitHeader({
           onClick={() =>
             navigate(`/teacher/${teacherId}/class/${classData.id}`)
           }
-          className="flex items-center gap-2 mb-4 text-sm"
+          className="flex items-center gap-2 mb-4 text-sm cursor-pointer"
           style={{ color: "#38b6ff" }}
         >
           <ArrowLeft className="w-4 h-4" />
@@ -85,6 +92,7 @@ export function UnitHeader({
                 {studentData.name}
               </Link>
             </p>
+            <p className="text-sm">{teacher?.name}</p>
             <p className="text-sm" style={{ color: "#000000", opacity: 0.7 }}>
               {classData.schoolYear}
             </p>

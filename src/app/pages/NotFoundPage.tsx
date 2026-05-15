@@ -43,7 +43,7 @@ export function NotFoundPage() {
 
         <button
           onClick={() => navigate(homePath)}
-          className="mt-4 flex items-center gap-2 px-6 py-3 rounded-xl transition-all"
+          className="mt-4 flex items-center gap-2 px-6 py-3 rounded-xl transition-all cursor-pointer"
           style={{ background: "#004aad", color: "#ffffff" }}
         >
           <MoveLeft className="w-5 h-5" />

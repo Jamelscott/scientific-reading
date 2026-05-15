@@ -24,7 +24,7 @@ export function PageContainer({
         <div className="max-w-7xl mx-auto">
           <button
             onClick={() => navigate(navRoute)}
-            className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all"
+            className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             {t("studentTracking.backToDashboard")}
