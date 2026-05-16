@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { mockApiData, StudentAnswers, UnitData } from "../../mockData";
 import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
+import {answers as mockDataAnswers} from "../../mockData/answers";
 
 /** Derive a 0–100 score from per-question answers. Null/unanswered counts as wrong. */
 export function computeScore(evaluation: StudentAnswers): number {
@@ -82,7 +83,7 @@ export const useUnitsStore = create<UnitsStore>()(
       const studentAnswersCache = new Map<number, StudentAnswers[]>();
 
       return {
-        getAllAnswers: mockApiData.answers.map(fromMockResponse),
+        getAllAnswers: mockDataAnswers.map(fromMockResponse),
         getStudentAnswers: (classId:number) => {
           const currentAnswers = get().getAllAnswers;
           

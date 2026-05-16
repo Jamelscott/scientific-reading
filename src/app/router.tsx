@@ -12,6 +12,7 @@ import { ClassPage } from "./pages/teacher/ClassPage";
 import { ProfilePage as TeacherProfile } from "./pages/teacher/Profile";
 import { SettingsPage as TeacherSettings } from "./pages/teacher/Settings";
 import { ReportsPage as TeacherReports } from "./pages/teacher/Reports";
+import { UnitDashboard } from "./components/LirbaryPage/UnitDashboard";
 
 // School pages
 import { SchoolDashboard } from "./pages/school/Dashboard";
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
             errorElement: <ErrorBoundary />,
           },
           { path: "library", Component: LibraryPage },
+          { path: "library/unit/:unitId", Component: UnitDashboard },
           { path: "profile", Component: TeacherProfile },
           { path: "reports", Component: TeacherReports },
           { path: "settings", Component: TeacherSettings },

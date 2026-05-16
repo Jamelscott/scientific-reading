@@ -17,7 +17,9 @@
   },
   "library": {
     "library": "Library",
-    "subtitle": "Access teaching resources and guides to support your instruction"
+    "subtitle": "Access teaching resources and guides to support your instruction",
+    "selectOption": "Select an option below",
+    "backToLibrary": "Back to library"
   },
   "dashboard": {
     "welcome": "Welcome!",
@@ -457,6 +459,7 @@
     "evaluationNotRequired": "Evaluation not required",
     "measurmentSystem":"Reading Measurement System (RMS)",
     "backToTracking": "Back to tracking",
+    "educationalUnits": "Educational units",
     "history": "History",
     "unit": "Unit {{number}}",
     "unit1-1": "Evaluation 1: Letter and sound knowledge",

@@ -57,24 +57,44 @@
 
   /* Unit header colors */
   --unit-1-bg: #3b82f6;
+  --unit-1-bg-15: #3b82f615;
+  --unit-1-bg-30: #3b82f630;
   --unit-1-fg: #ffffff;
   --unit-2-bg: #38bdf8;
+  --unit-2-bg-15: #38bdf815;
+  --unit-2-bg-30: #38bdf830;
   --unit-2-fg: #000000;
   --unit-3-bg: #22d3ee;
+  --unit-3-bg-15: #22d3ee15;
+  --unit-3-bg-30: #22d3ee30;
   --unit-3-fg: #000000;
   --unit-4-bg: #a3e635;
+  --unit-4-bg-15: #a3e63515;
+  --unit-4-bg-30: #a3e63530;
   --unit-4-fg: #000000;
   --unit-5-bg: #fbbf24;
+  --unit-5-bg-15: #fbbf2415;
+  --unit-5-bg-30: #fbbf2430;
   --unit-5-fg: #000000;
   --unit-6-bg: #fb923c;
+  --unit-6-bg-15: #fb923c15;
+  --unit-6-bg-30: #fb923c30;
   --unit-6-fg: #000000;
   --unit-7-bg: #fb7185;
+  --unit-7-bg-15: #fb718515;
+  --unit-7-bg-30: #fb718530;
   --unit-7-fg: #000000;
   --unit-8-bg: #a855f7;
+  --unit-8-bg-15: #a855f715;
+  --unit-8-bg-30: #a855f730;
   --unit-8-fg: #ffffff;
   --unit-9-bg: #0ea5e9;
+  --unit-9-bg-15: #0ea5e915;
+  --unit-9-bg-30: #0ea5e930;
   --unit-9-fg: #ffffff;
   --unit-10-bg: #ef4444;
+  --unit-10-bg-15: #ef444415;
+  --unit-10-bg-30: #ef444430;
   --unit-10-fg: #ffffff;
 }
 

@@ -23,7 +23,9 @@
   },
   "library": {
     "library": "Bibliothèque",
-    "subtitle": "Accédez aux ressources pédagogiques et aux guides pour soutenir votre enseignement"
+    "subtitle": "Accédez aux ressources pédagogiques et aux guides pour soutenir votre enseignement",
+    "selectOption": "Sélectionnez une option ci-dessous",
+    "backToLibrary": "Retour à la bibliothèque"
   },
   "dashboard": {
     "welcome": "Bon retour, Mme Gisèle!",
@@ -481,6 +483,7 @@
       "title":"Atelier marqué comme non requis",
       "description": "Cet atelier a été exclu selon le jugement professionnel de l'enseignant(e) et n'affectera pas les rapports."
     },
+    "educationalUnits": "Unités pédagogiques",
     "evaluation": "Atelier {{number}}",
     "comments": "Commentaires",
     "addComments": "Ajouter des commentaires",
@@ -501,7 +504,17 @@
     "unit7-1":"Atelier 10 : Lecture répétée de phrases",
     "unit8-1":"Atelier 11 : Lecture de graphèmes avancés",
     "unit9-1":"Atelier 12 : Lecture et compréhension de texte court",
-    "unit10-1":"Atelier 13 : Lecture autonome et compréhension"
+    "unit10-1":"Atelier 13 : Lecture autonome et compréhension",
+    "unit1Desc":"Connaissance des lettres et des sons",
+    "unit2Desc":"Lecture de syllabes simples et correspondance son-lettre",
+    "unit3Desc":"Lecture de syllabes ouvertes, fermées et complexes",
+    "unit4Desc":"Lecture de mots fréquents",
+    "unit5Desc":"Lecture de graphèmes complexes",
+    "unit6Desc":"Familles de mots et terminaisons fréquentes",
+    "unit7Desc":"Lecture répétée de phrases",
+    "unit8Desc":"Lecture de graphèmes avancés",
+    "unit9Desc":"Lecture et compréhension de texte court",
+    "unit10Desc":"Lecture autonome et compréhension"
   },
   "studentPage": {
     "studentNotFound": "Élève non trouvé",
