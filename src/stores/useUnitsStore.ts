@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { mockApiData, StudentAnswers, UnitData } from "../../mockData";
+import { downloadableResources } from "../../mockData/resources";
+import type { ResourceCategory } from "../../mockData/types";
 import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
 import {answers as mockDataAnswers} from "../../mockData/answers";
 
@@ -50,6 +52,9 @@ function fromMockResponse(r: StudentAnswers): StudentAnswers & { status: "succes
 }
 
 interface UnitsStore {
+  resources: ResourceCategory[];
+  /** Load resource mock data into store and return it (defensive copy) */
+  getResources: () => ResourceCategory[];
   getAllAnswers: StudentAnswers[];
   getStudentAnswers: (classId:number) => StudentAnswers[];
   /** Update or create a student answer with complete answers object */
@@ -84,6 +89,8 @@ export const useUnitsStore = create<UnitsStore>()(
 
       return {
         getAllAnswers: mockDataAnswers.map(fromMockResponse),
+        resources: downloadableResources,
+        getResources: () => downloadableResources,
         getStudentAnswers: (classId:number) => {
           const currentAnswers = get().getAllAnswers;
           
@@ -180,7 +187,7 @@ export const useUnitsStore = create<UnitsStore>()(
       };
     },
     {
-      name: "units-storage",
+      name: "units-storage",   
     },
   ),
 );

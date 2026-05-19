@@ -22,3 +22,23 @@ export interface MockStudent {
   schoolId: number; // School ID the student is associated with
   grade: "Maternelle" | "Jardin" | "1re année" | "2e année";
 }
+
+export interface ResourceActivity {
+  id: number;
+  name: string;
+  fileName: string;
+  description: string;
+}
+
+export interface Resource {
+  id: number;
+  title: string;
+  activities: ResourceActivity[];
+}
+
+export interface ResourceCategory {
+  id: number;
+  title: string;
+  color: string;
+  resources: Resource[];
+}

@@ -29,6 +29,7 @@ import { BoardSchools } from "./pages/board/Schools";
 import { Settings as BoardSettings } from "./pages/board/Settings";
 import { LibraryPage } from "./pages/teacher/LibriaryPage";
 import { StudentPage } from "./pages/teacher/StudentPage";
+import { ResourcePage } from "./pages/teacher/ResourcePage.tsx";
 
 function RequireAuth({
   children,
@@ -87,6 +88,10 @@ export const router = createBrowserRouter([
             errorElement: <ErrorBoundary />,
           },
           { path: "library", Component: LibraryPage },
+          {
+            path: "library/resources/:category/:resourceId",
+            Component: ResourcePage,
+          },
           { path: "library/unit/:unitId", Component: UnitDashboard },
           { path: "profile", Component: TeacherProfile },
           { path: "reports", Component: TeacherReports },

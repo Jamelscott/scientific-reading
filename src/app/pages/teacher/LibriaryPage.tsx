@@ -1,97 +1,26 @@
 import { useNavigate, useParams } from "react-router";
-import { Download, FileCheck } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Download,
+  FileCheck,
+  FileText,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
 import { Initials } from "../../components/Initials";
 import { Sidebar } from "../../components/Sidebar";
 import { Continuum } from "../../components/LirbaryPage/Continuum";
-import { exportContinuumToPdf } from "../../components/utils/exportContinuumToPdf";
-import { Button } from "../../components/ui/Button";
 import { useUnitsStore } from "../../../stores";
-
-interface Resource {
-  id: number;
-  title: string;
-  icon: React.ReactNode;
-}
-const resources = [
-  {
-    id: 2,
-    title: "Unité 1",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-1-bg)" }} />
-    ),
-  },
-  {
-    id: 3,
-    title: "Unité 2",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-2-bg)" }} />
-    ),
-  },
-  {
-    id: 4,
-    title: "Unité 3",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-3-bg)" }} />
-    ),
-  },
-  {
-    id: 5,
-    title: "Unité 4",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-4-bg)" }} />
-    ),
-  },
-  {
-    id: 6,
-    title: "Unité 5",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-5-bg)" }} />
-    ),
-  },
-  {
-    id: 7,
-    title: "Unité 6",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-6-bg)" }} />
-    ),
-  },
-  {
-    id: 8,
-    title: "Unité 7",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-7-bg)" }} />
-    ),
-  },
-  {
-    id: 9,
-    title: "Unité 8",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-8-bg)" }} />
-    ),
-  },
-  {
-    id: 10,
-    title: "Unité 9",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-9-bg)" }} />
-    ),
-  },
-  {
-    id: 11,
-    title: "Unité 10",
-    icon: (
-      <FileCheck className="w-4 h-4" style={{ color: "var(--unit-10-bg)" }} />
-    ),
-  },
-];
 
 export function LibraryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teacherId } = useParams();
-  const unitData = useUnitsStore((state) => state.getUnitsData);
+  const resources = useUnitsStore((state) => state.getResources());
+
+  const slugify = (str: string) =>
+    str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, "-");
 
   return (
     <div
@@ -121,7 +50,10 @@ export function LibraryPage() {
 
         {/* Resources Grid */}
         <div>
-          <h2 className="text-2xl mb-4" style={{ color: "#004aad" }}>
+          <h2
+            className="text-3xl mb-8 font-bold mt-16"
+            style={{ color: "#004aad" }}
+          >
             {t("units.educationalUnits")}
           </h2>
 
@@ -140,6 +72,7 @@ export function LibraryPage() {
                     borderRadius: "20px",
                     padding: "24px 20px",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+                    gap: "16px",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.boxShadow =
@@ -181,34 +114,161 @@ export function LibraryPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/teacher/t-1/library/unit/${unitNum}`);
-                    }}
-                    className="w-full py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
-                    style={{
-                      background: `var(--unit-${unitNum}-bg-15)`,
-                      color: `var(--unit-${unitNum}-text)`,
-                      border: `2px solid var(--unit-${unitNum}-bg-30)`,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = `var(--unit-${unitNum}-bg)`;
-                      e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
-                      e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg)`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = `var(--unit-${unitNum}-bg-15)`;
-                      e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
-                      e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg-30)`;
-                    }}
-                  >
-                    Ouvrir
-                  </button>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="w-full py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
+                      style={{
+                        background: `var(--unit-${unitNum}-bg-15)`,
+                        color: `var(--unit-${unitNum}-text)`,
+                        border: `2px solid var(--unit-${unitNum}-bg-30)`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = `var(--unit-${unitNum}-bg)`;
+                        e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
+                        e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = `var(--unit-${unitNum}-bg-15)`;
+                        e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
+                        e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg-30)`;
+                      }}
+                    >
+                      Fiche Rapide
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/teacher/${teacherId}/library/unit/${unitNum}`,
+                        )
+                      }
+                      className="w-full py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                      style={{
+                        background: `var(--unit-${unitNum}-bg-15)`,
+                        color: `var(--unit-${unitNum}-text)`,
+                        border: `2px solid var(--unit-${unitNum}-bg-30)`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = `var(--unit-${unitNum}-bg)`;
+                        e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
+                        e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = `var(--unit-${unitNum}-bg-15)`;
+                        e.currentTarget.style.color = `var(--unit-${unitNum}-text)`;
+                        e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg-30)`;
+                      }}
+                    >
+                      <ArrowRight className="w-3 h-3" />
+                      Leçons
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
+        </div>
+        {/* Downloadable Resources Section */}
+        <h2
+          className="text-3xl mb-8 font-bold mt-16"
+          style={{ color: "#004aad", letterSpacing: "-0.02em" }}
+        >
+          Ressources téléchargeables
+        </h2>
+
+        <div className="space-y-4">
+          {resources.map((category, idx) => (
+            <details
+              key={idx}
+              className="rounded-2xl overflow-hidden transition-all"
+              style={{
+                background: "#ffffff",
+                border: `2px solid ${category.color}20`,
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+              }}
+            >
+              <summary
+                className="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-opacity-50 transition-all"
+                style={{
+                  background: `${category.color}10`,
+                  listStyle: "none",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ background: category.color }}
+                  >
+                    <FileText
+                      className="w-5 h-5"
+                      style={{ color: "#ffffff" }}
+                    />
+                  </div>
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ color: "#004aad" }}
+                  >
+                    {category.title}
+                  </h3>
+                  <span
+                    className="text-xs px-2 py-1 rounded-full"
+                    style={{
+                      background: `${category.color}20`,
+                      color: category.color,
+                    }}
+                  >
+                    {category.resources.length} ressources
+                  </span>
+                </div>
+                <ChevronDown
+                  className="w-5 h-5"
+                  style={{ color: category.color }}
+                />
+              </summary>
+              <div className="p-6 grid grid-cols-3 gap-3">
+                {category.resources.map((resource, resIdx) => {
+                  const categorySlug = slugify(category.title);
+                  const firstActivity =
+                    resource.activities && resource.activities[0];
+                  const activitySlug = firstActivity
+                    ? slugify(firstActivity.name)
+                    : slugify(resource.title);
+                  return (
+                    <button
+                      key={resIdx}
+                      onClick={() =>
+                        navigate(
+                          `/teacher/${teacherId}/library/resources/${categorySlug}/${activitySlug}`,
+                        )
+                      }
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all text-left"
+                      style={{
+                        background: `${category.color}08`,
+                        border: `1px solid ${category.color}20`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = `${category.color}15`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = `${category.color}08`;
+                      }}
+                    >
+                      <Download
+                        className="w-4 h-4"
+                        style={{ color: category.color }}
+                      />
+                      <span className="text-sm" style={{ color: "#004aad" }}>
+                        {resource.title}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </details>
+          ))}
         </div>
       </div>
     </div>

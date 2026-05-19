@@ -1,15 +1,5 @@
 import { useNavigate, useParams } from "react-router";
-import {
-  BookOpen,
-  BarChart3,
-  User,
-  LogOut,
-  Users,
-  ArrowLeft,
-  FileText,
-  Book,
-  Download,
-} from "lucide-react";
+import { ArrowLeft, FileText, Book, Download } from "lucide-react";
 import { NotificationDropdown } from "../NotificationDropdown";
 import { useTranslation } from "react-i18next";
 
@@ -44,9 +34,8 @@ export function UnitDashboard() {
   const { t } = useTranslation();
   const { unitId, teacherId } = useParams();
   const resourceTitle = resourceTitles[unitId!];
-  console.log(unitId, resourceTitles);
   const unitColor = unitColors[unitId || "2"];
-  console.log(unitId);
+
   const getEvaluationRange = (id: string) => {
     const ranges: { [key: string]: string } = {
       "1": "Ateliers 1, 2, 3, 4",
@@ -98,21 +87,29 @@ export function UnitDashboard() {
     if (option.type === "lessons") {
       navigate(`/teacher/${teacherId}/library/unit/${unitId}/lessons`);
     } else {
-      // Handle PDF download/view
       console.log(`Opening PDF for ${option.title}`);
     }
   };
 
+  const lessonCount = unitId === "2" ? 13 : 8;
+  const lessons = Array.from({ length: lessonCount }, (_, i) => i + 1);
+
+  // Group lessons into columns with up to 4 items each
+  const itemsPerColumn = 4;
+  const columns: number[][] = [];
+  for (let i = 0; i < lessons.length; i += itemsPerColumn) {
+    columns.push(lessons.slice(i, i + itemsPerColumn));
+  }
+
   return (
     <div
-      className="h-screen overflow-hidden"
+      className="min-h-screen"
       style={{
         backgroundColor: "rgba(59, 130, 246, 0.082)",
+        minHeight: "100vh",
       }}
     >
-      {/* Main Content */}
-      <div className="h-full overflow-y-auto">
-        {/* Header */}
+      <div className="h-full">
         <div className="p-12 pb-8" style={{ background: "#ffffff" }}>
           <div className="flex items-start justify-between">
             <div>
@@ -124,17 +121,24 @@ export function UnitDashboard() {
                 <ArrowLeft className="w-4 h-4" />
                 {t("library.backToLibrary")}
               </button>
-              <h1 className="text-3xl mb-2" style={{ color: "#004aad" }}>
-                {resourceTitle} - {t(`units.unit${unitId}Desc`)}
-              </h1>
-              <div
-                className="inline-block px-4 py-2 rounded-xl mb-3"
-                style={{ background: "#f7ffd6", border: "1px solid #c9e265" }}
-              >
-                <p style={{ color: "#004aad" }}>
-                  {getEvaluationRange(unitId || "2")}
-                </p>
+
+              <div className="flex items-center gap-3 mb-2">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: unitColor }}
+                >
+                  <FileText className="w-6 h-6" style={{ color: "#ffffff" }} />
+                </div>
+                <div>
+                  <p className="text-sm" style={{ color: "#666" }}>
+                    {getEvaluationRange(unitId || "2")}
+                  </p>
+                  <h1 className="text-3xl" style={{ color: "#004aad" }}>
+                    {resourceTitle}
+                  </h1>
+                </div>
               </div>
+
               <p className="text-lg" style={{ color: "#000000" }}>
                 {t("library.selectOption")}
               </p>
@@ -151,55 +155,105 @@ export function UnitDashboard() {
           </div>
         </div>
 
-        {/* Resource Options */}
+        {/* Lessons Grid - dynamic columns with max 4 items each */}
         <div className="p-12 pt-8">
-          <div className="flex flex-wrap gap-6">
-            {resourceOptions.map((option) => (
-              <button
-                key={option.id}
-                className="rounded-2xl flex flex-col justify-between p-8 shadow-lg transition-all hover:shadow-xl text-left h-[250px] w-[325px]"
-                style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
+          <div className="flex gap-6 flex-wrap">
+            {columns.map((col, colIndex) => (
+              <div
+                key={colIndex}
+                className="flex-1 min-w-[260px] flex flex-col gap-6"
               >
-                <div>
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: "#dff3ff" }}
+                {col.map((lessonNum) => (
+                  <details
+                    key={lessonNum}
+                    className="rounded-xl overflow-hidden transition-all w-full"
+                    style={{
+                      background: "#ffffff",
+                      border: `2px solid var(--unit-${unitId}-color-30)`,
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                    }}
                   >
-                    {option.icon}
-                  </div>
-
-                  <h3 className="text-xl mb-2" style={{ color: "#004aad" }}>
-                    {option.title}
-                  </h3>
-
-                  <p
-                    className="text-sm mb-4"
-                    style={{ color: "#000000", opacity: 0.7 }}
-                  >
-                    {option.description}
-                  </p>
-                </div>
-
-                <div
-                  className="flex items-center gap-2"
-                  style={{ color: "#38b6ff" }}
-                >
-                  {option.type === "pdf" ? (
-                    <div className="flex gap-3 items-center cursor-pointer">
-                      <Download className="w-4 h-4" />
-                      <span className="text-sm">Télécharger PDF</span>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex gap-3 cursor-pointer"
-                      onClick={() => handleOptionClick(option)}
+                    <summary
+                      className="px-4 py-3 cursor-pointer flex items-center justify-between transition-all list-none"
+                      style={{ background: `var(--unit-${unitId}-bg-15)` }}
                     >
-                      <ArrowLeft className="w-4 h-4 rotate-180" />
-                      <span className="text-sm">Accéder</span>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
+                          style={{
+                            background: `var(--unit-${unitId}-bg)`,
+                            color: `var(--unit-${unitId}-text)`,
+                          }}
+                        >
+                          {lessonNum}
+                        </div>
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: "#004aad" }}
+                        >
+                          Leçon {lessonNum}
+                        </span>
+                      </div>
+                    </summary>
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <h3
+                          className="text-xl font-bold"
+                          style={{ color: "#004aad" }}
+                        >
+                          Leçon {lessonNum} — Titre de la leçon {lessonNum}
+                        </h3>
+                        <p className="text-sm text-gray-700 mt-2">
+                          Description de la leçon {lessonNum}. Ce bloc occupe
+                          plus d'espace pour donner l'apparence d'une page
+                          dédiée à la leçon.
+                        </p>
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/resource/${unitId}/lesson/${lessonNum}/interactive`,
+                            )
+                          }
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-left text-sm"
+                          style={{
+                            background: `${unitColor}08`,
+                            border: `1px solid ${unitColor}20`,
+                            color: "#004aad",
+                          }}
+                        >
+                          <Book
+                            className="w-4 h-4"
+                            style={{ color: unitColor }}
+                          />{" "}
+                          Leçon interactive
+                        </button>
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/resource/${unitId}/lesson/${lessonNum}/worksheet`,
+                            )
+                          }
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-left text-sm"
+                          style={{
+                            background: `${unitColor}08`,
+                            border: `1px solid ${unitColor}20`,
+                            color: "#004aad",
+                          }}
+                        >
+                          <Download
+                            className="w-4 h-4"
+                            style={{ color: unitColor }}
+                          />{" "}
+                          Fiche d'activité associée
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </button>
+                  </details>
+                ))}
+              </div>
             ))}
           </div>
         </div>
