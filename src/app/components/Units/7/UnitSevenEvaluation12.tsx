@@ -12,9 +12,9 @@ import {
 import CommentsContainer from "../components/CommentsContainer";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitSevenEvaluationTen() {
+export function UnitSevenEvaluationTwelve() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -42,7 +42,7 @@ export function UnitSevenEvaluationTen() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationTenData = unitsData[9];
+  const evaluationTwelveData = unitsData[11];
 
   type EvaluationState = {
     sentenceFluency: Array<boolean | null>;
@@ -72,32 +72,54 @@ export function UnitSevenEvaluationTen() {
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
+    
     const mapToArray = (obj: any, length: number) => {
       if (!obj) return new Array(length).fill(null);
       return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+        const val = obj[i] ?? obj[i.toString()];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
-    setEvaluationState({
-      sentenceFluency: mapToArray(
-        ans.sentenceFluency,
-        evaluationTenSentences.length,
-      ),
-      sentencePunctuation: mapToArray(
-        ans.sentencePunctuation,
-        evaluationTenSentences.length,
-      ),
-      sentenceIntonation: mapToArray(
-        ans.sentenceIntonation,
-        evaluationTenSentences.length,
-      ),
-      pseudoWords: mapToArray(ans.pseudoWords, evaluationTenPseudoWords.length),
-      comments: singleAnswer.comment,
-    });
+    // Check if data is in template format (ans.data) or saved format
+    if (ans.data) {
+      // Template format - convert from sentence keys to arrays
+      const sentenceKeys = Object.keys(ans.data);
+      const sentenceData = sentenceKeys.map(key => {
+        const val = ans.data[key];
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          return val.correct === true ? true : val.correct === false ? false : null;
+        }
+        return val === true ? true : val === false ? false : null;
+      });
+      
+      // Map sentence data to fluency, leave others null
+      setEvaluationState({
+        sentenceFluency: sentenceData.slice(0, evaluationTenSentences.length),
+        sentencePunctuation: new Array(evaluationTenSentences.length).fill(null),
+        sentenceIntonation: new Array(evaluationTenSentences.length).fill(null),
+        pseudoWords: new Array(evaluationTenPseudoWords.length).fill(null),
+        comments: singleAnswer.comment,
+      });
+    } else {
+      // Saved format - use existing arrays
+      setEvaluationState({
+        sentenceFluency: mapToArray(ans.sentenceFluency, evaluationTenSentences.length),
+        sentencePunctuation: mapToArray(ans.sentencePunctuation, evaluationTenSentences.length),
+        sentenceIntonation: mapToArray(ans.sentenceIntonation, evaluationTenSentences.length),
+        pseudoWords: mapToArray(ans.pseudoWords, evaluationTenPseudoWords.length),
+        comments: singleAnswer.comment,
+      });
+    }
+    
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
   }, [singleAnswer]);
@@ -251,8 +273,8 @@ export function UnitSevenEvaluationTen() {
   return (
     <>
       <UnitHeader
-        title={evaluationTenData.title}
-        evaluationNumber={evaluationTenData.evaluation}
+        title={evaluationTwelveData.title}
+        evaluationNumber={evaluationTwelveData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -262,7 +284,7 @@ export function UnitSevenEvaluationTen() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationTenData.unit}
+          unitNumber={evaluationTwelveData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
@@ -457,4 +479,4 @@ export function UnitSevenEvaluationTen() {
     </>
   );
 }
-export default UnitSevenEvaluationTen;
+export default UnitSevenEvaluationTwelve;

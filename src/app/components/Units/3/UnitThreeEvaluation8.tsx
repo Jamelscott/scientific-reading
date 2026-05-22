@@ -1,20 +1,16 @@
 import { useMemo, useState, useEffect } from "react";
-import { useUnitsStore } from "../../../../stores";
+import { useTranslation } from "react-i18next";
 import EvaluationHeader from "../components/EvaluationHeader";
 import UnitContainer from "../components/UnitContainer";
 import UnitHeader from "../components/UnitHeader";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
-import { useTranslation } from "react-i18next";
-import {
-  evaluationNineWords,
-  evaluationNineFamilies,
-} from "../../../pages/const";
+import { useUnitsStore } from "../../../../stores";
+import { useParams } from "react-router";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import CommentsContainer from "../components/CommentsContainer";
-import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitSixEvaluationNine() {
+export function UnitThreeEvaluationEight() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -42,12 +38,32 @@ export function UnitSixEvaluationNine() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationNineData = unitsData[8];
+  const evaluationEightData = unitsData[7];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const frequentWordsKeys = useMemo(
+    () => getKeys(evaluationEightData.questions.frequentWords),
+    [evaluationEightData.questions.frequentWords],
+  );
+
+  const openClosedListKeys = useMemo(
+    () => getKeys(evaluationEightData.questions.openClosedList),
+    [evaluationEightData.questions.openClosedList],
+  );
+
+  const complexListKeys = useMemo(
+    () => getKeys(evaluationEightData.questions.complexList),
+    [evaluationEightData.questions.complexList],
+  );
 
   type EvaluationState = {
-    wordFamilies: Array<boolean | null>;
-    frequentEndings: Array<boolean | null>;
-    frequentWords: Array<boolean | null>;
+    openClosed: Array<boolean | null>;
+    complex: Array<boolean | null>;
+    frequent: Array<boolean | null>;
     comments: string;
   };
 
@@ -55,46 +71,50 @@ export function UnitSixEvaluationNine() {
     new Array(length).fill(value) as Array<boolean | null>;
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
-    frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-    frequentWords: buildEvaluationArray(null, 5),
+    openClosed: buildEvaluationArray(null, openClosedListKeys.length),
+    complex: buildEvaluationArray(null, complexListKeys.length),
+    frequent: buildEvaluationArray(null, frequentWordsKeys.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      wordFamilies: mapToArray(ans.wordFamilies, evaluationNineFamilies.length),
-      frequentEndings: mapToArray(
-        ans.frequentEndings,
-        evaluationNineWords.length,
-      ),
-      frequentWords: mapToArray(ans.frequentWords, 5),
+      openClosed: mapToArray(openClosedListKeys, ans.openClosedList),
+      complex: mapToArray(complexListKeys, ans.complexList),
+      frequent: mapToArray(frequentWordsKeys, ans.frequentWords),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, frequentWordsKeys, openClosedListKeys, complexListKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        wordFamilies: buildEvaluationArray(true, evaluationNineFamilies.length),
-        frequentEndings: buildEvaluationArray(true, evaluationNineWords.length),
-        frequentWords: buildEvaluationArray(true, 5),
+        openClosed: buildEvaluationArray(true, openClosedListKeys.length),
+        complex: buildEvaluationArray(true, complexListKeys.length),
+        frequent: buildEvaluationArray(true, frequentWordsKeys.length),
       }));
       setHasChanges(true);
     });
@@ -106,15 +126,9 @@ export function UnitSixEvaluationNine() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        wordFamilies: buildEvaluationArray(
-          false,
-          evaluationNineFamilies.length,
-        ),
-        frequentEndings: buildEvaluationArray(
-          false,
-          evaluationNineWords.length,
-        ),
-        frequentWords: buildEvaluationArray(false, 5),
+        openClosed: buildEvaluationArray(false, openClosedListKeys.length),
+        complex: buildEvaluationArray(false, complexListKeys.length),
+        frequent: buildEvaluationArray(false, frequentWordsKeys.length),
       }));
       setHasChanges(true);
     });
@@ -126,9 +140,9 @@ export function UnitSixEvaluationNine() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
-        frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-        frequentWords: buildEvaluationArray(null, 5),
+        openClosed: buildEvaluationArray(null, openClosedListKeys.length),
+        complex: buildEvaluationArray(null, complexListKeys.length),
+        frequent: buildEvaluationArray(null, frequentWordsKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -139,9 +153,9 @@ export function UnitSixEvaluationNine() {
   const handleNotRequired = () => {
     setEvaluationState((prev) => ({
       ...prev,
-      wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
-      frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-      frequentWords: buildEvaluationArray(null, 5),
+      openClosed: buildEvaluationArray(null, openClosedListKeys.length),
+      complex: buildEvaluationArray(null, complexListKeys.length),
+      frequent: buildEvaluationArray(null, frequentWordsKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -149,23 +163,23 @@ export function UnitSixEvaluationNine() {
 
   const handleSave = () => {
     const answers: any = {
-      wordFamilies: evaluationState.wordFamilies.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      openClosedList: openClosedListKeys.reduce(
+        (acc, syl, idx) => {
+          acc[syl] = evaluationState.openClosed[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      frequentEndings: evaluationState.frequentEndings.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      complexList: complexListKeys.reduce(
+        (acc, syl, idx) => {
+          acc[syl] = evaluationState.complex[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      frequentWords: evaluationState.frequentWords.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      frequentWords: frequentWordsKeys.reduce(
+        (acc, word, idx) => {
+          acc[word] = evaluationState.frequent[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -186,8 +200,8 @@ export function UnitSixEvaluationNine() {
   return (
     <>
       <UnitHeader
-        title={evaluationNineData.title}
-        evaluationNumber={evaluationNineData.evaluation}
+        title={evaluationEightData.title}
+        evaluationNumber={evaluationEightData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -197,66 +211,70 @@ export function UnitSixEvaluationNine() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationNineData.unit}
+          unitNumber={evaluationEightData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
           evaluationId={evaluationId!}
         />
-
         <div
           className="mb-6 p-4 rounded-xl"
           style={{ background: "#fff9e6", border: "1px solid #ffde59" }}
         >
           <p className="text-sm" style={{ color: "#004aad" }}>
-            <strong>{t("unitSix.instructions.title")}</strong>{" "}
-            {t("unitSix.instructions.body")}
+            <strong>{t("unitThreeEval.instructions.title")}</strong>{" "}
+            {t("unitThreeEval.instructions.body")}
           </p>
         </div>
 
-        <div id="atelier9-content" className="space-y-6">
+        <div id="atelier6-content" className="space-y-6">
           <div className="p-5 rounded-xl" style={{ background: "#dff3ff" }}>
             <h3
               className="text-base mb-4 font-bold"
               style={{ color: "#004aad" }}
             >
-              {t("unitSix.wordFamilies.title")}
+              {t("unitThreeEval.openClosedSyllables.title")}
             </h3>
             <p className="text-sm mb-3" style={{ color: "#666" }}>
-              {t("unitSix.wordFamilies.prompt")}
+              {t("unitThreeEval.openClosedSyllables.prompt")}
             </p>
-            {evaluationNineFamilies.map((family, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 mb-3 p-2 rounded"
-                style={{ background: "#ffffff" }}
-              >
-                <span className="text-sm flex-1" style={{ color: "#004aad" }}>
-                  {family.join(", ")}
-                </span>
-                <EvaluationCheckbox
-                  value={evaluationState.wordFamilies[i]}
-                  onCheck={() => {
-                    const newArr = [...evaluationState.wordFamilies];
-                    newArr[i] = true;
-                    setEvaluationState((prev) => ({
-                      ...prev,
-                      wordFamilies: newArr,
-                    }));
-                    setHasChanges(true);
-                  }}
-                  onFail={() => {
-                    const newArr = [...evaluationState.wordFamilies];
-                    newArr[i] = false;
-                    setEvaluationState((prev) => ({
-                      ...prev,
-                      wordFamilies: newArr,
-                    }));
-                    setHasChanges(true);
-                  }}
-                />
-              </div>
-            ))}
+            <div className="grid grid-cols-5 gap-3">
+              {openClosedListKeys.map((syl, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-2 p-3 rounded-lg"
+                  style={{ background: "#ffffff" }}
+                >
+                  <span
+                    className="text-lg font-bold"
+                    style={{ color: "#004aad" }}
+                  >
+                    {syl}
+                  </span>
+                  <EvaluationCheckbox
+                    value={evaluationState.openClosed[i]}
+                    onCheck={() => {
+                      const newArr = [...evaluationState.openClosed];
+                      newArr[i] = true;
+                      setEvaluationState((prev) => ({
+                        ...prev,
+                        openClosed: newArr,
+                      }));
+                      setHasChanges(true);
+                    }}
+                    onFail={() => {
+                      const newArr = [...evaluationState.openClosed];
+                      newArr[i] = false;
+                      setEvaluationState((prev) => ({
+                        ...prev,
+                        openClosed: newArr,
+                      }));
+                      setHasChanges(true);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="p-5 rounded-xl" style={{ background: "#dff3ff" }}>
@@ -264,41 +282,41 @@ export function UnitSixEvaluationNine() {
               className="text-base mb-4 font-bold"
               style={{ color: "#004aad" }}
             >
-              {t("unitSix.frequentEndings.title")}
+              {t("unitThreeEval.complexSyllables.title")}
             </h3>
             <p className="text-sm mb-3" style={{ color: "#666" }}>
-              {t("unitSix.frequentEndings.prompt")}
+              {t("unitThreeEval.complexSyllables.prompt")}
             </p>
             <div className="grid grid-cols-5 gap-3">
-              {evaluationNineWords.map((word, i) => (
+              {complexListKeys.map((syl, i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center gap-2 p-2 rounded"
+                  className="flex flex-col items-center gap-2 p-3 rounded-lg"
                   style={{ background: "#ffffff" }}
                 >
                   <span
-                    className="text-sm font-semibold"
+                    className="text-lg font-bold"
                     style={{ color: "#004aad" }}
                   >
-                    {word}
+                    {syl}
                   </span>
                   <EvaluationCheckbox
-                    value={evaluationState.frequentEndings[i]}
+                    value={evaluationState.complex[i]}
                     onCheck={() => {
-                      const newArr = [...evaluationState.frequentEndings];
+                      const newArr = [...evaluationState.complex];
                       newArr[i] = true;
                       setEvaluationState((prev) => ({
                         ...prev,
-                        frequentEndings: newArr,
+                        complex: newArr,
                       }));
                       setHasChanges(true);
                     }}
                     onFail={() => {
-                      const newArr = [...evaluationState.frequentEndings];
+                      const newArr = [...evaluationState.complex];
                       newArr[i] = false;
                       setEvaluationState((prev) => ({
                         ...prev,
-                        frequentEndings: newArr,
+                        complex: newArr,
                       }));
                       setHasChanges(true);
                     }}
@@ -313,41 +331,41 @@ export function UnitSixEvaluationNine() {
               className="text-base mb-4 font-bold"
               style={{ color: "#004aad" }}
             >
-              {t("unitSix.frequentWords.title")}
+              {t("unitThreeEval.frequentWords.title")}
             </h3>
             <p className="text-sm mb-3" style={{ color: "#666" }}>
-              {t("unitSix.frequentWords.prompt")}
+              {t("unitThreeEval.frequentWords.prompt")}
             </p>
             <div className="grid grid-cols-5 gap-3">
-              {evaluationNineWords.map((word, i) => (
+              {frequentWordsKeys.map((word, i) => (
                 <div
                   key={i}
                   className="flex flex-col items-center gap-2 p-3 rounded-lg"
                   style={{ background: "#ffffff" }}
                 >
                   <span
-                    className="text-base font-semibold"
+                    className="text-lg font-semibold"
                     style={{ color: "#004aad" }}
                   >
                     {word}
                   </span>
                   <EvaluationCheckbox
-                    value={evaluationState.frequentWords[i]}
+                    value={evaluationState.frequent[i]}
                     onCheck={() => {
-                      const newArr = [...evaluationState.frequentWords];
+                      const newArr = [...evaluationState.frequent];
                       newArr[i] = true;
                       setEvaluationState((prev) => ({
                         ...prev,
-                        frequentWords: newArr,
+                        frequent: newArr,
                       }));
                       setHasChanges(true);
                     }}
                     onFail={() => {
-                      const newArr = [...evaluationState.frequentWords];
+                      const newArr = [...evaluationState.frequent];
                       newArr[i] = false;
                       setEvaluationState((prev) => ({
                         ...prev,
-                        frequentWords: newArr,
+                        frequent: newArr,
                       }));
                       setHasChanges(true);
                     }}
@@ -373,7 +391,6 @@ export function UnitSixEvaluationNine() {
             pendingAction();
             setPendingAction(null);
           }
-          setShowConfirmModal(false);
         }}
         onCancel={() => {
           setShowConfirmModal(false);
@@ -383,4 +400,4 @@ export function UnitSixEvaluationNine() {
     </>
   );
 }
-export default UnitSixEvaluationNine;
+export default UnitThreeEvaluationEight;

@@ -6,6 +6,7 @@ import {
   useClassStore,
   useStudentStore,
   useTeacherStore,
+  useUnitsStore,
 } from "../../../../stores";
 import { GlobalLoadingSpinner } from "../../GlobalLoadingSpinner";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
@@ -35,7 +36,7 @@ export function UnitHeader({
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
   const [showNotRequiredModal, setShowNotRequiredModal] = useState(false);
-
+  const unitsData = useUnitsStore((state) => state.getUnitsData);
   const { classId, studentId, teacherId } = useParams<{
     classId: string;
     studentId: string;
@@ -59,7 +60,12 @@ export function UnitHeader({
   return (
     <div
       className="p-6 border-b flex-shrink-0 z-10"
-      style={{ background: "#ffffff", borderColor: "#dff3ff" }}
+      style={{
+        background: "#ffffff",
+        borderColor: "#dff3ff",
+        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+        position: "relative",
+      }}
     >
       <div className="max-w-7xl mx-auto">
         <button
@@ -126,9 +132,9 @@ export function UnitHeader({
                   color: "#004aad",
                 }}
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((num) => (
-                  <option key={num} value={num}>
-                    {t("units.evaluation", { number: num })}
+                {unitsData.map((evaluation) => (
+                  <option key={evaluation.id} value={evaluation.id}>
+                    {t("units.evaluation", { number: evaluation.id })}
                   </option>
                 ))}
               </select>

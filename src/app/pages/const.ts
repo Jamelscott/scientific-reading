@@ -1,8 +1,8 @@
 export const gradeBenchmarks = {
     "Maternelle": { expected: 2, label: "Fin de maternelle" },
-    "Jardin": { expected: 4, label: "Fin de jardin" },
+    "Jardin": { expected: 6, label: "Fin de jardin" },
     "1re année": { expected: 8, label: "Fin de 1re année" },
-    "2e année": { expected: 13, label: "Fin de 2e année" },
+    "2e année": { expected: 15, label: "Fin de 2e année" },
   };
 
 export const frequentWords = [

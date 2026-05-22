@@ -8,10 +8,9 @@ import { useUnitsStore } from "../../../../stores";
 import { useParams } from "react-router";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import CommentsContainer from "../components/CommentsContainer";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
-import { soundRows, syllables } from "../../../pages/const";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitTwoEvaluationFive() {
+export function UnitTwoEvaluationSeven() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,7 +38,22 @@ export function UnitTwoEvaluationFive() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationFiveData = unitsData[4];
+  const evaluationSevenData = unitsData[6];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const syllablesKeys = useMemo(
+    () => getKeys(evaluationSevenData.questions.syllables),
+    [evaluationSevenData.questions.syllables],
+  );
+
+  const soundRowsKeys = useMemo(
+    () => getKeys(evaluationSevenData.questions.soundRows),
+    [evaluationSevenData.questions.soundRows],
+  );
 
   type EvaluationState = {
     syllableReading: Array<boolean | null>;
@@ -51,8 +65,8 @@ export function UnitTwoEvaluationFive() {
     new Array(length).fill(value) as Array<boolean | null>;
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    syllableReading: buildEvaluationArray(null, syllables.length),
-    soundCorrespondence: buildEvaluationArray(null, soundRows.length),
+    syllableReading: buildEvaluationArray(null, syllablesKeys.length),
+    soundCorrespondence: buildEvaluationArray(null, soundRowsKeys.length),
     comments: "",
   });
 
@@ -60,35 +74,46 @@ export function UnitTwoEvaluationFive() {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
 
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
+        // Handle soundRows format with correct as a string or other value
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          val.correct !== undefined
+        ) {
+          return val.correct; // Return the actual value (could be string like "a")
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      syllableReading: mapToArray(ans.syllableReading, syllables.length),
-      soundCorrespondence: mapToArray(
-        ans.soundCorrespondence,
-        soundRows.length,
-      ),
+      syllableReading: mapToArray(syllablesKeys, ans.syllables),
+      soundCorrespondence: mapToArray(soundRowsKeys, ans.soundRows),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, syllablesKeys, soundRowsKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        syllableReading: buildEvaluationArray(true, syllables.length),
-        soundCorrespondence: buildEvaluationArray(true, soundRows.length),
+        syllableReading: buildEvaluationArray(true, syllablesKeys.length),
+        soundCorrespondence: buildEvaluationArray(true, soundRowsKeys.length),
       }));
       setHasChanges(true);
     });
@@ -100,8 +125,8 @@ export function UnitTwoEvaluationFive() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        syllableReading: buildEvaluationArray(false, syllables.length),
-        soundCorrespondence: buildEvaluationArray(false, soundRows.length),
+        syllableReading: buildEvaluationArray(false, syllablesKeys.length),
+        soundCorrespondence: buildEvaluationArray(false, soundRowsKeys.length),
       }));
       setHasChanges(true);
     });
@@ -113,8 +138,8 @@ export function UnitTwoEvaluationFive() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        syllableReading: buildEvaluationArray(null, syllables.length),
-        soundCorrespondence: buildEvaluationArray(null, soundRows.length),
+        syllableReading: buildEvaluationArray(null, syllablesKeys.length),
+        soundCorrespondence: buildEvaluationArray(null, soundRowsKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -125,8 +150,8 @@ export function UnitTwoEvaluationFive() {
   const handleNotRequired = () => {
     setEvaluationState((prev) => ({
       ...prev,
-      syllableReading: buildEvaluationArray(null, syllables.length),
-      soundCorrespondence: buildEvaluationArray(null, soundRows.length),
+      syllableReading: buildEvaluationArray(null, syllablesKeys.length),
+      soundCorrespondence: buildEvaluationArray(null, soundRowsKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -134,16 +159,16 @@ export function UnitTwoEvaluationFive() {
 
   const handleSave = () => {
     const answers: any = {
-      syllableReading: evaluationState.syllableReading.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      syllables: syllablesKeys.reduce(
+        (acc, syl, idx) => {
+          acc[syl] = evaluationState.syllableReading[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      soundCorrespondence: evaluationState.soundCorrespondence.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      soundRows: soundRowsKeys.reduce(
+        (acc, key, idx) => {
+          acc[key] = evaluationState.soundCorrespondence[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -164,8 +189,8 @@ export function UnitTwoEvaluationFive() {
   return (
     <>
       <UnitHeader
-        title={evaluationFiveData.title}
-        evaluationNumber={evaluationFiveData.evaluation}
+        title={evaluationSevenData.title}
+        evaluationNumber={evaluationSevenData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -175,7 +200,7 @@ export function UnitTwoEvaluationFive() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationFiveData.unit}
+          unitNumber={evaluationSevenData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
@@ -186,24 +211,24 @@ export function UnitTwoEvaluationFive() {
           style={{ background: "#fff9e6", border: "1px solid #ffde59" }}
         >
           <p className="text-sm" style={{ color: "#004aad" }}>
-            <strong>{t("unitFive.instructions.title")}</strong>{" "}
-            {t("unitFive.instructions.body")}
+            <strong>{t("unitSeven.instructions.title")}</strong>{" "}
+            {t("unitSeven.instructions.body")}
           </p>
         </div>
 
-        <div id="atelier5-content" className="space-y-6">
+        <div id="atelier7-content" className="space-y-6">
           <div className="p-5 rounded-xl" style={{ background: "#dff3ff" }}>
             <h3
               className="text-base mb-4 font-bold"
               style={{ color: "#004aad" }}
             >
-              {t("unitFive.syllableReading.title")}
+              {t("unitSeven.syllableReading.title")}
             </h3>
             <p className="text-sm mb-3" style={{ color: "#666" }}>
-              {t("unitFive.syllableReading.prompt")}
+              {t("unitSeven.syllableReading.prompt")}
             </p>
             <div className="grid grid-cols-5 gap-3">
-              {syllables.map((syl, i) => (
+              {syllablesKeys.map((syl, i) => (
                 <div
                   key={i}
                   className="flex flex-col items-center gap-2 p-3 rounded-lg"
@@ -281,58 +306,69 @@ export function UnitTwoEvaluationFive() {
                 </tr>
               </thead>
               <tbody>
-                {soundRows.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #dff3ff" }}>
-                    <td
-                      className="px-3 py-2 font-medium"
-                      style={{ color: "#004aad", border: "1px solid #dff3ff" }}
-                    >
-                      {item.letters}
-                    </td>
-                    <td
-                      className="px-3 py-2 text-center"
-                      style={{ color: "#666", border: "1px solid #dff3ff" }}
-                    >
-                      {item.sound}
-                    </td>
-                    <td
-                      className="px-3 py-2 text-center font-bold"
-                      style={{ color: "#2e7d32", border: "1px solid #dff3ff" }}
-                    >
-                      {item.correct}
-                    </td>
-                    <td
-                      className="px-3 py-2 text-center"
-                      style={{ border: "1px solid #dff3ff" }}
-                    >
-                      <EvaluationCheckbox
-                        value={evaluationState.soundCorrespondence[i]}
-                        onCheck={() => {
-                          const newArr = [
-                            ...evaluationState.soundCorrespondence,
-                          ];
-                          newArr[i] = true;
-                          setEvaluationState((prev) => ({
-                            ...prev,
-                            soundCorrespondence: newArr,
-                          }));
-                          setHasChanges(true);
+                {soundRowsKeys.map((key, i) => {
+                  const item = (
+                    evaluationSevenData.questions.soundRows as any
+                  )?.[key];
+                  return (
+                    <tr key={i} style={{ borderBottom: "1px solid #dff3ff" }}>
+                      <td
+                        className="px-3 py-2 font-medium"
+                        style={{
+                          color: "#004aad",
+                          border: "1px solid #dff3ff",
                         }}
-                        onFail={() => {
-                          const newArr = [
-                            ...evaluationState.soundCorrespondence,
-                          ];
-                          newArr[i] = false;
-                          setEvaluationState((prev) => ({
-                            ...prev,
-                            soundCorrespondence: newArr,
-                          }));
-                          setHasChanges(true);
+                      >
+                        {item?.word}
+                      </td>
+                      <td
+                        className="px-3 py-2 text-center"
+                        style={{ color: "#666", border: "1px solid #dff3ff" }}
+                      >
+                        {item?.sound}
+                      </td>
+                      <td
+                        className="px-3 py-2 text-center font-bold"
+                        style={{
+                          color: "#2e7d32",
+                          border: "1px solid #dff3ff",
                         }}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                      >
+                        {item?.correct}
+                      </td>
+                      <td
+                        className="px-3 py-2 text-center"
+                        style={{ border: "1px solid #dff3ff" }}
+                      >
+                        <EvaluationCheckbox
+                          value={evaluationState.soundCorrespondence[i]}
+                          onCheck={() => {
+                            const newArr = [
+                              ...evaluationState.soundCorrespondence,
+                            ];
+                            newArr[i] = true;
+                            setEvaluationState((prev) => ({
+                              ...prev,
+                              soundCorrespondence: newArr,
+                            }));
+                            setHasChanges(true);
+                          }}
+                          onFail={() => {
+                            const newArr = [
+                              ...evaluationState.soundCorrespondence,
+                            ];
+                            newArr[i] = false;
+                            setEvaluationState((prev) => ({
+                              ...prev,
+                              soundCorrespondence: newArr,
+                            }));
+                            setHasChanges(true);
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -362,4 +398,4 @@ export function UnitTwoEvaluationFive() {
     </>
   );
 }
-export default UnitTwoEvaluationFive;
+export default UnitTwoEvaluationSeven;

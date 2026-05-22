@@ -13,7 +13,7 @@ export function UnderConstructionPage() {
       ? "/board/dashboard"
       : currentUser?.type === "school"
         ? "/school/dashboard"
-        : "/teacher/dashboard";
+        : `/teacher/${currentUser?.id}/dashboard`;
 
   return (
     <div

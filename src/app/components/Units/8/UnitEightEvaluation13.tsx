@@ -8,10 +8,9 @@ import { useTranslation } from "react-i18next";
 import CommentsContainer from "../components/CommentsContainer";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
-import { evaluationElevenWords } from "../../../pages/const";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitEightEvaluationEleven() {
+export function UnitEightEvaluationThirteen() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,7 +38,17 @@ export function UnitEightEvaluationEleven() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationElevenData = unitsData[10];
+  const evaluationThirteenData = unitsData[12];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const dataKeys = useMemo(
+    () => getKeys(evaluationThirteenData.questions.data),
+    [evaluationThirteenData.questions.data],
+  );
 
   type EvaluationState = {
     advancedGraphemeWords: Array<boolean | null>;
@@ -50,46 +59,43 @@ export function UnitEightEvaluationEleven() {
     new Array(length).fill(value) as Array<boolean | null>;
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    advancedGraphemeWords: buildEvaluationArray(
-      null,
-      evaluationElevenWords.length,
-    ),
+    advancedGraphemeWords: buildEvaluationArray(null, dataKeys.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      advancedGraphemeWords: mapToArray(
-        ans.advancedGraphemeWords,
-        evaluationElevenWords.length,
-      ),
+      advancedGraphemeWords: mapToArray(dataKeys, ans.data),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, dataKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        advancedGraphemeWords: buildEvaluationArray(
-          true,
-          evaluationElevenWords.length,
-        ),
+        advancedGraphemeWords: buildEvaluationArray(true, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -101,10 +107,7 @@ export function UnitEightEvaluationEleven() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        advancedGraphemeWords: buildEvaluationArray(
-          false,
-          evaluationElevenWords.length,
-        ),
+        advancedGraphemeWords: buildEvaluationArray(false, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -116,10 +119,7 @@ export function UnitEightEvaluationEleven() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        advancedGraphemeWords: buildEvaluationArray(
-          null,
-          evaluationElevenWords.length,
-        ),
+        advancedGraphemeWords: buildEvaluationArray(null, dataKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -130,10 +130,7 @@ export function UnitEightEvaluationEleven() {
   const handleNotRequired = () => {
     setEvaluationState((prev) => ({
       ...prev,
-      advancedGraphemeWords: buildEvaluationArray(
-        null,
-        evaluationElevenWords.length,
-      ),
+      advancedGraphemeWords: buildEvaluationArray(null, dataKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -141,9 +138,9 @@ export function UnitEightEvaluationEleven() {
 
   const handleSave = () => {
     const answers: any = {
-      advancedGraphemeWords: evaluationState.advancedGraphemeWords.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      data: dataKeys.reduce(
+        (acc, word, idx) => {
+          acc[word] = evaluationState.advancedGraphemeWords[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -164,8 +161,8 @@ export function UnitEightEvaluationEleven() {
   return (
     <>
       <UnitHeader
-        title={evaluationElevenData.title}
-        evaluationNumber={evaluationElevenData.evaluation}
+        title={evaluationThirteenData.title}
+        evaluationNumber={evaluationThirteenData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -175,7 +172,7 @@ export function UnitEightEvaluationEleven() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationElevenData.unit}
+          unitNumber={evaluationThirteenData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
@@ -203,7 +200,7 @@ export function UnitEightEvaluationEleven() {
             {t("unitEight.advancedGraphemes.prompt")}
           </p>
           <div className="grid grid-cols-5 gap-3">
-            {evaluationElevenWords.map((word, i) => (
+            {dataKeys.map((word, i) => (
               <div
                 key={i}
                 className="flex flex-col items-center gap-2 p-3 rounded-lg"
@@ -266,4 +263,4 @@ export function UnitEightEvaluationEleven() {
     </>
   );
 }
-export default UnitEightEvaluationEleven;
+export default UnitEightEvaluationThirteen;

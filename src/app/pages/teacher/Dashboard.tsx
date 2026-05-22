@@ -3,6 +3,7 @@ import { Users, Plus, BookOpen, Edit, Trash2, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { useClassStore } from "../../../stores";
+import { useStudentStore } from "../../../stores/useStudentStore";
 import { Sidebar } from "../../components/Sidebar";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
 import { Initials } from "../../components/Initials";
@@ -15,12 +16,12 @@ export function TeacherDashboard() {
   const { teacherId } = useParams();
   const navigate = useNavigate();
   const classes = useClassStore((state) => state.classes);
-  const updateClass = useClassStore((state) => state.updateClass);
   const setClasses = useClassStore((state) => state.setClasses);
+  const getStudentCountByClass = useStudentStore(
+    (state) => state.getStudentCountByClass,
+  );
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showEditClassesModal, setShowEditClassesModal] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editedName, setEditedName] = useState("");
   const [showDeleteId, setShowDeleteId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
 
@@ -78,63 +79,19 @@ export function TeacherDashboard() {
               >
                 <div className="flex-1 flex items-start justify-between mb-6 gap-2">
                   <div className="overflow-hidden">
-                    {editMode && editingId === classItem.id ? (
-                      <input
-                        type="text"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        onBlur={() => {
-                          if (editedName.trim())
-                            updateClass(classItem.id, {
-                              name: editedName.trim(),
-                            });
-                          setEditingId(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            if (editedName.trim())
-                              updateClass(classItem.id, {
-                                name: editedName.trim(),
-                              });
-                            setEditingId(null);
-                          } else if (e.key === "Escape") {
-                            setEditingId(null);
-                          }
-                        }}
-                        autoFocus
-                        className="text-2xl mb-2 px-2 py-1 rounded-lg border-2 outline-none bg-[#eaf6ff]"
-                        style={{
-                          color: "#004aad",
-                          borderColor: "#38b6ff",
-                          maxWidth: "100%",
-                          width: "100%",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className={`flex items-center gap-2 text-2xl mb-2 ${editMode ? "cursor-pointer hover:bg-[#eaf6ff] rounded-lg px-2 py-1 transition" : ""}`}
-                        style={{ color: "#004aad" }}
-                        onClick={() => {
-                          if (editMode) {
-                            setEditingId(classItem.id);
-                            setEditedName(classItem.name);
-                          }
-                        }}
-                      >
-                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                          {classItem.name}
-                        </span>
-                        {editMode && (
-                          <Pencil className="w-4 h-4 ml-1 text-[#38b6ff] opacity-80" />
-                        )}
-                      </div>
-                    )}
+                    <div
+                      className={`flex items-center gap-2 text-2xl mb-2`}
+                      style={{ color: "#004aad" }}
+                    >
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                        {classItem.grade}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2 ">
                       <Users className="w-5 h-5" style={{ color: "#38b6ff" }} />
                       <span className="text-lg" style={{ color: "#000000" }}>
                         {t("dashboard.studentsCount", {
-                          count: classItem.studentCount,
+                          count: getStudentCountByClass(classItem.id),
                         })}
                       </span>
                     </div>

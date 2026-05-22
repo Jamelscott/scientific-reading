@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Download, Plus } from "lucide-react";
+import { ArrowLeft, Download, Plus, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useClassStore } from "../../../stores/useClassStore";
 import { useStudentStore } from "../../../stores/useStudentStore";
-import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { useTeacherStore } from "../../../stores/useTeacherStore";
 import { AddStudentModal } from "../../components/AddStudentModal";
 import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
@@ -14,48 +13,53 @@ import { Button } from "../../components/ui/Button";
 export function ClassPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { classId } = useParams<{ classId: string }>();
+  const { classId, teacherId } = useParams<{
+    classId: string;
+    teacherId: string;
+  }>();
   const classes = useClassStore((state) => state.classes);
   const updateClass = useClassStore((state) => state.updateClass);
   const teacher = useTeacherStore((state) => state.teacher);
 
   // Parse classId from URL and set it as active
   const currentClassId = parseInt(classId || "", 10);
+
   const currentClass = classes.find((c) => c?.id === currentClassId);
 
   const allStudents = useStudentStore((state) => state.students);
+  const getStudentCountByClass = useStudentStore(
+    (state) => state.getStudentCountByClass,
+  );
   const students = allStudents.filter((student) =>
     student.classIds.includes(currentClassId),
   );
-  const answers = useUnitsStore((state) => state.getAnswersByClass);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
-  const [isEditingClassName, setIsEditingClassName] = useState(false);
-  const [editedClassName, setEditedClassName] = useState("");
+  const [showClassDropdown, setShowClassDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleClassNameClick = () => {
-    setEditedClassName(currentClass?.name || "");
-    setIsEditingClassName(true);
-  };
-
-  const handleClassNameSave = () => {
-    if (editedClassName.trim() && currentClassId) {
-      updateClass(currentClassId, { name: editedClassName.trim() });
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowClassDropdown(false);
+      }
     }
-    setIsEditingClassName(false);
-  };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleClassNameKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleClassNameSave();
-    } else if (e.key === "Escape") {
-      setIsEditingClassName(false);
-    }
+  const handleClassChange = (classId: number) => {
+    setShowClassDropdown(false);
+    navigate(`/teacher/${teacherId}/class/${classId}`);
   };
 
   const handleExportPDF = async () => {
-    if (!currentClass?.name) return;
+    if (!currentClass?.grade) return;
     const teacherName = teacher?.name || "Teacher";
-    await exportTableToPdf(currentClass.name, teacherName);
+    await exportTableToPdf(currentClass.grade, teacherName);
   };
 
   return (
@@ -66,11 +70,17 @@ export function ClassPage() {
       {/* Header */}
       <div
         className="p-6 border-b flex-shrink-0 shadow-sm z-11"
-        style={{ background: "#ffffff", borderColor: "#dff3ff" }}
+        style={{
+          background: "#ffffff",
+          borderColor: "#dff3ff",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+          position: "relative",
+          zIndex: 10,
+        }}
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate("/teacher/dashboard")}
+            onClick={() => navigate(`/teacher/${teacherId}/dashboard`)}
             className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -79,33 +89,61 @@ export function ClassPage() {
 
           <div className="flex items-center justify-between">
             <div>
-              {isEditingClassName ? (
-                <input
-                  type="text"
-                  value={editedClassName}
-                  onChange={(e) => setEditedClassName(e.target.value)}
-                  onBlur={handleClassNameSave}
-                  onKeyDown={handleClassNameKeyDown}
-                  autoFocus
-                  className="text-3xl mb-2 px-2 py-1 rounded-lg border-2 outline-none"
-                  style={{
-                    color: "#004aad",
-                    borderColor: "#38b6ff",
-                    background: "#dff3ff",
-                  }}
-                />
-              ) : (
-                <h1
-                  onClick={handleClassNameClick}
-                  className="text-3xl mb-2 cursor-pointer hover:opacity-70 transition-opacity"
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowClassDropdown(!showClassDropdown)}
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 transition-opacity"
                   style={{ color: "#004aad" }}
                 >
-                  {currentClass?.name || "1re année Mme Gisèle"}
-                </h1>
-              )}
+                  {currentClass?.grade || "no class available"}
+                  <ChevronDown
+                    className="w-6 h-6 transition-transform duration-200"
+                    style={{
+                      transform: showClassDropdown
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                    }}
+                  />
+                </button>
+
+                {showClassDropdown && (
+                  <div
+                    className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border overflow-hidden z-50 min-w-[250px]"
+                    style={{ borderColor: "#dff3ff" }}
+                  >
+                    {classes.map((cls) => (
+                      <button
+                        key={cls.id}
+                        onClick={() => handleClassChange(cls.id)}
+                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02]"
+                        style={{
+                          backgroundColor:
+                            cls.id === currentClassId
+                              ? "#dff3ff"
+                              : "transparent",
+                        }}
+                      >
+                        <span
+                          className="group-hover:text-white transition-colors"
+                          style={{ color: "#004aad" }}
+                        >
+                          {cls.grade}
+                        </span>
+                        <span
+                          className="text-sm group-hover:text-white transition-colors"
+                          style={{ color: "#666" }}
+                        >
+                          {getStudentCountByClass(cls.id)}{" "}
+                          {t("studentTracking.student")}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <p className="text-lg" style={{ color: "#000000" }}>
                 {t("studentTracking.studentsCount", {
-                  count: currentClass?.studentCount || students.length,
+                  count: students.length,
                 })}
               </p>
             </div>
@@ -129,11 +167,7 @@ export function ClassPage() {
         </div>
       </div>
 
-      <ClassTable
-        students={students}
-        classAnswers={answers(currentClassId)}
-        classId={String(currentClassId)}
-      />
+      <ClassTable students={students} classId={String(currentClassId)} />
 
       <AddStudentModal
         isOpen={showAddStudentModal}

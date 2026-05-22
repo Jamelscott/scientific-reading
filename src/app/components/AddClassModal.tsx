@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 import { useClassStore } from "../../stores";
+import type { Grades } from "../../../mockData/types";
 
 interface AddClassModalProps {
   isOpen: boolean;
@@ -12,47 +13,64 @@ interface AddClassModalProps {
 export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   const { t } = useTranslation();
   const addClass = useClassStore((state) => state.addClass);
-  const [className, setClassName] = useState("");
-  const [grade, setGrade] = useState("maternelle");
+  const classes = useClassStore((state) => state.classes);
+
+  // Get existing grades for this teacher
+  const existingGrades = classes.map((c) => c.grade);
+
+  // Find first available grade
+  const availableGrades: Grades[] = [
+    "Maternelle",
+    "Jardin",
+    "1re année",
+    "2e année",
+    "3e année",
+  ];
+  const firstAvailableGrade: Grades =
+    availableGrades.find((g) => !existingGrades.includes(g)) || "Maternelle";
+
+  const [schoolYear, setSchoolYear] = useState("");
+  const [grade, setGrade] = useState<Grades>(firstAvailableGrade);
   const [errors, setErrors] = useState({
-    className: "",
+    schoolYear: "",
     grade: "",
   });
 
   const handleSubmit = () => {
     const newErrors = {
-      className: "",
+      schoolYear: "",
       grade: "",
     };
 
-    if (!className.trim()) {
-      newErrors.className = t("dashboard.errors.classNameRequired");
+    if (!schoolYear.trim()) {
+      newErrors.schoolYear = t("dashboard.errors.schoolYearRequired");
     }
 
     if (!grade) {
       newErrors.grade = t("dashboard.errors.gradeRequired");
     }
 
-    if (newErrors.className || newErrors.grade) {
+    if (newErrors.schoolYear || newErrors.grade) {
       setErrors(newErrors);
       return;
     }
 
     addClass({
-      name: className.trim(),
       grade,
+      schoolYear,
       studentCount: 0,
+      studentIds: [],
     });
-    setClassName("");
-    setGrade("maternelle");
-    setErrors({ className: "", grade: "" });
+    setSchoolYear("");
+    setGrade(firstAvailableGrade);
+    setErrors({ schoolYear: "", grade: "" });
     onClose();
   };
 
   const handleClose = () => {
-    setClassName("");
-    setGrade("maternelle");
-    setErrors({ className: "", grade: "" });
+    setSchoolYear("");
+    setGrade(firstAvailableGrade);
+    setErrors({ schoolYear: "", grade: "" });
     onClose();
   };
 
@@ -86,22 +104,22 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
         <div className="space-y-6">
           <div>
             <label className="block text-sm mb-2" style={{ color: "#000000" }}>
-              {t("dashboard.className")}
+              class year
             </label>
             <input
               type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
+              value={schoolYear}
+              onChange={(e) => setSchoolYear(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
-                borderColor: errors.className ? "#ff5757" : "#38b6ff",
+                borderColor: errors.schoolYear ? "#ff5757" : "#38b6ff",
               }}
               placeholder={t("dashboard.classExample")}
             />
-            {errors.className && (
+            {errors.schoolYear && (
               <p className="text-sm mt-1" style={{ color: "#ff5757" }}>
-                {errors.className}
+                {errors.schoolYear}
               </p>
             )}
           </div>
@@ -112,7 +130,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
             </label>
             <select
               value={grade}
-              onChange={(e) => setGrade(e.target.value)}
+              onChange={(e) => setGrade(e.target.value as Grades)}
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
@@ -120,11 +138,51 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
                 color: "#000000",
               }}
             >
-              <option value="maternelle">
+              <option
+                value="Maternelle"
+                disabled={existingGrades.includes("Maternelle")}
+              >
                 {t("dashboard.gradeOptions.maternelle")}
+                {existingGrades.includes("Maternelle")
+                  ? ` (${t("dashboard.gradeOptions.alreadyExists")})`
+                  : ""}
               </option>
-              <option value="1re">{t("dashboard.gradeOptions.1re")}</option>
-              <option value="2e">{t("dashboard.gradeOptions.2e")}</option>
+              <option
+                value="Jardin"
+                disabled={existingGrades.includes("Jardin")}
+              >
+                {t("dashboard.gradeOptions.jardin")}
+                {existingGrades.includes("Jardin")
+                  ? ` (${t("dashboard.gradeOptions.alreadyExists")})`
+                  : ""}
+              </option>
+              <option
+                value="1re année"
+                disabled={existingGrades.includes("1re année")}
+              >
+                {t("dashboard.gradeOptions.1re")}
+                {existingGrades.includes("1re année")
+                  ? ` (${t("dashboard.gradeOptions.alreadyExists")})`
+                  : ""}
+              </option>
+              <option
+                value="2e année"
+                disabled={existingGrades.includes("2e année")}
+              >
+                {t("dashboard.gradeOptions.2e")}
+                {existingGrades.includes("2e année")
+                  ? ` (${t("dashboard.gradeOptions.alreadyExists")})`
+                  : ""}
+              </option>
+              <option
+                value="3e année"
+                disabled={existingGrades.includes("3e année")}
+              >
+                {t("dashboard.gradeOptions.3e")}
+                {existingGrades.includes("3e année")
+                  ? ` (${t("dashboard.gradeOptions.alreadyExists")})`
+                  : ""}
+              </option>
             </select>
             {errors.grade && (
               <p className="text-sm mt-1" style={{ color: "#ff5757" }}>

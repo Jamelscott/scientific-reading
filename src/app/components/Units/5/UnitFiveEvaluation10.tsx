@@ -8,10 +8,9 @@ import { useTranslation } from "react-i18next";
 import CommentsContainer from "../components/CommentsContainer";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
-import { evaluationTwelveComprehension } from "../../../pages/const";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitNineEvaluationTwelve() {
+export function UnitFiveEvaluationTen() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,10 +38,20 @@ export function UnitNineEvaluationTwelve() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationTwelveData = unitsData[11];
+  const evaluationTenData = unitsData[9];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const dataKeys = useMemo(
+    () => getKeys(evaluationTenData.questions.data),
+    [evaluationTenData.questions.data],
+  );
 
   type EvaluationState = {
-    comprehensionQuestions: Array<boolean | null>;
+    complex: Array<boolean | null>;
     comments: string;
   };
 
@@ -50,46 +59,43 @@ export function UnitNineEvaluationTwelve() {
     new Array(length).fill(value) as Array<boolean | null>;
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    comprehensionQuestions: buildEvaluationArray(
-      null,
-      evaluationTwelveComprehension.length,
-    ),
+    complex: buildEvaluationArray(null, dataKeys.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      comprehensionQuestions: mapToArray(
-        ans.comprehensionQuestions,
-        evaluationTwelveComprehension.length,
-      ),
+      complex: mapToArray(dataKeys, ans.data),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, dataKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        comprehensionQuestions: buildEvaluationArray(
-          true,
-          evaluationTwelveComprehension.length,
-        ),
+        complex: buildEvaluationArray(true, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -101,10 +107,7 @@ export function UnitNineEvaluationTwelve() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        comprehensionQuestions: buildEvaluationArray(
-          false,
-          evaluationTwelveComprehension.length,
-        ),
+        complex: buildEvaluationArray(false, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -116,10 +119,7 @@ export function UnitNineEvaluationTwelve() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        comprehensionQuestions: buildEvaluationArray(
-          null,
-          evaluationTwelveComprehension.length,
-        ),
+        complex: buildEvaluationArray(null, dataKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -130,10 +130,7 @@ export function UnitNineEvaluationTwelve() {
   const handleNotRequired = () => {
     setEvaluationState((prev) => ({
       ...prev,
-      comprehensionQuestions: buildEvaluationArray(
-        null,
-        evaluationTwelveComprehension.length,
-      ),
+      complex: buildEvaluationArray(null, dataKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -141,9 +138,9 @@ export function UnitNineEvaluationTwelve() {
 
   const handleSave = () => {
     const answers: any = {
-      comprehensionQuestions: evaluationState.comprehensionQuestions.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      data: dataKeys.reduce(
+        (acc, word, idx) => {
+          acc[word] = evaluationState.complex[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -164,8 +161,8 @@ export function UnitNineEvaluationTwelve() {
   return (
     <>
       <UnitHeader
-        title={evaluationTwelveData.title}
-        evaluationNumber={evaluationTwelveData.evaluation}
+        title={evaluationTenData.title}
+        evaluationNumber={evaluationTenData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -175,7 +172,7 @@ export function UnitNineEvaluationTwelve() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationTwelveData.unit}
+          unitNumber={evaluationTenData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
@@ -186,84 +183,56 @@ export function UnitNineEvaluationTwelve() {
           style={{ background: "#fff9e6", border: "1px solid #ffde59" }}
         >
           <p className="text-sm" style={{ color: "#004aad" }}>
-            <strong>{t("unitNine.instructions.title")}</strong>{" "}
-            {t("unitNine.instructions.body")}
+            <strong>{t("unitFive.instructions.title")}</strong>{" "}
+            {t("unitFive.instructions.body")}
           </p>
         </div>
 
-        <div id="atelier12-content" className="space-y-4">
-          <div className="p-5 rounded-xl" style={{ background: "#dff3ff" }}>
-            <h3
-              className="text-base mb-3 font-bold"
-              style={{ color: "#004aad" }}
-            >
-              Texte lu par l'enseignant(e)
-            </h3>
-            <p className="text-sm mb-3" style={{ color: "#666" }}>
-              L'élève ferme les yeux et écoute attentivement pendant la lecture.
-            </p>
-            <div
-              className="p-4 rounded leading-relaxed"
-              style={{ background: "#ffffff" }}
-            >
-              <p className="text-sm mb-2" style={{ color: "#004aad" }}>
-                C'est une belle journée d'été. Sophie et son frère Marc vont au
-                parc avec leur chien Félix. Ils apportent un ballon rouge et un
-                pique-nique. Au parc, ils jouent au ballon sur l'herbe verte.
-                Félix court après le ballon et aboie joyeusement. Après le jeu,
-                ils mangent des sandwichs et boivent du jus. Sophie et Marc sont
-                très contents de leur journée au parc. Ils rentrent à la maison
-                fatigués mais heureux.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-xl" style={{ background: "#f7ffd6" }}>
-            <h3
-              className="text-base mb-4 font-bold"
-              style={{ color: "#004aad" }}
-            >
-              {t("unitNine.comprehension.title")}
-            </h3>
-            {evaluationTwelveComprehension.map((item, i) => (
+        <div
+          id="atelier8-content"
+          className="p-5 rounded-xl"
+          style={{ background: "#dff3ff" }}
+        >
+          <h3 className="text-base mb-4 font-bold" style={{ color: "#004aad" }}>
+            {t("unitFive.soundCorrespondence.title")}
+          </h3>
+          <p className="text-sm mb-3" style={{ color: "#666" }}>
+            {t("unitFive.soundCorrespondence.prompt")}
+          </p>
+          <div className="grid grid-cols-5 gap-3">
+            {dataKeys.map((word, i) => (
               <div
                 key={i}
-                className="mb-3 p-3 rounded"
+                className="flex flex-col items-center gap-2 p-3 rounded-lg"
                 style={{ background: "#ffffff" }}
               >
-                <div className="flex items-start gap-3 mb-2">
-                  <span className="text-sm flex-1" style={{ color: "#004aad" }}>
-                    {item.q}
-                  </span>
-                  <EvaluationCheckbox
-                    value={evaluationState.comprehensionQuestions[i]}
-                    onCheck={() => {
-                      const newArr = [
-                        ...evaluationState.comprehensionQuestions,
-                      ];
-                      newArr[i] = true;
-                      setEvaluationState((prev) => ({
-                        ...prev,
-                        comprehensionQuestions: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                    onFail={() => {
-                      const newArr = [
-                        ...evaluationState.comprehensionQuestions,
-                      ];
-                      newArr[i] = false;
-                      setEvaluationState((prev) => ({
-                        ...prev,
-                        comprehensionQuestions: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                  />
-                </div>
-                <p className="text-xs italic pl-3" style={{ color: "#2e7d32" }}>
-                  [Réponse: {item.a}]
-                </p>
+                <span
+                  className="text-base font-semibold"
+                  style={{ color: "#004aad" }}
+                >
+                  {word}
+                </span>
+                <EvaluationCheckbox
+                  value={evaluationState.complex[i]}
+                  onCheck={() => {
+                    const newArr = [...evaluationState.complex];
+                    newArr[i] = true;
+                    setEvaluationState((prev) => ({
+                      ...prev,
+                      complex: newArr,
+                    }));
+                    setHasChanges(true);
+                  }}
+                  onFail={() => {
+                    const newArr = [...evaluationState.complex];
+                    newArr[i] = false;
+                    setEvaluationState((prev) => ({
+                      ...prev,
+                      complex: newArr,
+                    }));
+                    setHasChanges(true);
+                  }}
+                />
               </div>
             ))}
           </div>
@@ -294,4 +263,4 @@ export function UnitNineEvaluationTwelve() {
     </>
   );
 }
-export default UnitNineEvaluationTwelve;
+export default UnitFiveEvaluationTen;

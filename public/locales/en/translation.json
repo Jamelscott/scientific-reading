@@ -34,15 +34,20 @@
     "studentsCount": "{{count}} students",
     "grade": "Grade",
     "gradeOptions": {
-      "maternelle": "Kindergarten",
+      "maternelle": "Junior Kindergarten",
+      "jardin": "Senior Kindergarten",
       "1re": "1st grade",
-      "2e": "2nd grade"
+      "2e": "2nd grade",
+      "3e": "3rd grade",
+      "alreadyExists": "Already exists"
     },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "errors": {
       "classNameRequired": "Class name is required",
-      "gradeRequired": "Grade is required"
+      "gradeRequired": "Grade is required",
+      "schoolYearRequired": "School year is required",
+      "classNameUnique": "You already have a class with this name"
     }
   },
   "evaluation": {
@@ -137,12 +142,41 @@
       "failingGrades": "Failing Grades",
       "notSubmitted": "Not Submitted"
     },
-    "classPerformance": "Class Performance",
+    "classPerformance": "Performance by Workshop Range",
     "studentProgress": "Student Progress",
     "chartPlaceholder": "Chart placeholder",
     "totalStudents": "Total Students",
     "averageScore": "Average Score",
     "classes": "Classes",
+    "progressOverTime": "Average Progress Over Time",
+    "workshopRanges": {
+      "unit1": "Unit 1 workshops",
+      "unit2To5": "Unit 2-5 workshops",
+      "unit6To10": "Unit 6-10 workshops"
+    },
+    "benchmarks": {
+      "title": "Grade Level Expectations",
+      "kindergartenEnd": "End of Kindergarten",
+      "classroomEnd": "End of Classroom Year",
+      "firstGradeEnd": "End of 1st Grade",
+      "secondGradeEnd": "End of 2nd Grade",
+      "unitInProgress": "Unit 1 in progress",
+      "unitComplete": "Unit 1 complete",
+      "unitsRange": "Units 1-10 complete",
+      "allUnits": "All units"
+    },
+    "classPerformanceTitle": "Class Performance",
+    "classPerformanceDetails": {
+      "onTrack": "Students on track (≥22)",
+      "progressing": "Students progressing",
+      "needingSupport": "Students needing support"
+    },
+    "distribution": "Class Distribution",
+    "topPerformers": "Engaged Students",
+    "needingSupport": "Students Needing Support",
+    "workshopsCompleted": "workshops completed",
+    "studentReports": "Individual Reports",
+    "studentReportsDescription": "Consult each student's detailed report including complete workshop history and comments",
     "legend": {
       "success": "Success (Good)",
       "adequate": "Adequate",
@@ -462,19 +496,21 @@
     "educationalUnits": "Educational units",
     "history": "History",
     "unit": "Unit {{number}}",
-    "unit1-1": "Evaluation 1: Letter and sound knowledge",
-    "unit1-2": "Evaluation 2: Letter formation",
-    "unit1-3": "Evaluation 3: Phonological awareness — rhymes and syllables",
-    "unit1-4": "Evaluation 4: Initial and final sound identification",
-    "unit2-1": "Evaluation 5: Reading simple syllables and letter/sound correspondence",
-    "unit3-1": "Evaluation 6: Reading open, closed, and complex syllables",
-    "unit4-1": "Evaluation 7: Reading high-frequency words",
-    "unit5-1": "Evaluation 8: Reading complex graphemes",
-    "unit6-1": "Evaluation 9: Word families and common endings",
-    "unit7-1": "Evaluation 10: Repeated reading of sentences",
-    "unit8-1": "Evaluation 11: Advanced grapheme reading",
-    "unit9-1": "Evaluation 12: Short text reading and comprehension",
-    "unit10-1": "Evaluation 13: Independent reading and comprehension"
+    "unit1-1":"Workshop 1: Uppercase letters (name and sound)",
+    "unit1-2":"Workshop 2: Lowercase letters (name and sound)",
+    "unit1-3":"Workshop 3: Formation of uppercase letters",
+    "unit1-4":"Workshop 4: Formation of lowercase letters",
+    "unit1-5":"Workshop 5: Rhymes and syllables",
+    "unit1-6":"Workshop 6: Identification of initial and final sounds",
+    "unit2-1":"Workshop 7: Reading simple syllables and sound-letter correspondence",
+    "unit3-1":"Workshop 8: Reading open, closed, and complex syllables",
+    "unit4-1":"Workshop 9: Reading high-frequency words",
+    "unit5-1":"Workshop 10: Reading complex graphemes",
+    "unit6-1":"Workshop 11: Word families and common endings",
+    "unit7-1":"Workshop 12: Repeated reading of sentences",
+    "unit8-1":"Workshop 13: Reading advanced graphemes",
+    "unit9-1":"Workshop 14: Reading and comprehension of short text",
+    "unit10-1":"Workshop 15: Independent reading and comprehension"
   },
   "studentPage": {
     "studentNotFound": "Student not found",
@@ -493,10 +529,10 @@
     "resultsDistribution": "Results Distribution",
     "results": "Results",
     "score": "Score",
-    "reading": "Reading",
-    "writing": "Writing",
-    "comprehension": "Comprehension",
-    "vocabulary": "Vocabulary",
-    "phonics": "Phonics"
+    "reading": "Alphabetic Knowledge",
+    "writing": "Phonological Awareness",
+    "decoding": "Decoding",
+    "fluency": "Fluency",
+    "comprehension": "Comprehension"
   }
 }

@@ -5,13 +5,12 @@ import UnitContainer from "../components/UnitContainer";
 import UnitHeader from "../components/UnitHeader";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { useTranslation } from "react-i18next";
-import CommentsContainer from "../components/CommentsContainer";
-import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
-import { evaluationEightWords } from "../../../pages/const";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
+import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
+import CommentsContainer from "../components/CommentsContainer";
 
-export function UnitFiveEvaluationEight() {
+export function UnitFourEvaluationNine() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,10 +38,20 @@ export function UnitFiveEvaluationEight() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationEightData = unitsData[7];
+  const evaluationNineData = unitsData[8];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const frequentWordsSliceKeys = useMemo(
+    () => getKeys(evaluationNineData.questions.frequentWordsSlice),
+    [evaluationNineData.questions.frequentWordsSlice],
+  );
 
   type EvaluationState = {
-    complex: Array<boolean | null>;
+    frequent: Array<boolean | null>;
     comments: string;
   };
 
@@ -50,37 +59,43 @@ export function UnitFiveEvaluationEight() {
     new Array(length).fill(value) as Array<boolean | null>;
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    complex: buildEvaluationArray(null, evaluationEightWords.length),
+    frequent: buildEvaluationArray(null, frequentWordsSliceKeys.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      complex: mapToArray(ans.complexWords, evaluationEightWords.length),
+      frequent: mapToArray(frequentWordsSliceKeys, ans.frequentWordsSlice),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, frequentWordsSliceKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        complex: buildEvaluationArray(true, evaluationEightWords.length),
+        frequent: buildEvaluationArray(true, frequentWordsSliceKeys.length),
       }));
       setHasChanges(true);
     });
@@ -92,7 +107,7 @@ export function UnitFiveEvaluationEight() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        complex: buildEvaluationArray(false, evaluationEightWords.length),
+        frequent: buildEvaluationArray(false, frequentWordsSliceKeys.length),
       }));
       setHasChanges(true);
     });
@@ -104,7 +119,7 @@ export function UnitFiveEvaluationEight() {
     setPendingAction(() => () => {
       setEvaluationState((prev) => ({
         ...prev,
-        complex: buildEvaluationArray(null, evaluationEightWords.length),
+        frequent: buildEvaluationArray(null, frequentWordsSliceKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -115,7 +130,7 @@ export function UnitFiveEvaluationEight() {
   const handleNotRequired = () => {
     setEvaluationState((prev) => ({
       ...prev,
-      complex: buildEvaluationArray(null, evaluationEightWords.length),
+      frequent: buildEvaluationArray(null, frequentWordsSliceKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -123,9 +138,9 @@ export function UnitFiveEvaluationEight() {
 
   const handleSave = () => {
     const answers: any = {
-      complexWords: evaluationState.complex.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      frequentWordsSlice: frequentWordsSliceKeys.reduce(
+        (acc, word, idx) => {
+          acc[word] = evaluationState.frequent[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -142,12 +157,11 @@ export function UnitFiveEvaluationEight() {
     );
     setHasChanges(false);
   };
-
   return (
     <>
       <UnitHeader
-        title={evaluationEightData.title}
-        evaluationNumber={evaluationEightData.evaluation}
+        title={evaluationNineData.title}
+        evaluationNumber={evaluationNineData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -157,35 +171,36 @@ export function UnitFiveEvaluationEight() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationEightData.unit}
+          unitNumber={evaluationNineData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
           evaluationId={evaluationId!}
         />
+
         <div
           className="mb-6 p-4 rounded-xl"
           style={{ background: "#fff9e6", border: "1px solid #ffde59" }}
         >
           <p className="text-sm" style={{ color: "#004aad" }}>
-            <strong>{t("unitFive.instructions.title")}</strong>{" "}
-            {t("unitFive.instructions.body")}
+            <strong>{t("unitFour.instructions.title")}</strong>{" "}
+            {t("unitFour.instructions.body")}
           </p>
         </div>
 
         <div
-          id="atelier8-content"
+          id="atelier7-content"
           className="p-5 rounded-xl"
-          style={{ background: "#dff3ff" }}
+          style={{ background: "#f7ffd6" }}
         >
           <h3 className="text-base mb-4 font-bold" style={{ color: "#004aad" }}>
-            {t("unitFive.soundCorrespondence.title")}
+            {t("unitFour.frequentWords.title")}
           </h3>
           <p className="text-sm mb-3" style={{ color: "#666" }}>
-            {t("unitFive.soundCorrespondence.prompt")}
+            {t("unitFour.frequentWords.prompt")}
           </p>
           <div className="grid grid-cols-5 gap-3">
-            {evaluationEightWords.map((word, i) => (
+            {frequentWordsSliceKeys.map((word, i) => (
               <div
                 key={i}
                 className="flex flex-col items-center gap-2 p-3 rounded-lg"
@@ -198,22 +213,22 @@ export function UnitFiveEvaluationEight() {
                   {word}
                 </span>
                 <EvaluationCheckbox
-                  value={evaluationState.complex[i]}
+                  value={evaluationState.frequent[i]}
                   onCheck={() => {
-                    const newArr = [...evaluationState.complex];
+                    const newArr = [...evaluationState.frequent];
                     newArr[i] = true;
                     setEvaluationState((prev) => ({
                       ...prev,
-                      complex: newArr,
+                      frequent: newArr,
                     }));
                     setHasChanges(true);
                   }}
                   onFail={() => {
-                    const newArr = [...evaluationState.complex];
+                    const newArr = [...evaluationState.frequent];
                     newArr[i] = false;
                     setEvaluationState((prev) => ({
                       ...prev,
-                      complex: newArr,
+                      frequent: newArr,
                     }));
                     setHasChanges(true);
                   }}
@@ -248,4 +263,5 @@ export function UnitFiveEvaluationEight() {
     </>
   );
 }
-export default UnitFiveEvaluationEight;
+
+export default UnitFourEvaluationNine;

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, FileText, Book, Download } from "lucide-react";
+import { ArrowLeft, FileText, Book, Download, FileCheck } from "lucide-react";
 import { NotificationDropdown } from "../NotificationDropdown";
 import { useTranslation } from "react-i18next";
 
@@ -100,7 +100,10 @@ export function UnitDashboard() {
   for (let i = 0; i < lessons.length; i += itemsPerColumn) {
     columns.push(lessons.slice(i, i + itemsPerColumn));
   }
-
+  const colors = {
+    bg: `var(--unit-${unitId}-bg)`,
+    text: `var(--unit-${unitId}-text)`,
+  };
   return (
     <div
       className="min-h-screen"
@@ -110,7 +113,15 @@ export function UnitDashboard() {
       }}
     >
       <div className="h-full">
-        <div className="p-12 pb-8" style={{ background: "#ffffff" }}>
+        <div
+          className="p-12 pb-8"
+          style={{
+            background: "#ffffff",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+            position: "relative",
+            zIndex: 10,
+          }}
+        >
           <div className="flex items-start justify-between">
             <div>
               <button
@@ -124,10 +135,16 @@ export function UnitDashboard() {
 
               <div className="flex items-center gap-3 mb-2">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ background: unitColor }}
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300"
+                  style={{
+                    background: colors.bg,
+                    boxShadow: `0 4px 16px ${colors.bg}40`,
+                  }}
                 >
-                  <FileText className="w-6 h-6" style={{ color: "#ffffff" }} />
+                  <FileCheck
+                    className="w-7 h-7"
+                    style={{ color: colors.text }}
+                  />
                 </div>
                 <div>
                   <p className="text-sm" style={{ color: "#666" }}>

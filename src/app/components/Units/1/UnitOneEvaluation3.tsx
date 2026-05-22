@@ -7,22 +7,20 @@ import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
-import { alphabetLower, alphabetUpper } from "../../../pages/const";
 import { useParams } from "react-router";
 import {
   StudentAnswers,
   MockQuestions,
   MockEvalationQuestions,
-} from "../../../../../mockData";
+} from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
 type EvaluationTwoState = {
   upperCase: EvaluationArray;
-  lowerCase: EvaluationArray;
   comments: string;
 };
 
-export function UnitOneEvaluationTwo() {
+export function UnitOneEvaluationThree() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -50,16 +48,22 @@ export function UnitOneEvaluationTwo() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationTwoData = unitsData[1];
+  const evaluationThreeData = unitsData[2];
 
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const bigKeys = useMemo(
+    () => getKeys(evaluationThreeData.questions.bigLetters),
+    [evaluationThreeData.questions.bigLetters],
+  );
   const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
-    new Array(Object.keys(evaluationTwoData.questions.bigLetters).length).fill(
-      value,
-    );
+    new Array(bigKeys.length).fill(value);
 
-  const [evaluationTwo, setEvaluationTwo] = useState<EvaluationTwoState>({
+  const [evaluationThree, setEvaluationThree] = useState<EvaluationTwoState>({
     upperCase: buildEvaluationArray(null),
-    lowerCase: buildEvaluationArray(null),
     comments: "",
   });
 
@@ -69,24 +73,22 @@ export function UnitOneEvaluationTwo() {
     const ans: MockQuestions = singleAnswer.answers;
     const big: MockEvalationQuestions =
       (ans.bigLetters as MockEvalationQuestions) || {};
-    const small: MockEvalationQuestions =
-      (ans.smallLetters as MockEvalationQuestions) || {};
 
+    const bigKeysArray = getKeys(evaluationThreeData.questions.bigLetters);
     const mapToState = (
       letters: string[],
       obj: MockEvalationQuestions | undefined,
     ) =>
       letters.map((ltr) => {
         const key = ltr === ltr.toLowerCase() ? ltr.toUpperCase() : ltr;
-        const val = obj?.[key]?.recognition ?? obj?.[ltr]?.recognition;
+        const val = obj?.[key]?.correct ?? obj?.[ltr]?.correct;
         if (val === true) return true;
         if (val === false) return false;
         return null;
       });
 
-    setEvaluationTwo({
-      upperCase: mapToState(alphabetUpper, big),
-      lowerCase: mapToState(alphabetLower, small),
+    setEvaluationThree({
+      upperCase: mapToState(bigKeysArray, big),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
@@ -96,10 +98,9 @@ export function UnitOneEvaluationTwo() {
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
-      setEvaluationTwo((prev) => ({
+      setEvaluationThree((prev) => ({
         ...prev,
         upperCase: buildEvaluationArray(true),
-        lowerCase: buildEvaluationArray(true),
       }));
       setHasChanges(true);
     });
@@ -109,10 +110,9 @@ export function UnitOneEvaluationTwo() {
   const handleFailAll = () => {
     setConfirmMessage(t("evaluation.confirmFailAll"));
     setPendingAction(() => () => {
-      setEvaluationTwo((prev) => ({
+      setEvaluationThree((prev) => ({
         ...prev,
         upperCase: buildEvaluationArray(false),
-        lowerCase: buildEvaluationArray(false),
       }));
       setHasChanges(true);
     });
@@ -122,10 +122,9 @@ export function UnitOneEvaluationTwo() {
   const handleClearAll = () => {
     setConfirmMessage(t("evaluation.confirmClearAll"));
     setPendingAction(() => () => {
-      setEvaluationTwo((prev) => ({
+      setEvaluationThree((prev) => ({
         ...prev,
         upperCase: buildEvaluationArray(null),
-        lowerCase: buildEvaluationArray(null),
         comments: "",
       }));
       setHasChanges(true);
@@ -134,10 +133,9 @@ export function UnitOneEvaluationTwo() {
   };
 
   const handleNotRequired = () => {
-    setEvaluationTwo((prev) => ({
+    setEvaluationThree((prev) => ({
       ...prev,
       upperCase: buildEvaluationArray(null),
-      lowerCase: buildEvaluationArray(null),
       comments: "",
     }));
     setHasChanges(true);
@@ -145,20 +143,10 @@ export function UnitOneEvaluationTwo() {
 
   const handleSave = () => {
     const answers: MockQuestions = {
-      bigLetters: alphabetUpper.reduce(
+      bigLetters: bigKeys.reduce(
         (acc, letter, idx) => {
           acc[letter] = {
-            recognition: evaluationTwo.upperCase[idx],
-          };
-          return acc;
-        },
-        {} as Record<string, Record<string, boolean | null>>,
-      ),
-      smallLetters: alphabetLower.reduce(
-        (acc, letter, idx) => {
-          const key = letter.toUpperCase();
-          acc[key] = {
-            recognition: evaluationTwo.lowerCase[idx],
+            recognition: evaluationThree.upperCase[idx],
           };
           return acc;
         },
@@ -171,7 +159,7 @@ export function UnitOneEvaluationTwo() {
       Number(classId),
       Number(evaluationId),
       answers,
-      evaluationTwo.comments,
+      evaluationThree.comments,
       !notRequired,
     );
     setHasChanges(false);
@@ -180,8 +168,8 @@ export function UnitOneEvaluationTwo() {
   return (
     <>
       <UnitHeader
-        title={evaluationTwoData.title}
-        evaluationNumber={evaluationTwoData.evaluation}
+        title={evaluationThreeData.title}
+        evaluationNumber={evaluationThreeData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -191,7 +179,7 @@ export function UnitOneEvaluationTwo() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationTwoData.unit}
+          unitNumber={evaluationThreeData.unit}
           handleCheckAll={handleCheckAll}
           handleFailAll={handleFailAll}
           handleClearAll={handleClearAll}
@@ -207,93 +195,49 @@ export function UnitOneEvaluationTwo() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Uppercase */}
-          <div>
-            <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
-              {t("unitTwo.uppercase")}
-            </h3>
-            <div className="space-y-2">
-              {alphabetUpper.map((letter, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-2 rounded-lg"
-                  style={{ background: "#f7ffd6" }}
-                >
-                  <span className="font-bold w-8" style={{ color: "#004aad" }}>
-                    {letter}
-                  </span>
-                  <EvaluationCheckbox
-                    value={evaluationTwo.upperCase[idx]}
-                    onCheck={() => {
-                      const newArr = [...evaluationTwo.upperCase];
-                      newArr[idx] = true;
-                      setEvaluationTwo((prev) => ({
-                        ...prev,
-                        upperCase: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                    onFail={() => {
-                      const newArr = [...evaluationTwo.upperCase];
-                      newArr[idx] = false;
-                      setEvaluationTwo((prev) => ({
-                        ...prev,
-                        upperCase: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Lowercase */}
-          <div>
-            <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
-              {t("unitTwo.lowercase")}
-            </h3>
-            <div className="space-y-2">
-              {alphabetLower.map((letter, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-2 rounded-lg"
-                  style={{ background: "#f7ffd6" }}
-                >
-                  <span className="font-bold w-8" style={{ color: "#004aad" }}>
-                    {letter}
-                  </span>
-                  <EvaluationCheckbox
-                    value={evaluationTwo.lowerCase[idx]}
-                    onCheck={() => {
-                      const newArr = [...evaluationTwo.lowerCase];
-                      newArr[idx] = true;
-                      setEvaluationTwo((prev) => ({
-                        ...prev,
-                        lowerCase: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                    onFail={() => {
-                      const newArr = [...evaluationTwo.lowerCase];
-                      newArr[idx] = false;
-                      setEvaluationTwo((prev) => ({
-                        ...prev,
-                        lowerCase: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+        <div>
+          <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
+            {t("unitTwo.uppercase")}
+          </h3>
+          <div className="space-y-2">
+            {bigKeys.map((letter, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-2 rounded-lg"
+                style={{ background: "#f7ffd6" }}
+              >
+                <span className="font-bold w-8" style={{ color: "#004aad" }}>
+                  {letter}
+                </span>
+                <EvaluationCheckbox
+                  value={evaluationThree.upperCase[idx]}
+                  onCheck={() => {
+                    const newArr = [...evaluationThree.upperCase];
+                    newArr[idx] = true;
+                    setEvaluationThree((prev) => ({
+                      ...prev,
+                      upperCase: newArr,
+                    }));
+                    setHasChanges(true);
+                  }}
+                  onFail={() => {
+                    const newArr = [...evaluationThree.upperCase];
+                    newArr[idx] = false;
+                    setEvaluationThree((prev) => ({
+                      ...prev,
+                      upperCase: newArr,
+                    }));
+                    setHasChanges(true);
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
         <CommentsContainer
-          comments={evaluationTwo.comments}
+          comments={evaluationThree.comments}
           onChange={(value) => {
-            setEvaluationTwo((prev) => ({ ...prev, comments: value }));
+            setEvaluationThree((prev) => ({ ...prev, comments: value }));
             setHasChanges(true);
           }}
         />

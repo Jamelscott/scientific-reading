@@ -1,26 +1,28 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router";
 import { useClassStore } from "../../../stores/useClassStore";
 import { useStudentStore } from "../../../stores/useStudentStore";
 import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { Initials } from "../../components/Initials";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
 import { Sidebar } from "../../components/Sidebar";
-import getScoreFromEvaluations from "../../utils/getScoreFromEvaluations";
+import getScoreFromEvaluations, {
+  getPercentageFromEvaluations,
+} from "../../utils/getScoreFromEvaluations";
 import {
   BookOpen,
   Users,
   TrendingUp,
   AlertCircle,
   CheckCircle,
-  LineChart as LineChartIcon,
   Download,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 
 import {
   BarChart,
   Bar,
-  PieChart as RechartsPieChart,
   Pie,
   XAxis,
   YAxis,
@@ -30,7 +32,9 @@ import {
   Cell,
   Line,
   LineChart,
+  PieChart,
 } from "recharts";
+import { gradeBenchmarks } from "../const";
 
 function scoreStatusToNumber(
   status: "success" | "adequate" | "needs-improvement" | null,
@@ -43,43 +47,38 @@ function scoreStatusToNumber(
 
 export function ReportsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { teacherId } = useParams();
   const classes = useClassStore((state) => state.classes);
-  const students = useStudentStore((state) => state.students);
   const getAllAnswers = useUnitsStore((state) => state.getAllAnswers);
   const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const students = useStudentStore((state) => state.students);
+  const getStudentCountByClass = useStudentStore(
+    (state) => state.getStudentCountByClass,
+  );
   const [selectedClassId, setSelectedClassId] = useState<number | null>(
     classes.length > 0 ? classes[0].id : null,
   );
-
-  // Calculate average score (0-100)
-  const calculateAverageScore = () => {
-    const classAnswers = getAllAnswers.filter(
-      (answer) => answer.classId === selectedClassId,
-    );
-
-    if (classAnswers.length === 0)
-      return { score: "0.0", label: "needs-improvement" as const };
-
-    let total = 0;
-    let count = 0;
-    classAnswers.forEach((answer) => {
-      const status = getScoreFromEvaluations(answer.answers);
-      if (status) {
-        total += scoreStatusToNumber(status);
-        count++;
+  const [expandedClassIds, setExpandedClassIds] = useState<Set<number>>(
+    new Set(classes.map((c) => c.id)),
+  );
+  console.log(students);
+  const toggleClassExpanded = (classId: number) => {
+    setExpandedClassIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(classId)) {
+        newSet.delete(classId);
+      } else {
+        newSet.add(classId);
       }
+      return newSet;
     });
-    const avg = count > 0 ? total / count : 0;
-    let label: "success" | "adequate" | "needs-improvement" =
-      "needs-improvement";
-    if (avg >= 85) label = "success";
-    else if (avg >= 70) label = "adequate";
-    return { score: avg.toFixed(1), label };
   };
-
   // Calculate grade distribution percentages
   const selectedClass = classes.find((c) => c.id === selectedClassId);
-  const classStudentCount = selectedClass?.studentIds?.length || 0;
+  const classStudentCount = selectedClassId
+    ? getStudentCountByClass(selectedClassId)
+    : 0;
 
   const calculateGradeDistribution = () => {
     // Use unitsData to compute expected total evaluations (units x students in selected class)
@@ -89,7 +88,6 @@ export function ReportsPage() {
     let successCount = 0;
     let adequateCount = 0;
     let needsImprovementCount = 0;
-
     // Count submitted (non-null) scores for the selected class only
     getAllAnswers
       .filter((answer) => answer.classId === selectedClassId)
@@ -123,26 +121,34 @@ export function ReportsPage() {
     };
   };
 
-  const calculateStudentDistribution = () => {
+  const calculateStudentDistribution = (
+    classId: number | null = selectedClassId,
+  ) => {
     let successStudents = 0;
     let adequateStudents = 0;
     let needsImprovementStudents = 0;
 
-    // Get students in the selected class
-    const classStudentIds = new Set(selectedClass?.studentIds || []);
+    // Get students in the specified class
+    const classStudentIds = new Set(
+      students.filter((s) => s.classIds.includes(classId!)).map((s) => s.id),
+    );
 
     if (classStudentIds.size === 0) {
       return [
-        { name: "success", value: 0, color: "#c9e265" },
-        { name: "adequate", value: 0, color: "#ffde59" },
-        { name: "needs-improvement", value: 0, color: "#ff5757" },
+        { name: t("reports.legend.success"), value: 0, color: "#c9e265" },
+        { name: t("reports.legend.adequate"), value: 0, color: "#ffde59" },
+        {
+          name: t("reports.legend.needsImprovement"),
+          value: 0,
+          color: "#ff5757",
+        },
       ];
     }
 
-    // Calculate average progress for each student in the selected class
+    // Calculate average progress for each student in the specified class
     classStudentIds.forEach((studentId) => {
       const studentAnswers = getAllAnswers.filter(
-        (a) => a.studentId === studentId && a.classId === selectedClassId,
+        (a) => a.studentId === studentId && a.classId === classId,
       );
 
       // Only count students who have submitted evaluations
@@ -168,122 +174,74 @@ export function ReportsPage() {
     });
 
     return [
-      { name: "success", value: successStudents, color: "#c9e265" },
-      { name: "adequate", value: adequateStudents, color: "#ffde59" },
       {
-        name: "needs-improvement",
+        name: t("reports.legend.success"),
+        value: successStudents,
+        color: "#c9e265",
+      },
+      {
+        name: t("reports.legend.adequate"),
+        value: adequateStudents,
+        color: "#ffde59",
+      },
+      {
+        name: t("reports.legend.needsImprovement"),
         value: needsImprovementStudents,
         color: "#ff5757",
       },
     ];
   };
 
-  // Calculate average score by class
-  const calculateClassPerformance = () => {
-    const classPerformance: Record<number, { total: number; count: number }> =
-      {};
-    classes.forEach((cls) => {
-      classPerformance[cls.id] = { total: 0, count: 0 };
-    });
-
-    getAllAnswers.forEach((answer) => {
-      const classId = answer.classId;
-      if (classPerformance[classId]) {
-        const status = getScoreFromEvaluations(answer.answers);
-        if (status) {
-          classPerformance[classId].total += scoreStatusToNumber(status);
-          classPerformance[classId].count++;
-        }
-      }
-    });
-
-    return classes.map((cls) => {
-      const { total, count } = classPerformance[cls.id];
-      const avg = count > 0 ? total / count : 0;
-      return {
-        fullName: cls.name,
-        name:
-          cls.name.length > 15 ? cls.name.substring(0, 8) + "..." : cls.name,
-        score: parseFloat(avg.toFixed(1)),
-      };
-    });
-  };
-
-  // Build classPerformanceData: counts students by class and their evaluation status
+  // Build classPerformanceData: produce three workshop-range items for the selected class
+  // Each item contains percentages for success, adequate and failing (stacked bars)
   const buildClassPerformanceData = () => {
-    interface ClassPerf {
-      name: string;
-      success: number;
-      adequate: number;
-      atRisk: number;
-    }
-    const classPerfMap: Record<number, ClassPerf> = {};
+    const ranges: { name: string; units: number[] }[] = [
+      { name: t("reports.workshopRanges.unit1"), units: [1, 2, 3, 4, 5, 6] },
+      { name: t("reports.workshopRanges.unit2To5"), units: [7, 8, 9, 10, 11] },
+      {
+        name: t("reports.workshopRanges.unit6To10"),
+        units: [12, 13, 14, 15],
+      },
+    ];
 
-    // Initialize each class
-    classes.forEach((cls) => {
-      classPerfMap[cls.id] = {
-        name: cls.name,
+    const classId = selectedClassId ?? (classes[0] && classes[0].id) ?? null;
+    if (!classId)
+      return ranges.map((r) => ({
+        name: r.name,
         success: 0,
         adequate: 0,
-        atRisk: 0,
-      };
-    });
+        failing: 0,
+      }));
 
-    // Group students by class and count their statuses
-    const studentStatusByClass: Record<
-      number,
-      Record<number, string | null>
-    > = {};
+    return ranges.map((range) => {
+      let successCount = 0;
+      let adequateCount = 0;
+      let failingCount = 0;
+      let submittedCount = 0;
 
-    classes.forEach((cls) => {
-      studentStatusByClass[cls.id] = {};
-      (cls.studentIds || []).forEach((studentId) => {
-        const studentAnswers = getAllAnswers.filter(
-          (a) => a.studentId === studentId && a.classId === cls.id,
-        );
-
-        if (studentAnswers.length === 0) {
-          studentStatusByClass[cls.id][studentId] = null;
-          return;
-        }
-
-        let total = 0;
-        let count = 0;
-        studentAnswers.forEach((answer) => {
-          const status = getScoreFromEvaluations(answer.answers);
+      getAllAnswers
+        .filter(
+          (a) => a.classId === classId && range.units.includes(a.unitDataId),
+        )
+        .forEach((a) => {
+          const status = getScoreFromEvaluations(a.answers);
           if (status) {
-            total += scoreStatusToNumber(status);
-            count++;
+            submittedCount++;
+            if (status === "success") successCount++;
+            else if (status === "adequate") adequateCount++;
+            else if (status === "needs-improvement") failingCount++;
           }
         });
 
-        if (count === 0) {
-          studentStatusByClass[cls.id][studentId] = null;
-          return;
-        }
+      if (submittedCount === 0)
+        return { name: range.name, success: 0, adequate: 0, failing: 0 };
 
-        const avg = total / count;
-        if (avg >= 85) {
-          studentStatusByClass[cls.id][studentId] = "success";
-        } else if (avg >= 70) {
-          studentStatusByClass[cls.id][studentId] = "adequate";
-        } else {
-          studentStatusByClass[cls.id][studentId] = "atRisk";
-        }
-      });
+      const success = Math.round((successCount / submittedCount) * 100);
+      const adequate = Math.round((adequateCount / submittedCount) * 100);
+      const failing = Math.max(0, 100 - success - adequate);
+
+      return { name: range.name, success, adequate, failing };
     });
-
-    // Count statuses for each class
-    classes.forEach((cls) => {
-      const statusMap = studentStatusByClass[cls.id];
-      Object.values(statusMap).forEach((status) => {
-        if (status === "success") classPerfMap[cls.id].success++;
-        else if (status === "adequate") classPerfMap[cls.id].adequate++;
-        else if (status === "atRisk") classPerfMap[cls.id].atRisk++;
-      });
-    });
-
-    return Object.values(classPerfMap);
   };
 
   // Build progressOverTime: average performance by month based on unit evaluations
@@ -363,6 +321,190 @@ export function ReportsPage() {
   const classPerformanceData = buildClassPerformanceData();
   const progressOverTime = buildProgressOverTime();
 
+  // Calculate average units completed per student in selected class
+  const calculateAverageUnitsCompleted = () => {
+    const classStudentIds = new Set(
+      students
+        .filter((s) => s.classIds.includes(selectedClassId!))
+        .map((s) => s.id),
+    );
+    if (classStudentIds.size === 0) return 0;
+
+    let totalUnits = 0;
+    let studentCount = 0;
+
+    classStudentIds.forEach((studentId) => {
+      const studentAnswers = getAllAnswers.filter(
+        (a) => a.studentId === studentId && a.classId === selectedClassId,
+      );
+
+      if (studentAnswers.length > 0) {
+        // Count unique units this student has completed
+        const uniqueUnits = new Set(studentAnswers.map((a) => a.unitDataId));
+        totalUnits += uniqueUnits.size;
+        studentCount++;
+      }
+    });
+
+    return studentCount > 0 ? Math.round(totalUnits / studentCount) : 0;
+  };
+
+  // Get student performance level counts
+  const getStudentLevelCounts = (classId: number | null = selectedClassId) => {
+    const distribution = calculateStudentDistribution(classId);
+    return {
+      onTrack:
+        distribution.find((d) => d.name === t("reports.legend.success"))
+          ?.value || 0,
+      progressing:
+        distribution.find((d) => d.name === t("reports.legend.adequate"))
+          ?.value || 0,
+      needingSupport:
+        distribution.find(
+          (d) => d.name === t("reports.legend.needsImprovement"),
+        )?.value || 0,
+    };
+  };
+
+  // Calculate evaluation distribution for a class (for pie chart)
+  const calculateClassEvaluationDistribution = (classId: number) => {
+    let successCount = 0;
+    let adequateCount = 0;
+    let needsImprovementCount = 0;
+
+    // Count submitted evaluations by status for this class
+    getAllAnswers
+      .filter((answer) => answer.classId === classId)
+      .forEach((answer) => {
+        const status = getScoreFromEvaluations(answer.answers);
+        if (status === "success") successCount++;
+        else if (status === "adequate") adequateCount++;
+        else if (status === "needs-improvement") needsImprovementCount++;
+      });
+
+    const total = successCount + adequateCount + needsImprovementCount;
+
+    if (total === 0) {
+      return [
+        { name: "En voie/acquis", value: 0, color: "#c9e265" },
+        { name: "À surveiller", value: 0, color: "#ffde59" },
+        { name: "À risque", value: 0, color: "#ff5757" },
+      ];
+    }
+
+    return [
+      {
+        name: "En voie/acquis",
+        value: Math.round((successCount / total) * 100),
+        color: "#c9e265",
+      },
+      {
+        name: "À surveiller",
+        value: Math.round((adequateCount / total) * 100),
+        color: "#ffde59",
+      },
+      {
+        name: "À risque",
+        value: Math.round((needsImprovementCount / total) * 100),
+        color: "#ff5757",
+      },
+    ];
+  };
+
+  // Get top performing students for a class
+  const getTopStudents = (classId: number) => {
+    const students = useStudentStore.getState().students;
+    const classStudentIds = students
+      .filter((s) => s.classIds.includes(classId))
+      .map((s) => s.id);
+
+    const studentScores = classStudentIds
+      .map((studentId) => {
+        const student = students.find((s) => s.id === studentId);
+        if (!student) return null;
+
+        const studentAnswers = getAllAnswers.filter(
+          (a) => a.studentId === studentId && a.classId === classId,
+        );
+
+        if (studentAnswers.length === 0) return null;
+
+        let total = 0;
+        let count = 0;
+        studentAnswers.forEach((answer) => {
+          const percentage = getPercentageFromEvaluations(answer.answers);
+          if (percentage !== null) {
+            total += percentage;
+            count++;
+          }
+        });
+
+        if (count === 0) return null;
+
+        return {
+          name: student.name,
+          score: Math.round(total / count),
+          evaluations: count,
+        };
+      })
+      .filter((s) => s !== null) as Array<{
+      name: string;
+      score: number;
+      evaluations: number;
+    }>;
+
+    return studentScores.sort((a, b) => b.score - a.score).slice(0, 3);
+  };
+
+  // Get students needing support for a class
+  const getStudentsNeedingSupport = (classId: number) => {
+    const students = useStudentStore.getState().students;
+    const classStudentIds = students
+      .filter((s) => s.classIds.includes(classId))
+      .map((s) => s.id);
+
+    const studentScores = classStudentIds
+      .map((studentId) => {
+        const student = students.find((s) => s.id === studentId);
+        if (!student) return null;
+
+        const studentAnswers = getAllAnswers.filter(
+          (a) => a.studentId === studentId && a.classId === classId,
+        );
+
+        if (studentAnswers.length === 0) return null;
+
+        let total = 0;
+        let count = 0;
+        studentAnswers.forEach((answer) => {
+          const percentage = getPercentageFromEvaluations(answer.answers);
+          if (percentage !== null) {
+            total += percentage;
+            count++;
+          }
+        });
+
+        if (count === 0) return null;
+
+        const avgScore = Math.round(total / count);
+        // Only include students with scores below 70 (needs improvement threshold)
+        if (avgScore >= 70) return null;
+
+        return {
+          name: student.name,
+          score: avgScore,
+          evaluations: count,
+        };
+      })
+      .filter((s) => s !== null) as Array<{
+      name: string;
+      score: number;
+      evaluations: number;
+    }>;
+
+    return studentScores.sort((a, b) => a.score - b.score).slice(0, 3);
+  };
+
   return (
     <div
       className="h-screen flex overflow-hidden"
@@ -380,25 +522,40 @@ export function ReportsPage() {
             <p className="text-lg" style={{ color: "#000000" }}>
               {t("reports.subtitle")}
             </p>
-            <div className="mt-4">
-              <label className="text-sm mr-2" style={{ color: "#6b7280" }}>
+            <div className="mt-6">
+              <label
+                className="text-sm mb-2 block font-medium"
+                style={{ color: "#004aad" }}
+              >
                 {t("reports.selectClass")}
               </label>
-              <select
-                value={selectedClassId ?? ""}
-                onChange={(e) =>
-                  setSelectedClassId(
-                    e.target.value ? Number(e.target.value) : null,
-                  )
-                }
-                className="border px-2 py-1 rounded"
-              >
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative inline-block">
+                <select
+                  value={selectedClassId ?? ""}
+                  onChange={(e) =>
+                    setSelectedClassId(
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
+                  className="appearance-none px-6 py-3 pr-12 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all"
+                  style={{
+                    background: "#ffffff",
+                    border: "2px solid #dff3ff",
+                    color: "#004aad",
+                    minWidth: "250px",
+                  }}
+                >
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.grade}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                  style={{ color: "#004aad" }}
+                />
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -502,17 +659,15 @@ export function ReportsPage() {
             </p>
           </div>
         </div>
-
-        {/* Reports Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Class Performance Report */}
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          {/* Performance by Evaluation Range */}
           <div
             className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl" style={{ color: "#004aad" }}>
-                Performance par plage d'ateliers
+                {t("reports.classPerformance")}
               </h2>
               <button
                 className="p-2 rounded-xl transition-all"
@@ -530,27 +685,9 @@ export function ReportsPage() {
                 />
                 <YAxis tick={{ fill: "#000000" }} />
                 <Tooltip />
-                <Bar
-                  key="success-bar"
-                  dataKey="success"
-                  stackId="a"
-                  fill="#c9e265"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  key="adequate-bar"
-                  dataKey="adequate"
-                  stackId="a"
-                  fill="#ffde59"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  key="atRisk-bar"
-                  dataKey="atRisk"
-                  stackId="a"
-                  fill="#ff5757"
-                  radius={[8, 8, 0, 0]}
-                />
+                <Bar dataKey="success" stackId="a" fill="#c9e265" />
+                <Bar dataKey="adequate" stackId="a" fill="#ffde59" />
+                <Bar dataKey="failing" stackId="a" fill="#ff5757" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -562,7 +699,7 @@ export function ReportsPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl" style={{ color: "#004aad" }}>
-                Progression moyenne au fil du temps
+                {t("reports.progressOverTime")}
               </h2>
               <button
                 className="p-2 rounded-xl transition-all"
@@ -590,48 +727,395 @@ export function ReportsPage() {
           </div>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total Students */}
-          <div
-            className="p-6 rounded-2xl shadow-lg"
-            style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
-          >
-            <p style={{ color: "#6b7280" }} className="text-sm mb-2">
-              {t("reports.totalStudents")}
-            </p>
-            <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
-              {classStudentCount}
-            </p>
+        {/* Grade-Level Benchmarks */}
+        <div
+          className="rounded-2xl p-8 shadow-lg mb-8"
+          style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
+        >
+          <h2 className="text-2xl mb-6" style={{ color: "#004aad" }}>
+            {t("reports.benchmarks.title")}
+          </h2>
+
+          <div className="grid grid-cols-4 gap-6 mb-8">
+            <div
+              className="p-6 rounded-xl text-center"
+              style={{ background: "#dff3ff", border: "2px solid #38b6ff" }}
+            >
+              <p className="text-sm mb-2" style={{ color: "#000000" }}>
+                {t("reports.benchmarks.kindergartenEnd")}
+              </p>
+              <p className="text-3xl mb-1" style={{ color: "#004aad" }}>
+                {gradeBenchmarks["Maternelle"].expected}
+              </p>
+              <p className="text-xs" style={{ color: "#000000", opacity: 0.7 }}>
+                {t("reports.benchmarks.unitInProgress")}
+              </p>
+            </div>
+
+            <div
+              className="p-6 rounded-xl text-center"
+              style={{ background: "#dff3ff", border: "2px solid #38b6ff" }}
+            >
+              <p className="text-sm mb-2" style={{ color: "#000000" }}>
+                {t("reports.benchmarks.classroomEnd")}
+              </p>
+              <p className="text-3xl mb-1" style={{ color: "#004aad" }}>
+                {gradeBenchmarks["Jardin"].expected}
+              </p>
+              <p className="text-xs" style={{ color: "#000000", opacity: 0.7 }}>
+                {t("reports.benchmarks.unitComplete")}
+              </p>
+            </div>
+
+            <div
+              className="p-6 rounded-xl text-center"
+              style={{ background: "#dff3ff", border: "2px solid #38b6ff" }}
+            >
+              <p className="text-sm mb-2" style={{ color: "#000000" }}>
+                {t("reports.benchmarks.firstGradeEnd")}
+              </p>
+              <p className="text-3xl mb-1" style={{ color: "#004aad" }}>
+                {gradeBenchmarks["1re année"].expected}
+              </p>
+              <p className="text-xs" style={{ color: "#000000", opacity: 0.7 }}>
+                {t("reports.benchmarks.unitsRange")}
+              </p>
+            </div>
+
+            <div
+              className="p-6 rounded-xl text-center"
+              style={{ background: "#dff3ff", border: "2px solid #38b6ff" }}
+            >
+              <p className="text-sm mb-2" style={{ color: "#000000" }}>
+                {t("reports.benchmarks.secondGradeEnd")}
+              </p>
+              <p className="text-3xl mb-1" style={{ color: "#004aad" }}>
+                {gradeBenchmarks["2e année"].expected}
+              </p>
+              <p className="text-xs" style={{ color: "#000000", opacity: 0.7 }}>
+                {t("reports.benchmarks.allUnits")}
+              </p>
+            </div>
           </div>
 
-          {/* Average Score */}
-          <div
-            className="p-6 rounded-2xl shadow-lg"
-            style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
-          >
-            <p style={{ color: "#6b7280" }} className="text-sm mb-2">
-              {t("reports.averageScore")}
-            </p>
-            <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
-              {calculateAverageScore().score} / 100
-            </p>
-            <p style={{ color: "#6b7280" }} className="text-xs mt-2">
-              {t(`reports.legend.${calculateAverageScore().label}`)}
-            </p>
-          </div>
+          {/* Class Performance Against Benchmark */}
+          {selectedClassId && selectedClass && (
+            <div className="flex flex-col gap-6">
+              <div
+                className="rounded-xl"
+                style={{
+                  background: "#eff9ff",
+                  border: "1px solid #38b6ff",
+                }}
+              >
+                <div className="p-6">
+                  <h3 className="text-lg mb-6" style={{ color: "#004aad" }}>
+                    {t("reports.classPerformanceTitle")} - {selectedClass.grade}
+                  </h3>
+                  <div className="flex flex-col gap-6">
+                    <div
+                      className="grid grid-cols-3 gap-6 rounded-2xl p-6 shadow-lg"
+                      style={{
+                        background: "#ffffff",
+                        border: "1px solid #dff3ff",
+                      }}
+                    >
+                      <div className="text-center">
+                        <p
+                          className="text-3xl mb-2"
+                          style={{ color: "#c9e265" }}
+                        >
+                          {getStudentLevelCounts(selectedClassId).onTrack}
+                        </p>
+                        <p className="text-sm" style={{ color: "#000000" }}>
+                          {t("reports.classPerformanceDetails.onTrack")}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p
+                          className="text-3xl mb-2"
+                          style={{ color: "#ffde59" }}
+                        >
+                          {getStudentLevelCounts(selectedClassId).progressing}
+                        </p>
+                        <p className="text-sm" style={{ color: "#000000" }}>
+                          {t("reports.classPerformanceDetails.progressing")}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p
+                          className="text-3xl mb-2"
+                          style={{ color: "#ff5757" }}
+                        >
+                          {
+                            getStudentLevelCounts(selectedClassId)
+                              .needingSupport
+                          }
+                        </p>
+                        <p className="text-sm" style={{ color: "#000000" }}>
+                          {t("reports.classPerformanceDetails.needingSupport")}
+                        </p>
+                      </div>
+                    </div>
+                    <hr className="text-red" />
+                    <div className="grid grid-cols-3 gap-6">
+                      {/* Distribution Chart */}
+                      <div
+                        className="rounded-2xl p-6 shadow-lg"
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid #dff3ff",
+                        }}
+                      >
+                        <h2
+                          className="text-xl mb-6"
+                          style={{ color: "#004aad" }}
+                        >
+                          {t("reports.distribution")}
+                        </h2>
+                        {calculateStudentDistribution(selectedClassId).some(
+                          (item) => item.value > 0,
+                        ) ? (
+                          <>
+                            <ResponsiveContainer width="100%" height={250}>
+                              <PieChart>
+                                <Pie
+                                  key="distribution-pie"
+                                  data={calculateStudentDistribution(
+                                    selectedClassId,
+                                  )}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={60}
+                                  outerRadius={90}
+                                  paddingAngle={5}
+                                  dataKey="value"
+                                >
+                                  {calculateStudentDistribution(
+                                    selectedClassId,
+                                  ).map((entry, index) => (
+                                    <Cell
+                                      key={`cell-${index}`}
+                                      fill={entry.color}
+                                    />
+                                  ))}
+                                </Pie>
+                                <Tooltip />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="space-y-2 mt-4">
+                              {calculateStudentDistribution(
+                                selectedClassId,
+                              ).map((item) => (
+                                <div
+                                  key={item.name}
+                                  className="flex items-center justify-between"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="w-4 h-4 rounded"
+                                      style={{ background: item.color }}
+                                    ></div>
+                                    <span
+                                      className="text-sm"
+                                      style={{ color: "#000000" }}
+                                    >
+                                      {item.name}
+                                    </span>
+                                  </div>
+                                  <span style={{ color: "#004aad" }}>
+                                    {item.value}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <p
+                            className="text-sm text-center"
+                            style={{
+                              color: "#6b7280",
+                              paddingTop: "100px",
+                              paddingBottom: "100px",
+                            }}
+                          >
+                            No data available
+                          </p>
+                        )}
+                      </div>
 
-          {/* Classes */}
+                      {/* Top Performers */}
+                      <div
+                        className="rounded-2xl p-6 shadow-lg"
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid #dff3ff",
+                        }}
+                      >
+                        <h2
+                          className="text-xl mb-6"
+                          style={{ color: "#004aad" }}
+                        >
+                          {t("reports.topPerformers")}
+                        </h2>
+                        <div className="space-y-4">
+                          {getTopStudents(selectedClassId).length > 0 ? (
+                            getTopStudents(selectedClassId).map(
+                              (student, idx) => (
+                                <div
+                                  key={student.name}
+                                  className="p-4 rounded-xl"
+                                  style={{ background: "#dff3ff" }}
+                                >
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span style={{ color: "#004aad" }}>
+                                      #{idx + 1}
+                                    </span>
+                                    <span
+                                      className="px-3 py-1 rounded-lg text-sm"
+                                      style={{
+                                        background: "#c9e265",
+                                        color: "#000000",
+                                      }}
+                                    >
+                                      {student.score}%
+                                    </span>
+                                  </div>
+                                  <p style={{ color: "#000000" }}>
+                                    {student.name}
+                                  </p>
+                                  <p
+                                    className="text-sm"
+                                    style={{ color: "#000000", opacity: 0.7 }}
+                                  >
+                                    {student.evaluations}{" "}
+                                    {t("reports.workshopsCompleted")}
+                                  </p>
+                                </div>
+                              ),
+                            )
+                          ) : (
+                            <p
+                              className="text-sm text-center"
+                              style={{
+                                color: "#6b7280",
+                                paddingTop: "100px",
+                                paddingBottom: "100px",
+                              }}
+                            >
+                              No data available
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Students Needing Support */}
+                      <div
+                        className="rounded-2xl p-6 shadow-lg"
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid #dff3ff",
+                        }}
+                      >
+                        <h2
+                          className="text-xl mb-6"
+                          style={{ color: "#004aad" }}
+                        >
+                          {t("reports.needingSupport")}
+                        </h2>
+                        <div className="space-y-4">
+                          {getStudentsNeedingSupport(selectedClassId).length >
+                          0 ? (
+                            getStudentsNeedingSupport(selectedClassId).map(
+                              (student) => (
+                                <div
+                                  key={student.name}
+                                  className="p-4 rounded-xl"
+                                  style={{ background: "#fff5f5" }}
+                                >
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span
+                                      className="px-3 py-1 rounded-lg text-sm"
+                                      style={{
+                                        background: "#ff5757",
+                                        color: "#ffffff",
+                                      }}
+                                    >
+                                      {student.score}%
+                                    </span>
+                                  </div>
+                                  <p style={{ color: "#000000" }}>
+                                    {student.name}
+                                  </p>
+                                  <p
+                                    className="text-sm"
+                                    style={{ color: "#000000", opacity: 0.7 }}
+                                  >
+                                    {student.evaluations}{" "}
+                                    {t("reports.workshopsCompleted")}
+                                  </p>
+                                </div>
+                              ),
+                            )
+                          ) : (
+                            <p
+                              className="text-sm text-center"
+                              style={{
+                                color: "#6b7280",
+                                paddingTop: "100px",
+                                paddingBottom: "100px",
+                              }}
+                            >
+                              No students needing support
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Individual Reporting Section */}
+        <div className="mt-8">
           <div
-            className="p-6 rounded-2xl shadow-lg"
+            className="rounded-2xl p-6 shadow-lg"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <p style={{ color: "#6b7280" }} className="text-sm mb-2">
-              {t("reports.classes")}
+            <h2 className="text-xl mb-4" style={{ color: "#004aad" }}>
+              {t("reports.studentReports")}
+            </h2>
+            <p className="text-sm mb-4" style={{ color: "#000000" }}>
+              {t("reports.studentReportsDescription")}
             </p>
-            <p className="text-3xl font-semibold" style={{ color: "#004aad" }}>
-              {classes.length}
-            </p>
+            <div className="grid grid-cols-4 gap-3">
+              {students
+                .filter(
+                  (s) =>
+                    selectedClassId && s.classIds.includes(selectedClassId),
+                )
+                .map((student) => (
+                  <button
+                    key={student.id}
+                    onClick={() => {
+                      navigate(
+                        `/teacher/${teacherId}/class/${selectedClassId}/student/${student.id}`,
+                      );
+                    }}
+                    className="px-4 py-3 rounded-xl transition-all text-left hover:shadow-md hover:bg-[#38b6ff] hover:text-white group"
+                    style={{
+                      background: "#dff3ff",
+                      border: "1px solid #38b6ff",
+                      color: "#004aad",
+                    }}
+                  >
+                    {student.name}
+                  </button>
+                ))}
+            </div>
           </div>
         </div>
       </div>

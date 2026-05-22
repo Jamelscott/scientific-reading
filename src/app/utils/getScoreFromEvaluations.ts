@@ -49,4 +49,19 @@ export function getScoreFromEvaluations(values: unknown): ScoreStatus | null {
   return scoreToStatus(averageScore);
 }
 
+export function getPercentageFromEvaluations(values: unknown): number | null {
+  const collected: Array<boolean | null> = [];
+  collectBooleans(values, collected);
+
+  if (collected.length === 0) return null;
+
+  // If no item has been answered (all null or non-boolean), return null
+  const hasAnswered = collected.some((v) => v === true || v === false);
+  if (!hasAnswered) return null;
+
+  const trueCount = collected.reduce((count, value) => (value === true ? count + 1 : count), 0);
+
+  return (trueCount / collected.length) * 100;
+}
+
 export default getScoreFromEvaluations;

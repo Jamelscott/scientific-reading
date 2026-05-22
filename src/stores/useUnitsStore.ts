@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { mockApiData, StudentAnswers, UnitData } from "../../mockData";
+import { mockApiData } from "../../mockData";
+import type { StudentAnswers, UnitData } from "../../mockData/types";
+import { unitData } from "../../mockData/unitData";
 import { downloadableResources } from "../../mockData/resources";
 import type { ResourceCategory } from "../../mockData/types";
 import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
@@ -182,7 +184,7 @@ export const useUnitsStore = create<UnitsStore>()(
           get().getAllAnswers.filter(
             (e) => e.unitDataId === evaluationId,
           ),
-        getUnitsData: mockApiData.unitData,
+        getUnitsData: unitData,
         getUnitAnswers: (classId:number) => mockApiData.answers.filter(answer => answer.classId === classId),
       };
     },

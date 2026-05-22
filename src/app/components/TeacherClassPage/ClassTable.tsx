@@ -1,17 +1,15 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Student } from "../../../stores/useStudentStore";
 import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { EvaluationButton } from "./EvaluationButton";
 import { Link, useNavigate, useParams } from "react-router";
-import { StudentAnswers } from "../../../../mockData";
 import { EvaluationLegend } from "../EvaluationLegend";
 import { Tooltip } from "../ui/Tooltip";
 import getScoreFromEvaluations from "../../utils/getScoreFromEvaluations";
+import { Student } from "../../../../mockData/types";
 
 interface ClassTableProps {
   students: Student[];
-  classAnswers: StudentAnswers[];
   classId: string;
 }
 
@@ -20,19 +18,17 @@ export function ClassTable({ students, classId }: ClassTableProps) {
   const navigate = useNavigate();
   const { teacherId } = useParams();
   const getUnitsData = useUnitsStore((state) => state.getUnitsData);
-  const getUnitAnswers = useUnitsStore((state) => state.getAnswersByClass);
-  const getAnswersByStudent = useUnitsStore(
-    (state) => state.getAnswersByStudent,
-  );
+
   const getAnswersByEvaluation = useUnitsStore(
     (state) => state.getAnswersByEvaluation,
   );
-  console.log(getUnitAnswers(Number(classId)));
 
   const evaluationsData = useMemo(() => getUnitsData, [getUnitsData]);
-
+  const numberOfUnitOneEvaluations = useMemo(() => {
+    return evaluationsData.filter((evalData) => evalData.unit === 1).length;
+  }, [evaluationsData]);
   return (
-    <div className="p-6 flex-1 overflow-y-auto">
+    <div className="p-8 flex-1 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         <div
           className="rounded-2xl overflow-hidden shadow-lg"
@@ -47,7 +43,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                     style={{ background: "#dff3ff" }}
                   ></th>
                   <th
-                    colSpan={4}
+                    colSpan={numberOfUnitOneEvaluations}
                     className="px-2 py-3 text-center text-xs border-r"
                     style={{
                       background: "var(--unit-1-bg)",
@@ -167,7 +163,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                   {evaluationsData.map((template, idx) => (
                     <th
                       key={template.id}
-                      className="px-4 py-4 text-center relative group"
+                      className="px-4 py-4 text-center group"
                       style={{
                         color: "#004aad",
                         minWidth: "60px",
@@ -190,7 +186,6 @@ export function ClassTable({ students, classId }: ClassTableProps) {
               </thead>
               <tbody>
                 {students.map((student, idx) => {
-                  const evaluationAnswersMap = getAnswersByStudent(student.id);
                   return (
                     <tr
                       key={student.id}
@@ -219,7 +214,6 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                             answer.studentId === student.id &&
                             answer.classId === Number(classId),
                         );
-                        console.log(singleAnswer);
                         const status = singleAnswer
                           ? getScoreFromEvaluations(singleAnswer.answers)
                           : null;

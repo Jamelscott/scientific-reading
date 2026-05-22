@@ -7,24 +7,21 @@ import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
-import { alphabetLower, alphabetUpper } from "../../../pages/const";
 import { useParams } from "react-router";
 import {
-  StudentAnswers,
-  MockQuestions,
   MockEvalationQuestions,
-} from "../../../../../mockData";
+  MockQuestions,
+  StudentAnswers,
+} from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
-type EvaluationOneState = {
-  upperCaseName: EvaluationArray;
-  upperCaseSound: EvaluationArray;
+type EvaluationTwoState = {
   lowerCaseName: EvaluationArray;
   lowerCaseSound: EvaluationArray;
   comments: string;
 };
 
-export function UnitOneEvaluationOne() {
+export function UnitOneEvaluationTwo() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -52,17 +49,23 @@ export function UnitOneEvaluationOne() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationOneData = unitsData[0];
-  const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
-    new Array(
-      Object.keys(evaluationOneData.questions.bigLetters).length +
-        Object.keys(evaluationOneData.questions.smallLetters).length,
-    ).fill(value);
+  const evaluationTwoData = unitsData[1];
 
-  // State for Atelier 1 & 2 (check/X options)
-  const [evaluationOne, setEvaluationOne] = useState<EvaluationOneState>({
-    upperCaseName: buildEvaluationArray(null),
-    upperCaseSound: buildEvaluationArray(null),
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const smallKeys = useMemo(
+    () => getKeys(evaluationTwoData.questions.smallLetters),
+    [evaluationTwoData.questions.smallLetters],
+  );
+
+  const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
+    new Array(smallKeys.length).fill(value);
+
+  // State for Atelier 2 (check/X options for lowercase)
+  const [evaluationTwo, setEvaluationTwo] = useState<EvaluationTwoState>({
     lowerCaseName: buildEvaluationArray(null),
     lowerCaseSound: buildEvaluationArray(null),
     comments: "",
@@ -72,11 +75,10 @@ export function UnitOneEvaluationOne() {
     if (!singleAnswer || !singleAnswer.answers) return;
 
     const ans: MockQuestions = singleAnswer.answers;
-    const big: MockEvalationQuestions =
-      (ans.bigLetters as MockEvalationQuestions) || {};
     const small: MockEvalationQuestions =
       (ans.smallLetters as MockEvalationQuestions) || {};
 
+    const smallKeysArray = getKeys(evaluationTwoData.questions.smallLetters);
     const mapToState = (
       letters: string[],
       obj: MockEvalationQuestions | undefined,
@@ -89,11 +91,10 @@ export function UnitOneEvaluationOne() {
         if (val === false) return false;
         return null;
       });
-    setEvaluationOne({
-      upperCaseName: mapToState(alphabetUpper, big, "name"),
-      upperCaseSound: mapToState(alphabetUpper, big, "sound"),
-      lowerCaseName: mapToState(alphabetLower, small, "name"),
-      lowerCaseSound: mapToState(alphabetLower, small, "sound"),
+
+    setEvaluationTwo({
+      lowerCaseName: mapToState(smallKeysArray, small, "name"),
+      lowerCaseSound: mapToState(smallKeysArray, small, "sound"),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
@@ -103,10 +104,8 @@ export function UnitOneEvaluationOne() {
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
-      setEvaluationOne((prev) => ({
+      setEvaluationTwo((prev) => ({
         ...prev,
-        upperCaseName: buildEvaluationArray(true),
-        upperCaseSound: buildEvaluationArray(true),
         lowerCaseName: buildEvaluationArray(true),
         lowerCaseSound: buildEvaluationArray(true),
       }));
@@ -118,13 +117,10 @@ export function UnitOneEvaluationOne() {
   const handleFailAll = () => {
     setConfirmMessage(t("evaluation.confirmFailAll"));
     setPendingAction(() => () => {
-      setEvaluationOne((prev) => ({
+      setEvaluationTwo((prev) => ({
         ...prev,
-        upperCaseName: buildEvaluationArray(false),
-        upperCaseSound: buildEvaluationArray(false),
         lowerCaseName: buildEvaluationArray(false),
         lowerCaseSound: buildEvaluationArray(false),
-        comments: evaluationOne.comments,
       }));
       setHasChanges(true);
     });
@@ -134,10 +130,8 @@ export function UnitOneEvaluationOne() {
   const handleClearAll = () => {
     setConfirmMessage(t("evaluation.confirmClearAll"));
     setPendingAction(() => () => {
-      setEvaluationOne((prev) => ({
+      setEvaluationTwo((prev) => ({
         ...prev,
-        upperCaseName: buildEvaluationArray(null),
-        upperCaseSound: buildEvaluationArray(null),
         lowerCaseName: buildEvaluationArray(null),
         lowerCaseSound: buildEvaluationArray(null),
         comments: "",
@@ -148,10 +142,8 @@ export function UnitOneEvaluationOne() {
   };
 
   const handleNotRequired = () => {
-    setEvaluationOne((prev) => ({
+    setEvaluationTwo((prev) => ({
       ...prev,
-      upperCaseName: buildEvaluationArray(null),
-      upperCaseSound: buildEvaluationArray(null),
       lowerCaseName: buildEvaluationArray(null),
       lowerCaseSound: buildEvaluationArray(null),
       comments: "",
@@ -161,23 +153,13 @@ export function UnitOneEvaluationOne() {
   };
 
   const handleSave = () => {
+    const smallKeysArray = getKeys(evaluationTwoData.questions.smallLetters);
     const answers: MockQuestions = {
-      bigLetters: alphabetUpper.reduce(
+      smallLetters: smallKeysArray.reduce(
         (acc, letter, idx) => {
           acc[letter] = {
-            name: evaluationOne.upperCaseName[idx],
-            sound: evaluationOne.upperCaseSound[idx],
-          };
-          return acc;
-        },
-        {} as Record<string, Record<string, boolean | null>>,
-      ),
-      smallLetters: alphabetLower.reduce(
-        (acc, letter, idx) => {
-          const key = letter.toUpperCase();
-          acc[key] = {
-            name: evaluationOne.lowerCaseName[idx],
-            sound: evaluationOne.lowerCaseSound[idx],
+            name: evaluationTwo.lowerCaseName[idx],
+            sound: evaluationTwo.lowerCaseSound[idx],
           };
           return acc;
         },
@@ -190,17 +172,16 @@ export function UnitOneEvaluationOne() {
       Number(classId),
       Number(evaluationId),
       answers,
-      evaluationOne.comments,
+      evaluationTwo.comments,
       !notRequired,
     );
     setHasChanges(false);
   };
-  console.log(evaluationOne.upperCaseSound);
   return (
     <>
       <UnitHeader
-        title={evaluationOneData.title}
-        evaluationNumber={evaluationOneData.evaluation}
+        title={evaluationTwoData.title}
+        evaluationNumber={evaluationTwoData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -211,7 +192,7 @@ export function UnitOneEvaluationOne() {
       <UnitContainer notRequired={notRequired}>
         <>
           <EvaluationHeader
-            unitNumber={evaluationOneData.unit}
+            unitNumber={evaluationTwoData.unit}
             handleCheckAll={handleCheckAll}
             handleFailAll={handleFailAll}
             handleClearAll={handleClearAll}
@@ -226,100 +207,7 @@ export function UnitOneEvaluationOne() {
               {t("unitOne.instructions.body")}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-6">
-            {/* Uppercase */}
-            <div>
-              <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
-                {t("unitOne.uppercase")}
-              </h3>
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr style={{ background: "#38b6ff" }}>
-                    <th
-                      className="px-3 py-2 text-left text-sm"
-                      style={{ color: "#ffffff" }}
-                    >
-                      {t("unitOne.labels.letter")}
-                    </th>
-                    <th
-                      className="px-3 py-2 text-center text-sm"
-                      style={{ color: "#ffffff" }}
-                    >
-                      {t("unitOne.labels.name")}
-                    </th>
-                    <th
-                      className="px-3 py-2 text-center text-sm"
-                      style={{ color: "#ffffff" }}
-                    >
-                      {t("unitOne.labels.sound")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {alphabetUpper.map((letter, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b"
-                      style={{ borderColor: "#dff3ff" }}
-                    >
-                      <td
-                        className="px-3 py-2 font-bold text-lg"
-                        style={{ color: "#004aad" }}
-                      >
-                        {letter}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <EvaluationCheckbox
-                          value={evaluationOne.upperCaseName[idx]}
-                          onCheck={() => {
-                            const newArr = [...evaluationOne.upperCaseName];
-                            newArr[idx] = true;
-                            setEvaluationOne((prev) => ({
-                              ...prev,
-                              upperCaseName: newArr,
-                            }));
-                            setHasChanges(true);
-                          }}
-                          onFail={() => {
-                            const newArr = [...evaluationOne.upperCaseName];
-                            newArr[idx] = false;
-                            setEvaluationOne((prev) => ({
-                              ...prev,
-                              upperCaseName: newArr,
-                            }));
-                            setHasChanges(true);
-                          }}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <EvaluationCheckbox
-                          value={evaluationOne.upperCaseSound[idx]}
-                          onCheck={() => {
-                            const newArr = [...evaluationOne.upperCaseSound];
-                            newArr[idx] = true;
-                            setEvaluationOne((prev) => ({
-                              ...prev,
-                              upperCaseSound: newArr,
-                            }));
-                            setHasChanges(true);
-                          }}
-                          onFail={() => {
-                            const newArr = [...evaluationOne.upperCaseSound];
-                            newArr[idx] = false;
-                            setEvaluationOne((prev) => ({
-                              ...prev,
-                              upperCaseSound: newArr,
-                            }));
-                            setHasChanges(true);
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
+          <div className="grid grid-cols-1 gap-6">
             {/* Lowercase */}
             <div>
               <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
@@ -349,7 +237,7 @@ export function UnitOneEvaluationOne() {
                   </tr>
                 </thead>
                 <tbody>
-                  {alphabetLower.map((letter, idx) => (
+                  {smallKeys.map((letter, idx) => (
                     <tr
                       key={idx}
                       className="border-b"
@@ -363,20 +251,20 @@ export function UnitOneEvaluationOne() {
                       </td>
                       <td className="px-3 py-2 text-center">
                         <EvaluationCheckbox
-                          value={evaluationOne.lowerCaseName[idx]}
+                          value={evaluationTwo.lowerCaseName[idx]}
                           onCheck={() => {
-                            const newArr = [...evaluationOne.lowerCaseName];
+                            const newArr = [...evaluationTwo.lowerCaseName];
                             newArr[idx] = true;
-                            setEvaluationOne((prev) => ({
+                            setEvaluationTwo((prev) => ({
                               ...prev,
                               lowerCaseName: newArr,
                             }));
                             setHasChanges(true);
                           }}
                           onFail={() => {
-                            const newArr = [...evaluationOne.lowerCaseName];
+                            const newArr = [...evaluationTwo.lowerCaseName];
                             newArr[idx] = false;
-                            setEvaluationOne((prev) => ({
+                            setEvaluationTwo((prev) => ({
                               ...prev,
                               lowerCaseName: newArr,
                             }));
@@ -386,20 +274,20 @@ export function UnitOneEvaluationOne() {
                       </td>
                       <td className="px-3 py-2 text-center">
                         <EvaluationCheckbox
-                          value={evaluationOne.lowerCaseSound[idx]}
+                          value={evaluationTwo.lowerCaseSound[idx]}
                           onCheck={() => {
-                            const newArr = [...evaluationOne.lowerCaseSound];
+                            const newArr = [...evaluationTwo.lowerCaseSound];
                             newArr[idx] = true;
-                            setEvaluationOne((prev) => ({
+                            setEvaluationTwo((prev) => ({
                               ...prev,
                               lowerCaseSound: newArr,
                             }));
                             setHasChanges(true);
                           }}
                           onFail={() => {
-                            const newArr = [...evaluationOne.lowerCaseSound];
+                            const newArr = [...evaluationTwo.lowerCaseSound];
                             newArr[idx] = false;
-                            setEvaluationOne((prev) => ({
+                            setEvaluationTwo((prev) => ({
                               ...prev,
                               lowerCaseSound: newArr,
                             }));
@@ -414,9 +302,9 @@ export function UnitOneEvaluationOne() {
             </div>
           </div>
           <CommentsContainer
-            comments={evaluationOne.comments}
+            comments={evaluationTwo.comments}
             onChange={(value) => {
-              setEvaluationOne((prev) => ({ ...prev, comments: value }));
+              setEvaluationTwo((prev) => ({ ...prev, comments: value }));
               setHasChanges(true);
             }}
           />
@@ -439,4 +327,4 @@ export function UnitOneEvaluationOne() {
     </>
   );
 }
-export default UnitOneEvaluationOne;
+export default UnitOneEvaluationTwo;

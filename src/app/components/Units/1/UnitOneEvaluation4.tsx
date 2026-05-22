@@ -1,17 +1,26 @@
 import { useMemo, useState, useEffect } from "react";
-import { useUnitsStore } from "../../../../stores";
-import EvaluationHeader from "../components/EvaluationHeader";
-import UnitContainer from "../components/UnitContainer";
+import { useTranslation } from "react-i18next";
+import { UnitContainer } from "../components/UnitContainer";
+import CommentsContainer from "../components/CommentsContainer";
 import UnitHeader from "../components/UnitHeader";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
-import { useTranslation } from "react-i18next";
-import { frequentWords } from "../../../pages/const";
+import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
-import CommentsContainer from "../components/CommentsContainer";
+import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
+import {
+  StudentAnswers,
+  MockQuestions,
+  MockEvalationQuestions,
+} from "../../../../../mockData/types";
 
-export function UnitFourEvaluationSeven() {
+type EvaluationArray = Array<boolean | null>;
+type EvaluationTwoState = {
+  upperCase: EvaluationArray;
+  comments: string;
+};
+
+export function UnitOneEvaluationFour() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,38 +48,47 @@ export function UnitFourEvaluationSeven() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationSevenData = unitsData[6];
+  const evaluationFourData = unitsData[3];
 
-  const list = frequentWords.slice(5, 20);
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
 
-  type EvaluationState = {
-    frequent: Array<boolean | null>;
-    comments: string;
-  };
+  const smallKeys = useMemo(
+    () => getKeys(evaluationFourData.questions.smallLetters),
+    [evaluationFourData.questions.smallLetters],
+  );
+  const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
+    new Array(smallKeys.length).fill(value);
 
-  const buildEvaluationArray = (value: boolean | null, length: number) =>
-    new Array(length).fill(value) as Array<boolean | null>;
-
-  const [evaluationState, setEvaluationState] = useState<EvaluationState>({
-    frequent: buildEvaluationArray(null, list.length),
+  const [evaluationFour, setEvaluationFour] = useState<EvaluationTwoState>({
+    upperCase: buildEvaluationArray(null),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
-    const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+
+    const ans: MockQuestions = singleAnswer.answers;
+    const small: MockEvalationQuestions =
+      (ans.smallLetters as MockEvalationQuestions) || {};
+
+    const smallKeysArray = getKeys(evaluationFourData.questions.smallLetters);
+    const mapToState = (
+      letters: string[],
+      obj: MockEvalationQuestions | undefined,
+    ) =>
+      letters.map((ltr) => {
+        const key = ltr === ltr.toLowerCase() ? ltr.toUpperCase() : ltr;
+        const val = obj?.[key]?.correct ?? obj?.[ltr]?.correct;
         if (val === true) return true;
         if (val === false) return false;
         return null;
       });
-    };
 
-    setEvaluationState({
-      frequent: mapToArray(ans.frequentWords, list.length),
+    setEvaluationFour({
+      upperCase: mapToState(smallKeysArray, small),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
@@ -80,9 +98,9 @@ export function UnitFourEvaluationSeven() {
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
+      setEvaluationFour((prev) => ({
         ...prev,
-        frequent: buildEvaluationArray(true, list.length),
+        upperCase: buildEvaluationArray(true),
       }));
       setHasChanges(true);
     });
@@ -92,9 +110,9 @@ export function UnitFourEvaluationSeven() {
   const handleFailAll = () => {
     setConfirmMessage(t("evaluation.confirmFailAll"));
     setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
+      setEvaluationFour((prev) => ({
         ...prev,
-        frequent: buildEvaluationArray(false, list.length),
+        upperCase: buildEvaluationArray(false),
       }));
       setHasChanges(true);
     });
@@ -104,9 +122,9 @@ export function UnitFourEvaluationSeven() {
   const handleClearAll = () => {
     setConfirmMessage(t("evaluation.confirmClearAll"));
     setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
+      setEvaluationFour((prev) => ({
         ...prev,
-        frequent: buildEvaluationArray(null, list.length),
+        upperCase: buildEvaluationArray(null),
         comments: "",
       }));
       setHasChanges(true);
@@ -115,22 +133,24 @@ export function UnitFourEvaluationSeven() {
   };
 
   const handleNotRequired = () => {
-    setEvaluationState((prev) => ({
+    setEvaluationFour((prev) => ({
       ...prev,
-      frequent: buildEvaluationArray(null, list.length),
+      upperCase: buildEvaluationArray(null),
       comments: "",
     }));
     setHasChanges(true);
   };
 
   const handleSave = () => {
-    const answers: any = {
-      frequentWords: evaluationState.frequent.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+    const answers: MockQuestions = {
+      smallLetters: smallKeys.reduce(
+        (acc, letter, idx) => {
+          acc[letter] = {
+            recognition: evaluationFour.upperCase[idx],
+          };
           return acc;
         },
-        {} as Record<string, boolean | null>,
+        {} as Record<string, Record<string, boolean | null>>,
       ),
     };
 
@@ -139,16 +159,17 @@ export function UnitFourEvaluationSeven() {
       Number(classId),
       Number(evaluationId),
       answers,
-      evaluationState.comments,
+      evaluationFour.comments,
       !notRequired,
     );
     setHasChanges(false);
   };
+
   return (
     <>
       <UnitHeader
-        title={evaluationSevenData.title}
-        evaluationNumber={evaluationSevenData.evaluation}
+        title={evaluationFourData.title}
+        evaluationNumber={evaluationFourData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -158,64 +179,53 @@ export function UnitFourEvaluationSeven() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationSevenData.unit}
+          unitNumber={evaluationFourData.unit}
           handleCheckAll={handleCheckAll}
-          handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
+          handleClearAll={handleClearAll}
           evaluationId={evaluationId!}
         />
-
         <div
           className="mb-6 p-4 rounded-xl"
           style={{ background: "#fff9e6", border: "1px solid #ffde59" }}
         >
           <p className="text-sm" style={{ color: "#004aad" }}>
-            <strong>{t("unitFour.instructions.title")}</strong>{" "}
-            {t("unitFour.instructions.body")}
+            <strong>{t("unitTwo.instructions.title")}</strong>{" "}
+            {t("unitTwo.instructions.body")}
           </p>
         </div>
 
-        <div
-          id="atelier7-content"
-          className="p-5 rounded-xl"
-          style={{ background: "#f7ffd6" }}
-        >
-          <h3 className="text-base mb-4 font-bold" style={{ color: "#004aad" }}>
-            {t("unitFour.frequentWords.title")}
+        <div>
+          <h3 className="text-lg mb-4" style={{ color: "#004aad" }}>
+            {t("unitTwo.lowercase")}
           </h3>
-          <p className="text-sm mb-3" style={{ color: "#666" }}>
-            {t("unitFour.frequentWords.prompt")}
-          </p>
-          <div className="grid grid-cols-5 gap-3">
-            {list.map((word, i) => (
+          <div className="space-y-2">
+            {smallKeys.map((letter, idx) => (
               <div
-                key={i}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg"
-                style={{ background: "#ffffff" }}
+                key={idx}
+                className="flex items-center justify-between p-2 rounded-lg"
+                style={{ background: "#f7ffd6" }}
               >
-                <span
-                  className="text-base font-semibold"
-                  style={{ color: "#004aad" }}
-                >
-                  {word}
+                <span className="font-bold w-8" style={{ color: "#004aad" }}>
+                  {letter}
                 </span>
                 <EvaluationCheckbox
-                  value={evaluationState.frequent[i]}
+                  value={evaluationFour.upperCase[idx]}
                   onCheck={() => {
-                    const newArr = [...evaluationState.frequent];
-                    newArr[i] = true;
-                    setEvaluationState((prev) => ({
+                    const newArr = [...evaluationFour.upperCase];
+                    newArr[idx] = true;
+                    setEvaluationFour((prev) => ({
                       ...prev,
-                      frequent: newArr,
+                      upperCase: newArr,
                     }));
                     setHasChanges(true);
                   }}
                   onFail={() => {
-                    const newArr = [...evaluationState.frequent];
-                    newArr[i] = false;
-                    setEvaluationState((prev) => ({
+                    const newArr = [...evaluationFour.upperCase];
+                    newArr[idx] = false;
+                    setEvaluationFour((prev) => ({
                       ...prev,
-                      frequent: newArr,
+                      upperCase: newArr,
                     }));
                     setHasChanges(true);
                   }}
@@ -225,9 +235,9 @@ export function UnitFourEvaluationSeven() {
           </div>
         </div>
         <CommentsContainer
-          comments={evaluationState.comments}
+          comments={evaluationFour.comments}
           onChange={(value) => {
-            setEvaluationState((prev) => ({ ...prev, comments: value }));
+            setEvaluationFour((prev) => ({ ...prev, comments: value }));
             setHasChanges(true);
           }}
         />
@@ -240,7 +250,6 @@ export function UnitFourEvaluationSeven() {
             pendingAction();
             setPendingAction(null);
           }
-          setShowConfirmModal(false);
         }}
         onCancel={() => {
           setShowConfirmModal(false);
@@ -250,5 +259,3 @@ export function UnitFourEvaluationSeven() {
     </>
   );
 }
-
-export default UnitFourEvaluationSeven;

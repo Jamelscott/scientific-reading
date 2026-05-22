@@ -18,7 +18,7 @@ const portals = [
     label: "Portail enseignant",
     description: "Suivre les élèves, accéder aux ressources et aux rapports",
     Icon: GraduationCap,
-    route: "/teacher/dashboard",
+    route: "/teacher/1/dashboard",
     color: "#004aad",
     bg: "var(--portal-teacher-bg)",
     border: "var(--portal-teacher-border)",

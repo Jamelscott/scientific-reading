@@ -1,4 +1,6 @@
 // Mock API data - simulates backend responses
+export type grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e année";
+
 export type MockEvalationQuestions = Record<string, Record<string, boolean | null>>;
 export type MockEvaluation = Record<string, MockEvalationQuestions>;
 
@@ -8,13 +10,13 @@ export interface MockStudent {
   name: string;
   classIds: number[]; // Array of class IDs the student belongs to
   schoolId: number; // School ID the student is associated with
-  grade: "Maternelle" | "Jardin" | "1re année" | "2e année";
+  grade: grades;
 }
 
 export interface MockClass {
   id: number;
   name: string;
-  grade: string;
+  grade: grades;
   subject?: string;
   studentCount:number;
   schoolYear:string;
@@ -137,7 +139,7 @@ export const mockApiData = {
     {
       id: 1,
       name: "1re année",
-      grade: "1",
+      grade: "1re année",
       schoolYear: "2023-2024",
       studentCount: 10,
       studentIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -145,7 +147,7 @@ export const mockApiData = {
     {
       id: 2,
       name: "2e année",
-      grade: "2",
+      grade: "2e année",
       subject: "Mathématiques",
       schoolYear: "2023-2024",
       studentCount: 6,
@@ -154,7 +156,7 @@ export const mockApiData = {
     {
       id: 3,
       name: "3e année",
-      grade: "3",
+      grade: "3e année",
       schoolYear: "2023-2024",
       subject: "Sciences",
       studentIds: [4, 12, 14, 15],

@@ -1,14 +1,21 @@
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
   BarChart as BarChartIcon,
   Calendar,
+  ChevronDown,
   Download,
   FileText,
   MessageSquare,
   TrendingUp,
 } from "lucide-react";
-import { useAuthStore, useStudentStore, useUnitsStore } from "../../../stores";
+import {
+  useAuthStore,
+  useClassStore,
+  useStudentStore,
+  useUnitsStore,
+} from "../../../stores";
 import { gradeBenchmarks } from "../const";
 import { formatDate } from "../../components/utils/formatDate";
 import {
@@ -51,24 +58,53 @@ const getStatusText = (
 
 export function StudentPage() {
   const navigate = useNavigate();
-  const { studentId, teacherId } = useParams();
+  const { studentId, teacherId, classId } = useParams();
   const { t } = useTranslation();
   const unitData = useUnitsStore((state) => state.getUnitsData);
   const student = useStudentStore((state) => state.getStudentById(studentId!));
+  const allStudents = useStudentStore((state) => state.students);
+  const classes = useClassStore((state) => state.classes);
+  const currentClass = classes.find(
+    (c) => c.id === parseInt(classId || "", 10),
+  );
+  const classStudents = allStudents.filter((s) =>
+    s.classIds.includes(parseInt(classId || "", 10)),
+  );
   const teacher = useAuthStore((state) => state.getCurrentUser());
   const studentAnswers = useUnitsStore((state) =>
     state.getAnswersByStudent(Number(studentId)!),
   );
 
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowStudentDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleStudentChange = (newStudentId: number) => {
+    setShowStudentDropdown(false);
+    navigate(`/teacher/${teacherId}/class/${classId}/student/${newStudentId}`);
+  };
+
   if (!student) {
     return <div>{t("studentPage.studentNotFound")}</div>;
   }
-  console.log(studentAnswers);
   const completedCount = studentAnswers?.length;
 
+  const studentGrade = currentClass?.grade || "1re année";
   const currentBenchmark =
-    gradeBenchmarks[student.grade as keyof typeof gradeBenchmarks] ||
-    gradeBenchmarks["1re année"];
+    gradeBenchmarks[studentGrade as keyof typeof gradeBenchmarks];
   const benchmarkProgress = Math.min(
     100,
     (completedCount / currentBenchmark.expected) * 100,
@@ -81,13 +117,93 @@ export function StudentPage() {
   ).length;
   const successRate = Math.round((successCount / completedCount) * 100);
 
+  // Calculate competency scores from student evaluations
+  const calculateCompetencyScore = (atelierRange: number[]) => {
+    const relevantAnswers = studentAnswers.filter((answer) =>
+      atelierRange.includes(answer.unitDataId),
+    );
+
+    if (relevantAnswers.length === 0) return 0;
+
+    let totalScore = 0;
+    let countedAnswers = 0;
+
+    relevantAnswers.forEach((answer) => {
+      if (answer.status === "success") {
+        totalScore += 100;
+        countedAnswers++;
+      } else if (answer.status === "adequate") {
+        totalScore += 70;
+        countedAnswers++;
+      } else if (answer.status === "needs-improvement") {
+        totalScore += 40;
+        countedAnswers++;
+      }
+      // not evaluated/not required = not counted at all
+    });
+
+    if (countedAnswers === 0) return 0;
+
+    return Math.round(totalScore / countedAnswers);
+  };
+
   const radarData = [
-    { subject: t("studentPage.reading"), score: 90 },
-    { subject: t("studentPage.writing"), score: 85 },
-    { subject: t("studentPage.comprehension"), score: 70 },
-    { subject: t("studentPage.vocabulary"), score: 95 },
-    { subject: t("studentPage.phonics"), score: 80 },
+    {
+      subject: t("studentPage.reading"),
+      score: calculateCompetencyScore([1, 2, 3, 4, 5, 6]),
+    },
+    {
+      subject: t("studentPage.writing"),
+      score: calculateCompetencyScore([7, 8, 9]),
+    },
+    {
+      subject: t("studentPage.decoding"),
+      score: calculateCompetencyScore([10, 11]),
+    },
+    {
+      subject: t("studentPage.fluency"),
+      score: calculateCompetencyScore([12, 13]),
+    },
+    {
+      subject: t("studentPage.comprehension"),
+      score: calculateCompetencyScore([14, 15]),
+    },
   ];
+
+  const CustomTick = ({ payload, x, y, textAnchor }: any) => {
+    if (payload.value === t("studentPage.reading")) {
+      return (
+        <g>
+          <text
+            x={x}
+            y={y}
+            textAnchor={textAnchor}
+            fill="#000000"
+            fontSize={12}
+            fontWeight="bold"
+          >
+            <tspan x={x} dy="-1em" style={{ paddingBottom: "10px" }}>
+              Alphabetic Knowledge
+            </tspan>
+          </text>
+        </g>
+      );
+    }
+    return (
+      <g>
+        <text
+          x={x}
+          y={y}
+          textAnchor={textAnchor}
+          fill="#000000"
+          fontSize={12}
+          fontWeight="bold"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
 
   return (
     <div
@@ -98,11 +214,17 @@ export function StudentPage() {
       <div
         id="student-page-header"
         className="p-6 border-b flex-shrink-0"
-        style={{ background: "#ffffff", borderColor: "#dff3ff" }}
+        style={{
+          background: "#ffffff",
+          borderColor: "#dff3ff",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+          position: "relative",
+          zIndex: 10,
+        }}
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(`/teacher/${teacherId}/class/1`)}
+            onClick={() => navigate(`/teacher/${teacherId}/class/${classId}`)}
             className="flex items-center gap-2 mb-4 text-sm"
             style={{ color: "#38b6ff" }}
           >
@@ -118,11 +240,53 @@ export function StudentPage() {
               >
                 <p className="text-sm">{t("studentPage.smlTitle")}</p>
               </div>
-              <h1 className="text-3xl mb-2" style={{ color: "#004aad" }}>
-                {student.name}
-              </h1>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowStudentDropdown(!showStudentDropdown)}
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 transition-opacity"
+                  style={{ color: "#004aad" }}
+                >
+                  {student.name}
+                  <ChevronDown
+                    className="w-6 h-6 transition-transform duration-200"
+                    style={{
+                      transform: showStudentDropdown
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                    }}
+                  />
+                </button>
+
+                {showStudentDropdown && (
+                  <div
+                    className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border overflow-y-auto overflow-x-hidden z-50 min-w-[300px]"
+                    style={{ borderColor: "#dff3ff", maxHeight: "280px" }}
+                  >
+                    {classStudents.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleStudentChange(s.id)}
+                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02]"
+                        style={{
+                          backgroundColor:
+                            s.id === parseInt(studentId || "", 10)
+                              ? "#dff3ff"
+                              : "transparent",
+                        }}
+                      >
+                        <span
+                          className="group-hover:text-white transition-colors"
+                          style={{ color: "#004aad" }}
+                        >
+                          {s.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <p className="text-lg" style={{ color: "#000000" }}>
-                {student.grade} - {teacher?.name}
+                {studentGrade} - {teacher?.name}
               </p>
             </div>
 
@@ -288,15 +452,15 @@ export function StudentPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#dff3ff" />
-                  <PolarAngleAxis
-                    dataKey="subject"
-                    tick={{ fill: "#000000", fontSize: 12 }}
+                  <PolarAngleAxis dataKey="subject" tick={<CustomTick />} />
+                  <PolarRadiusAxis
+                    angle={90}
+                    domain={[0, 100]}
+                    tick={{
+                      fill: "#000000",
+                      fontSize: 11,
+                    }}
                   />
-                  {/* <PolarRadiusAxis
-                    orientation="middle"
-                    tick={{ fill: "#000000" }}
-                    axisLine={false}
-                  /> */}
                   <Radar
                     name="Score"
                     dataKey="score"

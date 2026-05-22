@@ -8,10 +8,9 @@ import { useTranslation } from "react-i18next";
 import CommentsContainer from "../components/CommentsContainer";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData";
-import { evaluationThirteenComprehension } from "../../../pages/const";
+import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
 
-export function UnitTenEvaluationThirteen() {
+export function UnitTenEvaluationFifteen() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -39,7 +38,17 @@ export function UnitTenEvaluationThirteen() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationThirteenData = unitsData[12];
+  const evaluationFifteenData = unitsData[14];
+
+  const getKeys = (cat: any) =>
+    cat && typeof cat === "object" && !Array.isArray(cat)
+      ? Object.keys(cat)
+      : [];
+
+  const dataKeys = useMemo(
+    () => getKeys(evaluationFifteenData.questions.data),
+    [evaluationFifteenData.questions.data],
+  );
 
   type EvaluationState = {
     readingFluency: Array<boolean | null>;
@@ -52,37 +61,37 @@ export function UnitTenEvaluationThirteen() {
 
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
     readingFluency: buildEvaluationArray(null, 1),
-    comprehensionQuestions: buildEvaluationArray(
-      null,
-      evaluationThirteenComprehension.length,
-    ),
+    comprehensionQuestions: buildEvaluationArray(null, dataKeys.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    const mapToArray = (obj: any, length: number) => {
-      if (!obj) return new Array(length).fill(null);
-      return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+    const mapToArray = (keys: string[], obj: any) => {
+      if (!obj) return new Array(keys.length).fill(null);
+      return keys.map((key) => {
+        const val = obj[key];
+        // Handle direct boolean values
         if (val === true) return true;
         if (val === false) return false;
+        // Handle object format with 'correct' property
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
     setEvaluationState({
-      readingFluency: mapToArray(ans.readingFluency, 1),
-      comprehensionQuestions: mapToArray(
-        ans.comprehensionQuestions,
-        evaluationThirteenComprehension.length,
-      ),
+      readingFluency: mapToArray(["fluency"], ans.readingFluency),
+      comprehensionQuestions: mapToArray(dataKeys, ans.data),
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, dataKeys]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
@@ -90,10 +99,7 @@ export function UnitTenEvaluationThirteen() {
       setEvaluationState((prev) => ({
         ...prev,
         readingFluency: buildEvaluationArray(true, 1),
-        comprehensionQuestions: buildEvaluationArray(
-          true,
-          evaluationThirteenComprehension.length,
-        ),
+        comprehensionQuestions: buildEvaluationArray(true, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -106,10 +112,7 @@ export function UnitTenEvaluationThirteen() {
       setEvaluationState((prev) => ({
         ...prev,
         readingFluency: buildEvaluationArray(false, 1),
-        comprehensionQuestions: buildEvaluationArray(
-          false,
-          evaluationThirteenComprehension.length,
-        ),
+        comprehensionQuestions: buildEvaluationArray(false, dataKeys.length),
       }));
       setHasChanges(true);
     });
@@ -122,10 +125,7 @@ export function UnitTenEvaluationThirteen() {
       setEvaluationState((prev) => ({
         ...prev,
         readingFluency: buildEvaluationArray(null, 1),
-        comprehensionQuestions: buildEvaluationArray(
-          null,
-          evaluationThirteenComprehension.length,
-        ),
+        comprehensionQuestions: buildEvaluationArray(null, dataKeys.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -137,10 +137,7 @@ export function UnitTenEvaluationThirteen() {
     setEvaluationState((prev) => ({
       ...prev,
       readingFluency: buildEvaluationArray(null, 1),
-      comprehensionQuestions: buildEvaluationArray(
-        null,
-        evaluationThirteenComprehension.length,
-      ),
+      comprehensionQuestions: buildEvaluationArray(null, dataKeys.length),
       comments: "",
     }));
     setHasChanges(true);
@@ -150,14 +147,14 @@ export function UnitTenEvaluationThirteen() {
     const answers: any = {
       readingFluency: evaluationState.readingFluency.reduce(
         (acc, val, idx) => {
-          acc[idx] = val;
+          acc["fluency"] = val;
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      comprehensionQuestions: evaluationState.comprehensionQuestions.reduce(
-        (acc, val, idx) => {
-          acc[idx] = val;
+      data: dataKeys.reduce(
+        (acc, key, idx) => {
+          acc[key] = evaluationState.comprehensionQuestions[idx];
           return acc;
         },
         {} as Record<string, boolean | null>,
@@ -178,8 +175,8 @@ export function UnitTenEvaluationThirteen() {
   return (
     <>
       <UnitHeader
-        title={evaluationThirteenData.title}
-        evaluationNumber={evaluationThirteenData.evaluation}
+        title={evaluationFifteenData.title}
+        evaluationNumber={evaluationFifteenData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -189,7 +186,7 @@ export function UnitTenEvaluationThirteen() {
       />
       <UnitContainer notRequired={notRequired}>
         <EvaluationHeader
-          unitNumber={evaluationThirteenData.unit}
+          unitNumber={evaluationFifteenData.unit}
           handleCheckAll={handleCheckAll}
           handleClearAll={handleClearAll}
           handleFailAll={handleFailAll}
@@ -262,47 +259,50 @@ export function UnitTenEvaluationThirteen() {
             >
               {t("unitTen.comprehension.title")}
             </h3>
-            {evaluationThirteenComprehension.map((item, i) => (
-              <div
-                key={i}
-                className="mb-3 p-3 rounded"
-                style={{ background: "#ffffff" }}
-              >
-                <div className="flex items-start gap-3 mb-2">
-                  <span className="text-sm flex-1" style={{ color: "#004aad" }}>
-                    {item.q}
-                  </span>
-                  <EvaluationCheckbox
-                    value={evaluationState.comprehensionQuestions[i]}
-                    onCheck={() => {
-                      const newArr = [
-                        ...evaluationState.comprehensionQuestions,
-                      ];
-                      newArr[i] = true;
-                      setEvaluationState((prev) => ({
-                        ...prev,
-                        comprehensionQuestions: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                    onFail={() => {
-                      const newArr = [
-                        ...evaluationState.comprehensionQuestions,
-                      ];
-                      newArr[i] = false;
-                      setEvaluationState((prev) => ({
-                        ...prev,
-                        comprehensionQuestions: newArr,
-                      }));
-                      setHasChanges(true);
-                    }}
-                  />
+            {dataKeys.map((item, i) => {
+              const key = item;
+              return (
+                <div
+                  key={i}
+                  className="mb-3 p-3 rounded"
+                  style={{ background: "#ffffff" }}
+                >
+                  <div className="flex items-start gap-3 mb-2">
+                    <span
+                      className="text-sm flex-1"
+                      style={{ color: "#004aad" }}
+                    >
+                      {key}
+                    </span>
+                    <EvaluationCheckbox
+                      value={evaluationState.comprehensionQuestions[i]}
+                      onCheck={() => {
+                        const newArr = [
+                          ...evaluationState.comprehensionQuestions,
+                        ];
+                        newArr[i] = true;
+                        setEvaluationState((prev) => ({
+                          ...prev,
+                          comprehensionQuestions: newArr,
+                        }));
+                        setHasChanges(true);
+                      }}
+                      onFail={() => {
+                        const newArr = [
+                          ...evaluationState.comprehensionQuestions,
+                        ];
+                        newArr[i] = false;
+                        setEvaluationState((prev) => ({
+                          ...prev,
+                          comprehensionQuestions: newArr,
+                        }));
+                        setHasChanges(true);
+                      }}
+                    />
+                  </div>
                 </div>
-                <p className="text-xs italic pl-3" style={{ color: "#2e7d32" }}>
-                  [Réponse: {item.a}]
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         <CommentsContainer
@@ -331,4 +331,4 @@ export function UnitTenEvaluationThirteen() {
     </>
   );
 }
-export default UnitTenEvaluationThirteen;
+export default UnitTenEvaluationFifteen;

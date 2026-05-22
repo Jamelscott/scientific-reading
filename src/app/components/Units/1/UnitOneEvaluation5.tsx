@@ -18,7 +18,7 @@ type EvaluationThreeState = {
   comments: string;
 };
 
-export function UnitOneEvaluationThree() {
+export function UnitOneEvaluationFive() {
   const { t } = useTranslation();
   const { classId, studentId, evaluationId } = useParams();
   const [notRequired, setNotRequired] = useState(false);
@@ -46,12 +46,12 @@ export function UnitOneEvaluationThree() {
   }, [classAnswers]);
   const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
   const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
-  const evaluationThreeData = unitsData[2];
+  const evaluationFiveData = unitsData[4];
 
   const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
     new Array(5).fill(value);
 
-  const [evaluationThree, setEvaluationThree] = useState<EvaluationThreeState>({
+  const [evaluationFive, setEvaluationFive] = useState<EvaluationThreeState>({
     rhyming: buildEvaluationArray(null),
     segmenting: buildEvaluationArray(null),
     syllableCounting: buildEvaluationArray(null),
@@ -62,21 +62,45 @@ export function UnitOneEvaluationThree() {
     if (!singleAnswer || !singleAnswer.answers) return;
 
     const ans: MockQuestions = singleAnswer.answers;
-    const rhymingData = ans.rhyming as any;
-    const segmentingData = ans.segmenting as any;
-    const syllableCountingData = ans.syllableCounting as any;
+    // Support both saved format (rhyming/segmenting/syllableCounting) and template format (wordPairs/syllables/numOfSyllables)
+    const rhymingData = (ans.rhyming || ans.wordPairs) as any;
+    const segmentingData = (ans.segmenting || ans.syllables) as any;
+    const syllableCountingData = (ans.syllableCounting ||
+      ans.numOfSyllables) as any;
 
     const mapToArray = (obj: any, length: number) => {
       if (!obj) return new Array(length).fill(null);
+
+      // If object has named keys (template format), convert to array by taking first N values
+      const keys = Object.keys(obj);
+      if (keys.length > 0 && !keys.every((k) => /^\d+$/.test(k))) {
+        // Named keys format - take first length items
+        return keys.slice(0, length).map((key) => {
+          const val = obj[key];
+          if (val === true) return true;
+          if (val === false) return false;
+          if (typeof val === "object" && val !== null && "correct" in val) {
+            if (val.correct === true) return true;
+            if (val.correct === false) return false;
+          }
+          return null;
+        });
+      }
+
+      // Numeric keys format (saved answers)
       return Array.from({ length }, (_, i) => {
-        const val = obj[i];
+        const val = obj[i] ?? obj[i.toString()];
         if (val === true) return true;
         if (val === false) return false;
+        if (typeof val === "object" && val !== null && "correct" in val) {
+          if (val.correct === true) return true;
+          if (val.correct === false) return false;
+        }
         return null;
       });
     };
 
-    setEvaluationThree({
+    setEvaluationFive({
       rhyming: mapToArray(rhymingData, 5),
       segmenting: mapToArray(segmentingData, 5),
       syllableCounting: mapToArray(syllableCountingData, 5),
@@ -89,7 +113,7 @@ export function UnitOneEvaluationThree() {
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
     setPendingAction(() => () => {
-      setEvaluationThree((prev) => ({
+      setEvaluationFive((prev) => ({
         ...prev,
         rhyming: buildEvaluationArray(true),
         segmenting: buildEvaluationArray(true),
@@ -103,7 +127,7 @@ export function UnitOneEvaluationThree() {
   const handleFailAll = () => {
     setConfirmMessage(t("evaluation.confirmFailAll"));
     setPendingAction(() => () => {
-      setEvaluationThree((prev) => ({
+      setEvaluationFive((prev) => ({
         ...prev,
         rhyming: buildEvaluationArray(false),
         segmenting: buildEvaluationArray(false),
@@ -117,7 +141,7 @@ export function UnitOneEvaluationThree() {
   const handleClearAll = () => {
     setConfirmMessage(t("evaluation.confirmClearAll"));
     setPendingAction(() => () => {
-      setEvaluationThree((prev) => ({
+      setEvaluationFive((prev) => ({
         ...prev,
         rhyming: buildEvaluationArray(null),
         segmenting: buildEvaluationArray(null),
@@ -130,7 +154,7 @@ export function UnitOneEvaluationThree() {
   };
 
   const handleNotRequired = () => {
-    setEvaluationThree((prev) => ({
+    setEvaluationFive((prev) => ({
       ...prev,
       rhyming: buildEvaluationArray(null),
       segmenting: buildEvaluationArray(null),
@@ -142,21 +166,21 @@ export function UnitOneEvaluationThree() {
 
   const handleSave = () => {
     const answers: any = {
-      rhyming: evaluationThree.rhyming.reduce(
+      rhyming: evaluationFive.rhyming.reduce(
         (acc, val, idx) => {
           acc[idx] = val;
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      segmenting: evaluationThree.segmenting.reduce(
+      segmenting: evaluationFive.segmenting.reduce(
         (acc, val, idx) => {
           acc[idx] = val;
           return acc;
         },
         {} as Record<string, boolean | null>,
       ),
-      syllableCounting: evaluationThree.syllableCounting.reduce(
+      syllableCounting: evaluationFive.syllableCounting.reduce(
         (acc, val, idx) => {
           acc[idx] = val;
           return acc;
@@ -170,7 +194,7 @@ export function UnitOneEvaluationThree() {
       Number(classId),
       Number(evaluationId),
       answers,
-      evaluationThree.comments,
+      evaluationFive.comments,
       !notRequired,
     );
     setHasChanges(false);
@@ -179,8 +203,8 @@ export function UnitOneEvaluationThree() {
   return (
     <>
       <UnitHeader
-        title={evaluationThreeData.title}
-        evaluationNumber={evaluationThreeData.evaluation}
+        title={evaluationFiveData.title}
+        evaluationNumber={evaluationFiveData.evaluation}
         notRequired={notRequired}
         handleNotRequired={handleNotRequired}
         setNotRequired={setNotRequired}
@@ -191,7 +215,7 @@ export function UnitOneEvaluationThree() {
       <UnitContainer notRequired={notRequired}>
         <>
           <EvaluationHeader
-            unitNumber={evaluationThreeData.unit}
+            unitNumber={evaluationFiveData.unit}
             handleCheckAll={handleCheckAll}
             handleFailAll={handleFailAll}
             handleClearAll={handleClearAll}
@@ -270,20 +294,20 @@ export function UnitOneEvaluationThree() {
                         style={{ border: "1px solid #dff3ff" }}
                       >
                         <EvaluationCheckbox
-                          value={evaluationThree.rhyming[i]}
+                          value={evaluationFive.rhyming[i]}
                           onCheck={() => {
-                            const newArr = [...evaluationThree.rhyming];
+                            const newArr = [...evaluationFive.rhyming];
                             newArr[i] = true;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               rhyming: newArr,
                             }));
                             setHasChanges(true);
                           }}
                           onFail={() => {
-                            const newArr = [...evaluationThree.rhyming];
+                            const newArr = [...evaluationFive.rhyming];
                             newArr[i] = false;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               rhyming: newArr,
                             }));
@@ -360,20 +384,20 @@ export function UnitOneEvaluationThree() {
                         style={{ border: "1px solid #dff3ff" }}
                       >
                         <EvaluationCheckbox
-                          value={evaluationThree.segmenting[i]}
+                          value={evaluationFive.segmenting[i]}
                           onCheck={() => {
-                            const newArr = [...evaluationThree.segmenting];
+                            const newArr = [...evaluationFive.segmenting];
                             newArr[i] = true;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               segmenting: newArr,
                             }));
                             setHasChanges(true);
                           }}
                           onFail={() => {
-                            const newArr = [...evaluationThree.segmenting];
+                            const newArr = [...evaluationFive.segmenting];
                             newArr[i] = false;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               segmenting: newArr,
                             }));
@@ -450,24 +474,20 @@ export function UnitOneEvaluationThree() {
                         style={{ border: "1px solid #dff3ff" }}
                       >
                         <EvaluationCheckbox
-                          value={evaluationThree.syllableCounting[i]}
+                          value={evaluationFive.syllableCounting[i]}
                           onCheck={() => {
-                            const newArr = [
-                              ...evaluationThree.syllableCounting,
-                            ];
+                            const newArr = [...evaluationFive.syllableCounting];
                             newArr[i] = true;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               syllableCounting: newArr,
                             }));
                             setHasChanges(true);
                           }}
                           onFail={() => {
-                            const newArr = [
-                              ...evaluationThree.syllableCounting,
-                            ];
+                            const newArr = [...evaluationFive.syllableCounting];
                             newArr[i] = false;
-                            setEvaluationThree((prev) => ({
+                            setEvaluationFive((prev) => ({
                               ...prev,
                               syllableCounting: newArr,
                             }));
@@ -481,9 +501,9 @@ export function UnitOneEvaluationThree() {
               </table>
             </div>
             <CommentsContainer
-              comments={evaluationThree.comments}
+              comments={evaluationFive.comments}
               onChange={(value) => {
-                setEvaluationThree((prev) => ({ ...prev, comments: value }));
+                setEvaluationFive((prev) => ({ ...prev, comments: value }));
                 setHasChanges(true);
               }}
             />
@@ -508,4 +528,4 @@ export function UnitOneEvaluationThree() {
   );
 }
 
-export default UnitOneEvaluationThree;
+export default UnitOneEvaluationFive;
