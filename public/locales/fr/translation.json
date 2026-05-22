@@ -54,7 +54,9 @@
       "gradeRequired": "Le niveau est requis",
       "schoolYearRequired": "L'année scolaire est requise",
       "classNameUnique": "Vous avez déjà une classe avec ce nom"
-    }
+    },
+    "clearCache": "Effacer le cache local",
+    "confirmClearCache": "Êtes-vous sûr de vouloir effacer tout le cache local? Cela réinitialisera toutes les données et rechargera la page."
   },
   "evaluation": {
     "allSuccess": "✓ Tout réussi",

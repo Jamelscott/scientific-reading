@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Plus, BookOpen, Edit, Trash2, Pencil } from "lucide-react";
+import { Users, Plus, BookOpen, Edit, Trash2, Pencil, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { useClassStore } from "../../../stores";
@@ -24,6 +24,15 @@ export function TeacherDashboard() {
   const [showEditClassesModal, setShowEditClassesModal] = useState(false);
   const [showDeleteId, setShowDeleteId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
+
+  const handleClearCache = () => {
+    if (window.confirm(t("dashboard.confirmClearCache"))) {
+      // Clear localStorage
+      localStorage.clear();
+      // Reload the page to reset all stores
+      window.location.reload();
+    }
+  };
 
   return (
     <div
@@ -162,6 +171,16 @@ export function TeacherDashboard() {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Clear Cache Button */}
+          <div className="mt-12 flex justify-center">
+            <Button
+              onClick={handleClearCache}
+              label="dashboard.clearCache"
+              leadingIcon={<RotateCcw className="w-5 h-5" />}
+              variant="secondary"
+            />
           </div>
         </div>
       </div>

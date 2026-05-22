@@ -48,7 +48,9 @@
       "gradeRequired": "Grade is required",
       "schoolYearRequired": "School year is required",
       "classNameUnique": "You already have a class with this name"
-    }
+    },
+    "clearCache": "Clear Local Cache",
+    "confirmClearCache": "Are you sure you want to clear all local cache? This will reset all data and reload the page."
   },
   "evaluation": {
     "allSuccess": "✓ All successful",
