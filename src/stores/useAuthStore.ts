@@ -1,43 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export type TeacherUser = {
-  type: "teacher";
-  id: string;
-  name: string;
-  email: string;
-  school: string;
-  boardName: string;
-  subjects: string[];
-  phoneNumber?: string;
-  startDate?: string;
-  yearsExperience?: number;
-};
-
-export type BoardUser = {
-  type: "board";
-  id: string;
-  name: string;
-  email: string;
-  schools: string[];
-};
-
-export type SchoolUser = {
-  type: "school";
-  id: string;
-  name: string;
-  email: string;
-  teachers: string[];
-};
-
-export type AdminUser = {
-  type: "admin";
-  id: string;
-  name: string;
-  email: string;
-};
-
-export type AuthUser = TeacherUser | BoardUser | SchoolUser | AdminUser;
+import { AuthUser } from "../../mockData/types";
+import { useClassStore } from "./useClassStore";
+import { useStudentStore } from "./useStudentStore";
+import { useUnitsStore } from "./useUnitsStore";
 
 interface AuthStore {
   currentUser: AuthUser | null;
@@ -50,7 +16,21 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       currentUser: null,
-      login: (user) => set({ currentUser: user }),
+      login: (user) => {
+        set({ currentUser: user });
+        
+        // Set classes and students based on teacher ID
+        if (user.type === 'teacher') {
+          useClassStore.getState().setClasses(user.id);
+          useStudentStore.getState().setStudents(user.id);
+          useUnitsStore.getState().setStudentAnswers(user.id)
+          useUnitsStore.getState().setUnitsData()
+          useUnitsStore.getState().setResources()
+        }
+        if (user.type === 'school') {
+          // useClassStore.getState().setClasses(user.id);
+        }
+      },
       logout: () => set({ currentUser: null }),
       getCurrentUser: () => get().currentUser,
     }),

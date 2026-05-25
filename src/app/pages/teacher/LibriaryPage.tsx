@@ -17,7 +17,7 @@ export function LibraryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teacherId } = useParams();
-  const resources = useUnitsStore((state) => state.getResources());
+  const resources = useUnitsStore((state) => state.resources);
   const slugify = (str: string) =>
     str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, "-");
 

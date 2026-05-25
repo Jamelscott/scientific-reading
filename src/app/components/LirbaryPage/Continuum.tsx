@@ -293,7 +293,7 @@ export function Continuum() {
         <div className="flex h-10 rounded-xl overflow-hidden w-full">
           {/* All units with their specific colors */}
           {[
-            { n: 1, ateliers: 4, color: "#3b82f6", textColor: "#ffffff" },
+            { n: 1, ateliers: 6, color: "#3b82f6", textColor: "#ffffff" },
             { n: 2, ateliers: 1, color: "#38bdf8", textColor: "#000000" },
             { n: 3, ateliers: 1, color: "#22d3ee", textColor: "#000000" },
             { n: 4, ateliers: 1, color: "#a3e635", textColor: "#000000" },
@@ -322,19 +322,9 @@ export function Continuum() {
 
         {/* Atelier labels below bar */}
         <div className="flex w-full mt-2">
-          <div className="text-center" style={{ flex: 4 }}>
+          <div className="text-center" style={{ flex: 6 }}>
             <p className="text-xs" style={{ color: "#555" }}>
-              Ateliers 1–4
-            </p>
-          </div>
-          <div className="text-center" style={{ flex: 1 }}>
-            <p className="text-xs" style={{ color: "#555" }}>
-              A5
-            </p>
-          </div>
-          <div className="text-center" style={{ flex: 1 }}>
-            <p className="text-xs" style={{ color: "#555" }}>
-              A6
+              Ateliers 1–6
             </p>
           </div>
           <div className="text-center" style={{ flex: 1 }}>
@@ -370,6 +360,16 @@ export function Continuum() {
           <div className="text-center" style={{ flex: 1 }}>
             <p className="text-xs" style={{ color: "#555" }}>
               A13
+            </p>
+          </div>
+          <div className="text-center" style={{ flex: 1 }}>
+            <p className="text-xs" style={{ color: "#555" }}>
+              A14
+            </p>
+          </div>
+          <div className="text-center" style={{ flex: 1 }}>
+            <p className="text-xs" style={{ color: "#555" }}>
+              A15
             </p>
           </div>
         </div>

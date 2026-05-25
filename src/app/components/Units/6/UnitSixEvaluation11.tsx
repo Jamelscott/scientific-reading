@@ -22,7 +22,7 @@ export function UnitSixEvaluationEleven() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const unitsData = useUnitsStore((state) => state.unitsData);
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
@@ -57,14 +57,14 @@ export function UnitSixEvaluationEleven() {
   const [evaluationState, setEvaluationState] = useState<EvaluationState>({
     wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
     frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-    frequentWords: buildEvaluationArray(null, 5),
+    frequentWords: buildEvaluationArray(null, evaluationNineWords.length),
     comments: "",
   });
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    
+
     const mapToArray = (obj: any, length: number) => {
       if (!obj) return new Array(length).fill(null);
       return Array.from({ length }, (_, i) => {
@@ -82,33 +82,91 @@ export function UnitSixEvaluationEleven() {
     };
 
     // Check if data is in template format (ans.data) or saved format (ans.wordFamilies, etc.)
-    if (ans.data) {
+    if (ans.data && typeof ans.data === "object" && !Array.isArray(ans.data)) {
       // Template format - convert from object with word keys to arrays
-      const dataKeys = Object.keys(ans.data);
-      const wordFamiliesData = dataKeys.map(key => {
-        const val = ans.data[key];
+      const dataMap = ans.data as Record<string, any>;
+      const wordFamiliesData = evaluationNineFamilies.map((family) => {
+        const key = family[0]; // Use first word of family as key
+        const val = dataMap[key];
         if (typeof val === "object" && val !== null && "correct" in val) {
-          return val.correct === true ? true : val.correct === false ? false : null;
+          return val.correct === true
+            ? true
+            : val.correct === false
+              ? false
+              : null;
         }
         return val === true ? true : val === false ? false : null;
       });
-      
+
+      // Handle frequentEndings if present in template
+      let frequentEndingsData = new Array(evaluationNineWords.length).fill(
+        null,
+      );
+      if (
+        ans.frequentEndings &&
+        typeof ans.frequentEndings === "object" &&
+        !Array.isArray(ans.frequentEndings)
+      ) {
+        const endingsMap = ans.frequentEndings as Record<string, any>;
+        frequentEndingsData = evaluationNineWords.map((word) => {
+          const val = endingsMap[word];
+          if (typeof val === "object" && val !== null && "correct" in val) {
+            return val.correct === true
+              ? true
+              : val.correct === false
+                ? false
+                : null;
+          }
+          return val === true ? true : val === false ? false : null;
+        });
+      }
+
+      // Handle frequentWords if present in template
+      let frequentWordsData = new Array(evaluationNineWords.length).fill(null);
+      if (
+        ans.frequentWords &&
+        typeof ans.frequentWords === "object" &&
+        !Array.isArray(ans.frequentWords)
+      ) {
+        const wordsMap = ans.frequentWords as Record<string, any>;
+        frequentWordsData = evaluationNineWords.map((word) => {
+          const val = wordsMap[word];
+          if (typeof val === "object" && val !== null && "correct" in val) {
+            return val.correct === true
+              ? true
+              : val.correct === false
+                ? false
+                : null;
+          }
+          return val === true ? true : val === false ? false : null;
+        });
+      }
+
       setEvaluationState({
-        wordFamilies: wordFamiliesData.slice(0, evaluationNineFamilies.length),
-        frequentEndings: new Array(evaluationNineWords.length).fill(null),
-        frequentWords: new Array(5).fill(null),
+        wordFamilies: wordFamiliesData,
+        frequentEndings: frequentEndingsData,
+        frequentWords: frequentWordsData,
         comments: singleAnswer.comment,
       });
     } else {
       // Saved format - use existing arrays
       setEvaluationState({
-        wordFamilies: mapToArray(ans.wordFamilies, evaluationNineFamilies.length),
-        frequentEndings: mapToArray(ans.frequentEndings, evaluationNineWords.length),
-        frequentWords: mapToArray(ans.frequentWords, 5),
+        wordFamilies: mapToArray(
+          ans.wordFamilies,
+          evaluationNineFamilies.length,
+        ),
+        frequentEndings: mapToArray(
+          ans.frequentEndings,
+          evaluationNineWords.length,
+        ),
+        frequentWords: mapToArray(
+          ans.frequentWords,
+          evaluationNineWords.length,
+        ),
         comments: singleAnswer.comment,
       });
     }
-    
+
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
   }, [singleAnswer]);
@@ -120,7 +178,7 @@ export function UnitSixEvaluationEleven() {
         ...prev,
         wordFamilies: buildEvaluationArray(true, evaluationNineFamilies.length),
         frequentEndings: buildEvaluationArray(true, evaluationNineWords.length),
-        frequentWords: buildEvaluationArray(true, 5),
+        frequentWords: buildEvaluationArray(true, evaluationNineWords.length),
       }));
       setHasChanges(true);
     });
@@ -140,7 +198,7 @@ export function UnitSixEvaluationEleven() {
           false,
           evaluationNineWords.length,
         ),
-        frequentWords: buildEvaluationArray(false, 5),
+        frequentWords: buildEvaluationArray(false, evaluationNineWords.length),
       }));
       setHasChanges(true);
     });
@@ -154,7 +212,7 @@ export function UnitSixEvaluationEleven() {
         ...prev,
         wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
         frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-        frequentWords: buildEvaluationArray(null, 5),
+        frequentWords: buildEvaluationArray(null, evaluationNineWords.length),
         comments: "",
       }));
       setHasChanges(true);
@@ -167,7 +225,7 @@ export function UnitSixEvaluationEleven() {
       ...prev,
       wordFamilies: buildEvaluationArray(null, evaluationNineFamilies.length),
       frequentEndings: buildEvaluationArray(null, evaluationNineWords.length),
-      frequentWords: buildEvaluationArray(null, 5),
+      frequentWords: buildEvaluationArray(null, evaluationNineWords.length),
       comments: "",
     }));
     setHasChanges(true);

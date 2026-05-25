@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { Users, Plus, BookOpen, Edit, Trash2, Pencil, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Users,
+  Plus,
+  BookOpen,
+  Edit,
+  Trash2,
+  Pencil,
+  RotateCcw,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { useClassStore } from "../../../stores";
@@ -17,14 +25,12 @@ export function TeacherDashboard() {
   const navigate = useNavigate();
   const classes = useClassStore((state) => state.classes);
   const setClasses = useClassStore((state) => state.setClasses);
-  const getStudentCountByClass = useStudentStore(
-    (state) => state.getStudentCountByClass,
-  );
+  const students = useStudentStore((state) => state.students);
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showEditClassesModal, setShowEditClassesModal] = useState(false);
   const [showDeleteId, setShowDeleteId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
-
+  console.log(classes);
   const handleClearCache = () => {
     if (window.confirm(t("dashboard.confirmClearCache"))) {
       // Clear localStorage
@@ -80,97 +86,104 @@ export function TeacherDashboard() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classes.map((classItem) => (
-              <div
-                key={classItem.id}
-                className="rounded-2xl p-8 shadow-lg flex flex-col justify-between"
-                style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
-              >
-                <div className="flex-1 flex items-start justify-between mb-6 gap-2">
-                  <div className="overflow-hidden">
-                    <div
-                      className={`flex items-center gap-2 text-2xl mb-2`}
-                      style={{ color: "#004aad" }}
-                    >
-                      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                        {classItem.grade}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 ">
-                      <Users className="w-5 h-5" style={{ color: "#38b6ff" }} />
-                      <span className="text-lg" style={{ color: "#000000" }}>
-                        {t("dashboard.studentsCount", {
-                          count: getStudentCountByClass(classItem.id),
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    className="min-w-16 min-h-16 rounded-xl flex items-center justify-center"
-                    style={{ background: "#dff3ff" }}
-                  >
-                    <BookOpen
-                      className="w-8 h-8"
-                      style={{ color: "#004aad" }}
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() =>
-                      navigate(`/teacher/${teacherId}/class/${classItem.id}`)
-                    }
-                    className="w-full py-3 rounded-xl transition-all"
-                    style={{ background: "#004aad", color: "#ffffff" }}
-                  >
-                    {t("dashboard.viewMyClass")}
-                  </button>
-                  {editMode && (
-                    <button
-                      onClick={() => setShowDeleteId(classItem.id)}
-                      className="px-4 py-3 rounded-xl flex items-center gap-2 transition-all bg-[#ff5757] text-white"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-                {showDeleteId === classItem.id && (
-                  <div
-                    className="fixed inset-0 flex items-center justify-center z-50"
-                    style={{
-                      background: "rgba(0,0,0,0.5)",
-                      backdropFilter: "blur(4px)",
-                    }}
-                  >
-                    <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center">
-                      <span
-                        className="mb-4 text-lg"
-                        style={{ color: "#ff5757" }}
+            {classes.map((classItem) => {
+              const numOfStudents = useStudentStore((state) =>
+                state.getStudentCountByClass(classItem.id),
+              );
+              console.log(numOfStudents);
+              return (
+                <div
+                  key={classItem.id}
+                  className="rounded-2xl p-8 shadow-lg flex flex-col justify-between"
+                  style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
+                >
+                  <div className="flex-1 flex items-start justify-between mb-6 gap-2">
+                    <div className="overflow-hidden">
+                      <div
+                        className={`flex items-center gap-2 text-2xl mb-2`}
+                        style={{ color: "#004aad" }}
                       >
-                        {t("common.confirmDelete")}
-                      </span>
-                      <div className="flex gap-4">
-                        <Button
-                          onClick={() => {
-                            setClasses(
-                              classes.filter((cls) => cls.id !== classItem.id),
-                            );
-                            setShowDeleteId(null);
-                          }}
-                          label="common.confirm"
-                          variant="primary"
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                          {classItem.grade}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <Users
+                          className="w-5 h-5"
+                          style={{ color: "#38b6ff" }}
                         />
-                        <Button
-                          onClick={() => setShowDeleteId(null)}
-                          label="common.cancel"
-                          variant="secondary"
-                        />
+                        <span className="text-lg" style={{ color: "#000000" }}>
+                          {t("dashboard.studentsCount", {
+                            count: numOfStudents,
+                          })}
+                        </span>
                       </div>
                     </div>
+                    <div
+                      className="min-w-16 min-h-16 rounded-xl flex items-center justify-center"
+                      style={{ background: "#dff3ff" }}
+                    >
+                      <BookOpen
+                        className="w-8 h-8"
+                        style={{ color: "#004aad" }}
+                      />
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(`/teacher/${teacherId}/class/${classItem.id}`)
+                      }
+                      className="w-full py-3 rounded-xl transition-all"
+                      style={{ background: "#004aad", color: "#ffffff" }}
+                    >
+                      {t("dashboard.viewMyClass")}
+                    </button>
+                    {editMode && (
+                      <button
+                        onClick={() => setShowDeleteId(classItem.id)}
+                        className="px-4 py-3 rounded-xl flex items-center gap-2 transition-all bg-[#ff5757] text-white"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  {showDeleteId === classItem.id && (
+                    <div
+                      className="fixed inset-0 flex items-center justify-center z-50"
+                      style={{
+                        background: "rgba(0,0,0,0.5)",
+                        backdropFilter: "blur(4px)",
+                      }}
+                    >
+                      <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center">
+                        <span
+                          className="mb-4 text-lg"
+                          style={{ color: "#ff5757" }}
+                        >
+                          {t("common.confirmDelete")}
+                        </span>
+                        <div className="flex gap-4">
+                          <Button
+                            onClick={() => {
+                              setClasses(teacherId!);
+                              setShowDeleteId(null);
+                            }}
+                            label="common.confirm"
+                            variant="primary"
+                          />
+                          <Button
+                            onClick={() => setShowDeleteId(null)}
+                            label="common.cancel"
+                            variant="secondary"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Clear Cache Button */}

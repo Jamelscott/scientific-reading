@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../stores";
-import { mockApiData, type User } from "../../../mockData";
-import classroomPhoto from "../../../public/image-1.png";
+import { teachers, schools, boards, admins } from "../../../mockData/users";
 
 const portals = [
   {
@@ -18,7 +17,6 @@ const portals = [
     label: "Portail enseignant",
     description: "Suivre les élèves, accéder aux ressources et aux rapports",
     Icon: GraduationCap,
-    route: "/teacher/1/dashboard",
     color: "#004aad",
     bg: "var(--portal-teacher-bg)",
     border: "var(--portal-teacher-border)",
@@ -28,7 +26,6 @@ const portals = [
     label: "Portail école",
     description: "Vue d'ensemble des classes et des résultats par école",
     Icon: School,
-    route: "/school/dashboard",
     color: "#004aad",
     bg: "var(--portal-school-bg)",
     border: "var(--portal-school-border)",
@@ -38,7 +35,6 @@ const portals = [
     label: "Portail conseil scolaire",
     description: "Données agrégées et suivi à l'échelle du conseil",
     Icon: Building2,
-    route: "/board/dashboard",
     color: "#004aad",
     bg: "var(--portal-board-bg)",
     border: "var(--portal-board-border)",
@@ -51,8 +47,8 @@ export function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const [selectedPortal, setSelectedPortal] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("jean-pierre.dubois@ecole.qc.ca");
+  const [password, setPassword] = useState("12345");
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleLanguageToggle = () => {
@@ -62,11 +58,28 @@ export function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const portal = portals.find((p) => p.id === selectedPortal);
-    const user = mockApiData.users.find((u: User) => u.type === portal?.id);
-    if (user) {
-      login(user);
+    if (!portal) {
+      alert("Veuillez sélectionner un portail");
+      return;
     }
-    navigate(portal?.route ?? "/teacher-dashboard");
+
+    const usersByPortal = {
+      teacher: teachers,
+      school: schools,
+      board: boards,
+      admin: admins,
+    };
+
+    const users = usersByPortal[portal.id as keyof typeof usersByPortal];
+    const foundUser = users?.find((u) => u.email === email);
+
+    if (!foundUser) {
+      alert("Utilisateur non trouvé");
+      return;
+    } else {
+      login(foundUser);
+      navigate(`/${portal.id}/${foundUser.id}/dashboard`); // Redirect to the appropriate dashboard
+    }
   };
 
   const activePortal = portals.find((p) => p.id === selectedPortal);
@@ -91,7 +104,7 @@ export function LoginPage() {
       </div>
       <div className="flex-1 relative overflow-hidden">
         <img
-          src={classroomPhoto}
+          src="../../../public/image-1.png"
           alt="Enseignante en classe de maternelle faisant une leçon de phonétique en français"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -230,14 +243,45 @@ export function LoginPage() {
                   >
                     {t("login.email")}
                   </label>
-                  <input
+                  <select
+                    className="w-full px-4 py-3 rounded-xl border"
+                    style={{ background: "#f8ffdb", borderColor: "#dff3ff" }}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  >
+                    {activePortal?.id === "teacher" &&
+                      teachers.map((teacher) => (
+                        <option key={teacher.id} value={teacher.email}>
+                          {teacher.email}
+                        </option>
+                      ))}
+                    {activePortal?.id === "school" &&
+                      schools.map((school) => (
+                        <option key={school.id} value={school.email}>
+                          {school.email}
+                        </option>
+                      ))}
+                    {activePortal?.id === "board" &&
+                      boards.map((board) => (
+                        <option key={board.id} value={board.email}>
+                          {board.email}
+                        </option>
+                      ))}
+                    {activePortal?.id === "admin" &&
+                      admins.map((admin) => (
+                        <option key={admin.id} value={admin.email}>
+                          {admin.email}
+                        </option>
+                      ))}
+                  </select>
+                  {/* <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border"
                     style={{ background: "#f8ffdb", borderColor: "#dff3ff" }}
                     placeholder="votre@email.com"
-                  />
+                  /> */}
                 </div>
 
                 <div>

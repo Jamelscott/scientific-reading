@@ -17,12 +17,12 @@ export function ClassTable({ students, classId }: ClassTableProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teacherId } = useParams();
-  const getUnitsData = useUnitsStore((state) => state.getUnitsData);
+  const getUnitsData = useUnitsStore((state) => state.unitsData);
 
   const getAnswersByEvaluation = useUnitsStore(
     (state) => state.getAnswersByEvaluation,
   );
-
+  console.log(getUnitsData);
   const evaluationsData = useMemo(() => getUnitsData, [getUnitsData]);
   const numberOfUnitOneEvaluations = useMemo(() => {
     return evaluationsData.filter((evalData) => evalData.unit === 1).length;

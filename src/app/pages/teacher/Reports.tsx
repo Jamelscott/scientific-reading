@@ -50,8 +50,8 @@ export function ReportsPage() {
   const navigate = useNavigate();
   const { teacherId } = useParams();
   const classes = useClassStore((state) => state.classes);
-  const getAllAnswers = useUnitsStore((state) => state.getAllAnswers);
-  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const getAllAnswers = useUnitsStore((state) => state.answers);
+  const unitsData = useUnitsStore((state) => state.unitsData);
   const students = useStudentStore((state) => state.students);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
@@ -62,7 +62,6 @@ export function ReportsPage() {
   const [expandedClassIds, setExpandedClassIds] = useState<Set<number>>(
     new Set(classes.map((c) => c.id)),
   );
-  console.log(students);
   const toggleClassExpanded = (classId: number) => {
     setExpandedClassIds((prev) => {
       const newSet = new Set(prev);

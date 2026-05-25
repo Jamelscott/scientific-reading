@@ -1,21 +1,22 @@
-import { Class } from "./types";
+import { Class } from "../../types";
 
 export const classes = [
     {
-      id: 1,
+      id: 4,
       grade: "1re année",
       schoolYear: "2023-2024",
+      teacherId: 't-2',
     },
     {
-      id: 2,
+      id: 5,
       grade: "2e année",
-      subject: "Mathématiques",
       schoolYear: "2023-2024",
+      teacherId: 't-2',
     },
     {
-      id: 3,
+      id: 6,
       grade: "3e année",
       schoolYear: "2023-2024",
-      subject: "Sciences",
+      teacherId: 't-2',
     },
   ] as Class[]

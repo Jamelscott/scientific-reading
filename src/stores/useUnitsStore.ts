@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { mockApiData } from "../../mockData";
 import type { StudentAnswers, UnitData } from "../../mockData/types";
 import { unitData } from "../../mockData/unitData";
 import { downloadableResources } from "../../mockData/resources";
 import type { ResourceCategory } from "../../mockData/types";
 import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
-import {answers as mockDataAnswers} from "../../mockData/answers";
+import { useStudentStore } from "./useStudentStore";
+import {answers as studentT1Answers} from '../../mockData/teacher-t-1/answers'
+import {answers as studentT2Answers} from '../../mockData/teacher-t-2/answers'
 
 /** Derive a 0–100 score from per-question answers. Null/unanswered counts as wrong. */
 export function computeScore(evaluation: StudentAnswers): number {
@@ -54,12 +55,11 @@ function fromMockResponse(r: StudentAnswers): StudentAnswers & { status: "succes
 }
 
 interface UnitsStore {
+  unitsData: UnitData[];
+  answers: StudentAnswers[];
   resources: ResourceCategory[];
-  /** Load resource mock data into store and return it (defensive copy) */
-  getResources: () => ResourceCategory[];
-  getAllAnswers: StudentAnswers[];
-  getStudentAnswers: (classId:number) => StudentAnswers[];
-  /** Update or create a student answer with complete answers object */
+  setUnitsData: () => void;
+  setStudentAnswers: (userId: string) => void;
   updateAnswer: (
     studentId: number,
     classId: number,
@@ -77,8 +77,7 @@ interface UnitsStore {
   getAnswersByClass: (
     classId: number,
   ) => StudentAnswers[];
-  getUnitsData: UnitData[];
-  getUnitAnswers: (classId:number) => StudentAnswers[];
+  setResources: () => void;
 }
 
 export const useUnitsStore = create<UnitsStore>()(
@@ -88,13 +87,37 @@ export const useUnitsStore = create<UnitsStore>()(
       let lastAllAnswers: StudentAnswers[] | null = null;
       const memoCache = new Map<number, StudentAnswers[]>();
       const studentAnswersCache = new Map<number, StudentAnswers[]>();
-
+      
       return {
-        getAllAnswers: mockDataAnswers.map(fromMockResponse),
-        resources: downloadableResources,
-        getResources: () => downloadableResources,
+        unitsData: [],
+        answers: [],
+        resources: [],
+        setUnitsData: () => set((state) => {
+          return {
+            ...state, unitsData: unitData
+          }
+        }),
+        setStudentAnswers: (userId) => set((state) => {
+          if (userId === 't-1') {
+            return { ...state, answers: studentT1Answers.map(fromMockResponse)};
+          } else if (userId === 't-2') {
+            return { ...state, answers: studentT2Answers.map(fromMockResponse)};
+          } else if (userId === 't-2') {
+            return { ...state, answers: studentT2Answers.map(fromMockResponse)};
+          } else if (userId.startsWith('b') || userId.startsWith('s')) {
+            const allStudents = [...studentT1Answers, ...studentT2Answers]
+            return { ...state, answers: allStudents.map(fromMockResponse)};
+          } else {
+            return { ...state, answers: [] };
+          }
+        }),
+        setResources: () => set((state) => {
+          return {
+            ...state, resources: downloadableResources
+          }
+        }),       
         getStudentAnswers: (classId:number) => {
-          const currentAnswers = get().getAllAnswers;
+          const currentAnswers = get().answers;
           
           // If the underlying data changed, clear cache
           if (lastAllAnswers !== currentAnswers) {
@@ -112,7 +135,7 @@ export const useUnitsStore = create<UnitsStore>()(
           
           // Enrich with student info from mockApiData
           const enriched = filtered.map(answer => {
-            const student = mockApiData.students.find(s => s.id === answer.studentId);
+            const student = useStudentStore.getState().students.find(s => s.id === answer.studentId);
             return {
               ...answer,
               studentName: student?.name || "Unknown",
@@ -126,14 +149,14 @@ export const useUnitsStore = create<UnitsStore>()(
         updateAnswer: (studentId, classId, unitDataId, answers, comment, required) =>
           set((state) => {
             const status = getScoreFromEvaluations(answers);
-            const existing = state.getAllAnswers.find(
+            const existing = state.answers.find(
               (a) => a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
             );
 
             if (existing) {
               // Update existing answer
               return {
-                getAllAnswers: state.getAllAnswers.map((a) =>
+                answers: state.answers.map((a) =>
                   a.studentId === studentId && a.classId === classId && a.unitDataId === unitDataId
                     ? { ...a, answers, comment, required, lastModified: new Date().toISOString(), status }
                     : a
@@ -142,7 +165,7 @@ export const useUnitsStore = create<UnitsStore>()(
             } else {
               // Create new answer
               const newAnswer: StudentAnswers & { status: "success" | "adequate" | "needs-improvement" | null } = {
-                id: Math.max(0, ...state.getAllAnswers.map((a) => a.id)) + 1,
+                id: Math.max(0, ...state.answers.map((a) => a.id)) + 1,
                 lastModified: new Date().toISOString(),
                 studentId,
                 classId,
@@ -153,16 +176,16 @@ export const useUnitsStore = create<UnitsStore>()(
                 status,
               };
               return {
-                getAllAnswers: [...state.getAllAnswers, newAnswer as any],
+                answers: [...state.answers, newAnswer as any],
               };
             }
           }),
         getAnswersByClass: (classId) =>
-          get().getAllAnswers.filter(
+          get().answers.filter(
             (e) => e.classId === classId,
           ),
         getAnswersByStudent: (studentId) => {
-          const currentAnswers = get().getAllAnswers;
+          const currentAnswers = get().answers;
           
           // If the underlying data changed, clear cache
           if (lastAllAnswers !== currentAnswers) {
@@ -181,11 +204,9 @@ export const useUnitsStore = create<UnitsStore>()(
           return filtered;
         },
         getAnswersByEvaluation: (evaluationId) =>
-          get().getAllAnswers.filter(
+          get().answers.filter(
             (e) => e.unitDataId === evaluationId,
           ),
-        getUnitsData: unitData,
-        getUnitAnswers: (classId:number) => mockApiData.answers.filter(answer => answer.classId === classId),
       };
     },
     {

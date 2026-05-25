@@ -1,4 +1,4 @@
-import { Student } from "./types";
+import { Student } from "../types";
 
   export const students: Student[] = [
     { id: 1, name: "Amélie Dubois", classIds: [1], schoolId: 1 },

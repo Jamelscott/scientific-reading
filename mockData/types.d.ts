@@ -107,8 +107,52 @@ export type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e 
 export interface Class {
   id: number;
   grade: Grades;
-  subject?: string;
-  studentCount: number;
   schoolYear: string;
-  studentIds: number[]; // Array of student IDs in this class
+  teacherId: string; // ID of the teacher associated with this class
 }
+
+export type TeacherUser = Teacher
+
+export type Teacher = {
+  type: "teacher";
+  id: string;
+  schoolId: string;
+  boardId: string;
+  name: string;
+  email: string;
+  school: string;
+  boardName: string;
+  subjects: string[];
+  phoneNumber?: string;
+  password:string;
+  startDate?: string;
+  yearsExperience?: number;
+};
+
+export type BoardUser = {
+  type: "board";
+  id: string;
+  name: string;
+  email: string;
+  schools: string[];
+  password:string;
+};
+
+export type SchoolUser = {
+  id: string;
+  type: "school";
+  name: string;
+  email: string;
+  boardId: string;
+  password:string;
+};
+
+export type AdminUser = {
+  type: "admin";
+  id: string;
+  name: string;
+  email: string;
+  password:string;
+};
+
+export type AuthUser = TeacherUser | BoardUser | SchoolUser | AdminUser;

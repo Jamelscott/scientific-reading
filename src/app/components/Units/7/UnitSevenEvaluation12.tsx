@@ -22,7 +22,7 @@ export function UnitSevenEvaluationTwelve() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const unitsData = useUnitsStore((state) => state.unitsData);
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
@@ -68,11 +68,10 @@ export function UnitSevenEvaluationTwelve() {
     pseudoWords: buildEvaluationArray(null, evaluationTenPseudoWords.length),
     comments: "",
   });
-
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
     const ans: MockQuestions = singleAnswer.answers as any;
-    
+
     const mapToArray = (obj: any, length: number) => {
       if (!obj) return new Array(length).fill(null);
       return Array.from({ length }, (_, i) => {
@@ -90,36 +89,75 @@ export function UnitSevenEvaluationTwelve() {
     };
 
     // Check if data is in template format (ans.data) or saved format
-    if (ans.data) {
+    if (ans.data && typeof ans.data === "object" && !Array.isArray(ans.data)) {
       // Template format - convert from sentence keys to arrays
-      const sentenceKeys = Object.keys(ans.data);
-      const sentenceData = sentenceKeys.map(key => {
-        const val = ans.data[key];
+      const dataMap = ans.data as Record<string, any>;
+      const sentenceData = evaluationTenSentences.map((sentence) => {
+        const val = dataMap[sentence];
         if (typeof val === "object" && val !== null && "correct" in val) {
-          return val.correct === true ? true : val.correct === false ? false : null;
+          return val.correct === true
+            ? true
+            : val.correct === false
+              ? false
+              : null;
         }
         return val === true ? true : val === false ? false : null;
       });
-      
-      // Map sentence data to fluency, leave others null
+
+      // Handle pseudoWords if present in template
+      let pseudoWordsData = new Array(evaluationTenPseudoWords.length).fill(
+        null,
+      );
+      if (
+        ans.pseudoWords &&
+        typeof ans.pseudoWords === "object" &&
+        !Array.isArray(ans.pseudoWords)
+      ) {
+        const pseudoMap = ans.pseudoWords as Record<string, any>;
+        pseudoWordsData = evaluationTenPseudoWords.map((word) => {
+          const val = pseudoMap[word];
+          if (typeof val === "object" && val !== null && "correct" in val) {
+            return val.correct === true
+              ? true
+              : val.correct === false
+                ? false
+                : null;
+          }
+          return val === true ? true : val === false ? false : null;
+        });
+      }
+
+      // Map sentence data to all three categories (fluency, punctuation, intonation)
       setEvaluationState({
-        sentenceFluency: sentenceData.slice(0, evaluationTenSentences.length),
-        sentencePunctuation: new Array(evaluationTenSentences.length).fill(null),
-        sentenceIntonation: new Array(evaluationTenSentences.length).fill(null),
-        pseudoWords: new Array(evaluationTenPseudoWords.length).fill(null),
+        sentenceFluency: sentenceData,
+        sentencePunctuation: sentenceData,
+        sentenceIntonation: sentenceData,
+        pseudoWords: pseudoWordsData,
         comments: singleAnswer.comment,
       });
     } else {
       // Saved format - use existing arrays
       setEvaluationState({
-        sentenceFluency: mapToArray(ans.sentenceFluency, evaluationTenSentences.length),
-        sentencePunctuation: mapToArray(ans.sentencePunctuation, evaluationTenSentences.length),
-        sentenceIntonation: mapToArray(ans.sentenceIntonation, evaluationTenSentences.length),
-        pseudoWords: mapToArray(ans.pseudoWords, evaluationTenPseudoWords.length),
+        sentenceFluency: mapToArray(
+          ans.sentenceFluency,
+          evaluationTenSentences.length,
+        ),
+        sentencePunctuation: mapToArray(
+          ans.sentencePunctuation,
+          evaluationTenSentences.length,
+        ),
+        sentenceIntonation: mapToArray(
+          ans.sentenceIntonation,
+          evaluationTenSentences.length,
+        ),
+        pseudoWords: mapToArray(
+          ans.pseudoWords,
+          evaluationTenPseudoWords.length,
+        ),
         comments: singleAnswer.comment,
       });
     }
-    
+
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
   }, [singleAnswer]);

@@ -18,7 +18,7 @@ export function UnitThreeEvaluationEight() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const unitsData = useUnitsStore((state) => state.unitsData);
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);

@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, Download, Plus, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { shallow } from "zustand/shallow";
 import { useClassStore } from "../../../stores/useClassStore";
 import { useStudentStore } from "../../../stores/useStudentStore";
 import { useTeacherStore } from "../../../stores/useTeacherStore";
@@ -9,6 +10,7 @@ import { AddStudentModal } from "../../components/AddStudentModal";
 import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
 import { exportTableToPdf } from "../../components/utils/exportToPdf";
 import { Button } from "../../components/ui/Button";
+import { useShallow } from "zustand/react/shallow";
 
 export function ClassPage() {
   const { t } = useTranslation();
@@ -18,20 +20,21 @@ export function ClassPage() {
     teacherId: string;
   }>();
   const classes = useClassStore((state) => state.classes);
-  const updateClass = useClassStore((state) => state.updateClass);
   const teacher = useTeacherStore((state) => state.teacher);
 
   // Parse classId from URL and set it as active
   const currentClassId = parseInt(classId || "", 10);
 
-  const currentClass = classes.find((c) => c?.id === currentClassId);
+  const currentClass = useClassStore((state) =>
+    state.getClassById(currentClassId),
+  );
 
-  const allStudents = useStudentStore((state) => state.students);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
-  const students = allStudents.filter((student) =>
-    student.classIds.includes(currentClassId),
+
+  const students = useStudentStore(
+    useShallow((state) => state.getStudentByClass(Number(classId!))),
   );
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(false);
