@@ -97,20 +97,25 @@ export const useUnitsStore = create<UnitsStore>()(
             ...state, unitsData: unitData
           }
         }),
-        setStudentAnswers: (userId) => set((state) => {
-          if (userId === 't-1') {
-            return { ...state, answers: studentT1Answers.map(fromMockResponse)};
-          } else if (userId === 't-2') {
-            return { ...state, answers: studentT2Answers.map(fromMockResponse)};
-          } else if (userId === 't-2') {
-            return { ...state, answers: studentT2Answers.map(fromMockResponse)};
-          } else if (userId.startsWith('b') || userId.startsWith('s')) {
-            const allStudents = [...studentT1Answers, ...studentT2Answers]
-            return { ...state, answers: allStudents.map(fromMockResponse)};
-          } else {
-            return { ...state, answers: [] };
-          }
-        }),
+        setStudentAnswers: (userId) => {
+          set((state) => {
+            if (userId === 't-1') {
+              return { ...state, answers: studentT1Answers.map(fromMockResponse)};
+            } else if (userId === 't-2') {
+              return { ...state, answers: studentT2Answers.map(fromMockResponse)};
+            } else if (userId === 't-2') {
+              return { ...state, answers: studentT2Answers.map(fromMockResponse)};
+            } else if (userId.startsWith('b') || userId.startsWith('s')) {
+              const allStudents = [...studentT1Answers, ...studentT2Answers]
+              return { ...state, answers: allStudents.map(fromMockResponse)};
+            } else {
+              return { ...state, answers: [] };
+            }
+          });
+          
+          // Refresh student evaluations after loading answers
+          useStudentStore.getState().setStudentEvaluations();
+        },
         setResources: () => set((state) => {
           return {
             ...state, resources: downloadableResources
@@ -146,7 +151,7 @@ export const useUnitsStore = create<UnitsStore>()(
           return enriched as any;
         },
 
-        updateAnswer: (studentId, classId, unitDataId, answers, comment, required) =>
+        updateAnswer: (studentId, classId, unitDataId, answers, comment, required) => {
           set((state) => {
             const status = getScoreFromEvaluations(answers);
             const existing = state.answers.find(
@@ -179,7 +184,11 @@ export const useUnitsStore = create<UnitsStore>()(
                 answers: [...state.answers, newAnswer as any],
               };
             }
-          }),
+          });
+          
+          // Refresh student evaluations after updating answers
+          useStudentStore.getState().setStudentEvaluations();
+        },
         getAnswersByClass: (classId) =>
           get().answers.filter(
             (e) => e.classId === classId,

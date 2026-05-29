@@ -30,6 +30,7 @@ import { Settings as BoardSettings } from "./pages/board/Settings";
 import { LibraryPage } from "./pages/teacher/LibriaryPage";
 import { StudentPage } from "./pages/teacher/StudentPage";
 import { ResourcePage } from "./pages/teacher/ResourcePage.tsx";
+import { Academics } from "./pages/school/Academics.tsx";
 
 function RequireAuth({
   children,
@@ -112,12 +113,19 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <Navigate to="dashboard" replace /> },
-      { path: "dashboard", Component: SchoolDashboard },
-      { path: "profile", Component: SchoolProfile },
-      { path: "reports", Component: SchoolReports },
-      { path: "teachers", Component: SchoolTeachers },
-      { path: "settings", Component: SchoolSettings },
+      {
+        path: ":schoolId",
+        element: <Outlet />,
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", Component: SchoolDashboard },
+          { path: "profile", Component: SchoolProfile },
+          { path: "reports", Component: SchoolReports },
+          { path: "teachers", Component: SchoolTeachers },
+          { path: "settings", Component: SchoolSettings },
+          { path: "academics", Component: Academics },
+        ],
+      },
     ],
   },
 

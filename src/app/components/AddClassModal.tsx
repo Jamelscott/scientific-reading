@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 import { useClassStore } from "../../stores";
 import type { Grades } from "../../../mockData/types";
+import { useParams } from "react-router";
 
 interface AddClassModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface AddClassModalProps {
 
 export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   const { t } = useTranslation();
+  const { teacherId } = useParams();
   const addClass = useClassStore((state) => state.addClass);
   const classes = useClassStore((state) => state.classes);
 
@@ -54,12 +56,15 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
       setErrors(newErrors);
       return;
     }
+    if (!teacherId) {
+      setErrors({ schoolYear: "", grade: "" });
+      return;
+    }
 
     addClass({
       grade,
       schoolYear,
-      studentCount: 0,
-      studentIds: [],
+      teacherId,
     });
     setSchoolYear("");
     setGrade(firstAvailableGrade);

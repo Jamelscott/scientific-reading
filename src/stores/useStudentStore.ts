@@ -3,11 +3,12 @@ import { persist } from "zustand/middleware";
 import type {Grades, Student} from "../../mockData/types";
 import { students as studentsT1 } from "../../mockData/teacher-t-1/students";
 import { students as studentsT2 } from "../../mockData/teacher-t-2/students";
-
+import { useUnitsStore } from "./useUnitsStore";
 
 interface StudentStore {
   students: Student[];
   setStudents: (userId: string) => void;
+  setStudentEvaluations: () => void;
   addStudent: (firstName: string, lastName: string, classIds?: number[], schoolId?: number, grade?: Grades) => void;
   removeStudentFromClass: (studentId: number, classId: number) => void;
   getStudentById: (studentId: string) => Student | undefined;
@@ -30,6 +31,23 @@ export const useStudentStore = create<StudentStore>()(
             return { students: [] };
           }
       }),
+      setStudentEvaluations: () =>
+        set((state) => {
+          const allAnswers = useUnitsStore.getState().answers;
+          
+          const studentsWithEvaluations = state.students.map((student) => {
+            const studentEvaluations = allAnswers.filter(
+              (answer) => answer.studentId === student.id
+            );
+            
+            return {
+              ...student,
+              evaluations: studentEvaluations || [],
+            };
+          });
+          
+          return { students: studentsWithEvaluations };
+        }),
       addStudent: (firstName: string, lastName: string, classIds = [], schoolId = 1, grade) =>
         set((state) => {
           const maxId = state.students.reduce(

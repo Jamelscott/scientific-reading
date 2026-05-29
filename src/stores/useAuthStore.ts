@@ -4,6 +4,7 @@ import { AuthUser } from "../../mockData/types";
 import { useClassStore } from "./useClassStore";
 import { useStudentStore } from "./useStudentStore";
 import { useUnitsStore } from "./useUnitsStore";
+import { useTeacherStore } from "./useTeacherStore";
 
 interface AuthStore {
   currentUser: AuthUser | null;
@@ -23,13 +24,17 @@ export const useAuthStore = create<AuthStore>()(
         if (user.type === 'teacher') {
           useClassStore.getState().setClasses(user.id);
           useStudentStore.getState().setStudents(user.id);
-          useUnitsStore.getState().setStudentAnswers(user.id)
-          useUnitsStore.getState().setUnitsData()
-          useUnitsStore.getState().setResources()
+          useUnitsStore.getState().setStudentAnswers(user.id);
         }
         if (user.type === 'school') {
-          // useClassStore.getState().setClasses(user.id);
+          useTeacherStore.getState().setTeachersForSchool(user.id);
+          useClassStore.getState().setClasses(user.id);
+          useStudentStore.getState().setStudents(user.id);
+          useUnitsStore.getState().setStudentAnswers(user.id);
+          useStudentStore.getState().setStudentEvaluations();
         }
+        useUnitsStore.getState().setUnitsData()
+        useUnitsStore.getState().setResources()
       },
       logout: () => set({ currentUser: null }),
       getCurrentUser: () => get().currentUser,

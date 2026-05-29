@@ -60,7 +60,7 @@ export function StudentPage() {
   const navigate = useNavigate();
   const { studentId, teacherId, classId } = useParams();
   const { t } = useTranslation();
-  const unitData = useUnitsStore((state) => state.getUnitsData);
+  const unitData = useUnitsStore((state) => state.unitsData);
   const student = useStudentStore((state) => state.getStudentById(studentId!));
   const allStudents = useStudentStore((state) => state.students);
   const classes = useClassStore((state) => state.classes);

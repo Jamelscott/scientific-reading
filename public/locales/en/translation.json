@@ -18,7 +18,8 @@
     "schools": "Schools",
     "students": "Students",
     "analytics": "Analytics",
-    "library": "Library"
+    "library": "Library",
+    "academics": "Academics"
   },
   "library": {
     "library": "Library",
@@ -193,6 +194,60 @@
       "notComplete": "Not complete"
     }
   },
+  "academics": {
+    "title": "Academics",
+    "subtitle": "Student and teacher management and analysis",
+    "schoolName": "École Laurier-Trudeau",
+    "viewMode": {
+      "students": "Students",
+      "teachers": "Teachers"
+    },
+    "search": {
+      "student": "Search for a student...",
+      "teacher": "Search for a teacher..."
+    },
+    "filters": {
+      "title": "Filters",
+      "advancedFilters": "Advanced filters",
+      "clearAll": "Clear all",
+      "gradeLevel": "Grade level",
+      "teacher": "Teacher",
+      "currentWorkshop": "Current workshop",
+      "averageWorkshop": "Average workshop",
+      "min": "Min",
+      "max": "Max",
+      "status": "Status",
+      "onTrackOnly": "On track only",
+      "atRiskOnly": "At risk only"
+    },
+    "results": {
+      "result": "result",
+      "results": "results",
+      "noResults": "No results",
+      "adjustFilters": "Try adjusting your filters"
+    },
+    "sort": {
+      "sortBy": "Sort by:",
+      "name": "Name",
+      "grade": "Grade",
+      "workshop": "Workshop",
+      "teacher": "Teacher",
+      "students": "Students",
+      "onTrack": "On track %"
+    },
+    "labels": {
+      "grade": "Grade",
+      "workshop": "Workshop",
+      "status": "Status",
+      "students": "Students",
+      "avgWorkshop": "Avg. workshop",
+      "onTrack": "On track"
+    },
+    "status": {
+      "onTrack": "On track",
+      "atRisk": "At risk"
+    }
+  },
   "studentTracking": {
     "student": "Student",
     "backToDashboard": "Back to dashboard",
@@ -282,6 +337,48 @@
     }
   },
 
+  "school": {
+    "schoolName": "École Laurier-Trudeau",
+    "title": "Reports and Analytics",
+    "subtitle": "Detailed view of school performance",
+    "enrolledStudents": "Enrolled students",
+    "onTrackAvg": "On track average",
+    "gradeBenchmarks": "Grade benchmarks",
+    "progressionYear": "Progression throughout the year",
+    "viewByClass": "View by class",
+    "viewByGrade": "View by grade",
+    "students": "Students",
+    "onTrack": "On track",
+    "vsAverage": "vs avg.",
+    "classes": "classes",
+    "studentsLowercase": "students",
+    "averageOnTrack": "Average \"On track\"",
+    "studentsToMonitor": "Students to monitor",
+    "atRisk": "At risk",
+    "toMonitor": "To monitor",
+    "profileTitle": "Profile — School",
+    "profileSubtitle": "School information and staff management",
+    "schoolInfo": "School Information",
+    "schoolAdmin": "School Administrator",
+    "teachers": "Teachers",
+    "teachersCount": "Teachers",
+    "addTeacher": "Add Teacher",
+    "addTeacherButton": "Add Teacher",
+    "subjects": "Subjects",
+    "optional": "optional",
+    "subjectsHelp": "Separate multiple subjects with commas",
+    "yearsExperience": "Years of experience",
+    "noTeachers": "No teachers added yet",
+    "addFirstTeacher": "Add your first teacher to get started",
+    "confirmRemoveTeacher": "Are you sure you want to remove {{name}} from the school? This action cannot be undone.",
+    "deleteTeacher": "Delete Teacher",
+    "typeNameToConfirm": "To confirm, please type the teacher's name below:",
+    "teacherNameLabel": "Teacher name",
+    "typeNamePlaceholder": "Type the name exactly as shown above",
+    "nameDoesNotMatch": "The name you entered does not match. Please try again.",
+    "deleteTeacherButton": "Delete Teacher"
+  },
+
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
@@ -297,7 +394,9 @@
     "notRequired": "Not required",
     "notComplete": "Not complete",
     "pdfLabel": "Click here to download the supporting PDF for this evaluation",
-    "downloadPdf": "Download PDF"
+    "downloadPdf": "Download PDF",
+    "classes": "Classes",
+    "export": "Export"
    },
 
   "unitOne": {

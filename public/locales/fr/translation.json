@@ -19,7 +19,8 @@
     "teachers": "Enseignants",
     "students": "Élèves",
     "analytics": "Analytique",
-    "library": "Bibliothèque"
+    "library": "Bibliothèque",
+    "academics": "Académique"
   },
   "library": {
     "library": "Bibliothèque",
@@ -194,6 +195,60 @@
       "notComplete": "Non complété"
     }
   },
+  "academics": {
+    "title": "Académique",
+    "subtitle": "Gestion et analyse des élèves et enseignants",
+    "schoolName": "École Laurier-Trudeau",
+    "viewMode": {
+      "students": "Élèves",
+      "teachers": "Enseignants"
+    },
+    "search": {
+      "student": "Rechercher un élève...",
+      "teacher": "Rechercher un enseignant..."
+    },
+    "filters": {
+      "title": "Filtres",
+      "advancedFilters": "Filtres avancés",
+      "clearAll": "Effacer tout",
+      "gradeLevel": "Niveau scolaire",
+      "teacher": "Enseignant",
+      "currentWorkshop": "Atelier actuel",
+      "averageWorkshop": "Moyenne atelier",
+      "min": "Min",
+      "max": "Max",
+      "status": "Statut",
+      "onTrackOnly": "En voie seulement",
+      "atRiskOnly": "En risque seulement"
+    },
+    "results": {
+      "result": "résultat",
+      "results": "résultats",
+      "noResults": "Aucun résultat",
+      "adjustFilters": "Essayez d'ajuster vos filtres"
+    },
+    "sort": {
+      "sortBy": "Trier par:",
+      "name": "Nom",
+      "grade": "Niveau",
+      "workshop": "Atelier",
+      "teacher": "Enseignant",
+      "students": "Élèves",
+      "onTrack": "En voie %"
+    },
+    "labels": {
+      "grade": "Niveau",
+      "workshop": "Atelier",
+      "status": "Statut",
+      "students": "Élèves",
+      "avgWorkshop": "Atelier moy.",
+      "onTrack": "En voie"
+    },
+    "status": {
+      "onTrack": "En voie",
+      "atRisk": "À risque"
+    }
+  },
   "studentTracking": {
     "student":"Élève",
     "backToDashboard": "Retour au tableau de bord",
@@ -279,6 +334,48 @@
       "studentAdded": { "title": "Élève ajouté", "message": "Amélie Dubois a été ajoutée à votre classe", "time": "Il y a 3 jours" }
     }
   },
+  "school": {
+    "schoolName": "École Laurier-Trudeau",
+    "title": "Rapports et analyses",
+    "subtitle": "Vue détaillée des performances de l'école",
+    "enrolledStudents": "Élèves inscrits",
+    "onTrackAvg": "Moyenne en voie",
+    "gradeBenchmarks": "Repères par niveau",
+    "progressionYear": "Progression au cours de l'année",
+    "viewByClass": "Vue par classe",
+    "viewByGrade": "Vue par niveau",
+    "students": "Élèves",
+    "onTrack": "En voie",
+    "vsAverage": "vs moy.",
+    "classes": "classes",
+    "studentsLowercase": "élèves",
+    "averageOnTrack": "Moyenne \"En voie\"",
+    "studentsToMonitor": "Élèves à surveiller",
+    "atRisk": "À risque",
+    "toMonitor": "À surveiller",
+    "profileTitle": "Profil — École",
+    "profileSubtitle": "Informations de l'école et gestion du personnel",
+    "schoolInfo": "Informations de l'école",
+    "schoolAdmin": "Administrateur de l'école",
+    "teachers": "Enseignants",
+    "teachersCount": "Enseignants",
+    "addTeacher": "Ajouter un enseignant",
+    "addTeacherButton": "Ajouter un enseignant",
+    "subjects": "Matières",
+    "optional": "facultatif",
+    "subjectsHelp": "Séparez plusieurs matières par des virgules",
+    "yearsExperience": "Années d'expérience",
+    "noTeachers": "Aucun enseignant ajouté",
+    "addFirstTeacher": "Ajoutez votre premier enseignant pour commencer",
+    "confirmRemoveTeacher": "Êtes-vous sûr de vouloir retirer {{name}} de l'école ? Cette action ne peut pas être annulée.",
+    "deleteTeacher": "Supprimer l'enseignant",
+    "typeNameToConfirm": "Pour confirmer, veuillez taper le nom de l'enseignant ci-dessous :",
+    "teacherNameLabel": "Nom de l'enseignant",
+    "typeNamePlaceholder": "Tapez le nom exactement comme indiqué ci-dessus",
+    "nameDoesNotMatch": "Le nom saisi ne correspond pas. Veuillez réessayer.",
+    "deleteTeacherButton": "Supprimer l'enseignant"
+  },
+
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
@@ -292,7 +389,9 @@
     "notRequired": "Non requis",
     "notComplete": "Non complété",
     "pdfLabel": "Cliquez ici pour télécharger le PDF d'accompagnement pour cette évaluation",
-    "downloadPdf": "Télécharger le PDF"
+    "downloadPdf": "Télécharger le PDF",
+    "classes": "Classes",
+    "export": "Exporter"
   },
 
   "unitOne": {

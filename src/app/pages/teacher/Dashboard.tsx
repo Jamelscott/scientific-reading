@@ -30,7 +30,6 @@ export function TeacherDashboard() {
   const [showEditClassesModal, setShowEditClassesModal] = useState(false);
   const [showDeleteId, setShowDeleteId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
-  console.log(classes);
   const handleClearCache = () => {
     if (window.confirm(t("dashboard.confirmClearCache"))) {
       // Clear localStorage

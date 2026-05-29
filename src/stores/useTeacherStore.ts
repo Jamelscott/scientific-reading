@@ -1,20 +1,24 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthUser, Teacher } from "../../mockData/types";
+import { teachers as allTeachers } from "../../mockData/users";
+
+interface TeacherStore {
+  teacher: Teacher | null;
+  teachers: Teacher[] | null;
+  setTeacher: (teacher: AuthUser | null) => void;
+  setTeachersForSchool: (schoolId: string) => void;
+  updateTeacher: (updates: Teacher) => void;
+  updateTeachers: (updates: Teacher) => void;
+  removeTeacher: (teacherId: string) => void;
+  getTeacherById: (teacherId: string | number) => Teacher | null | void;
+}
 
 const normalizeTeacherId = (value: string | number) => {
   const raw = String(value);
   const digitsOnly = raw.replace(/\D+/g, "");
   return digitsOnly || raw;
 };
-interface TeacherStore {
-  teacher: Teacher | null;
-  teachers: Teacher[] | null;
-  setTeacher: (teacher: AuthUser | Teacher[] | null) => void;
-  updateTeacher: (updates: Teacher) => void;
-  updateTeachers: (updates: Teacher) => void;
-  getTeacherById: (teacherId: string | number) => Teacher | null | void;
-}
   
 export const useTeacherStore = create<TeacherStore>()(
   persist(
@@ -22,12 +26,6 @@ export const useTeacherStore = create<TeacherStore>()(
       teacher: null,
       teachers: null,
       setTeacher: (user) => {
-        // check if user is an array
-        if (Array.isArray(user)) {
-          set({ teachers: user });
-          return;
-        }
-
         if (user && user.type === "teacher") {
           const teacher: Teacher = {
             id: normalizeTeacherId(user.id),
@@ -46,6 +44,12 @@ export const useTeacherStore = create<TeacherStore>()(
         } else {
           set({ teacher: null, teachers: null });
         }
+      },
+      setTeachersForSchool: (schoolId) => {
+        const filteredTeachers = allTeachers.filter(
+          (teacher) => teacher.schoolId === schoolId
+        );
+        set({ teachers: filteredTeachers });
       },
       updateTeacher: (updates) =>
         set((state) => ({
@@ -70,6 +74,12 @@ export const useTeacherStore = create<TeacherStore>()(
             return { teachers: [...state.teachers, updates] };
           }
         }),
+      removeTeacher: (teacherId) =>
+        set((state) => ({
+          teachers: state.teachers
+            ? state.teachers.filter((teacher) => teacher.id !== teacherId)
+            : null,
+        })),
       getTeacherById: (teacherId: string | number) => {
         const activeTeacher = get().teacher;
         if (Array.isArray(activeTeacher)) {

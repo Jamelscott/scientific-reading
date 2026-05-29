@@ -72,6 +72,7 @@ export interface Student {
   name: string;
   classIds: number[]; // Array of class IDs the student belongs to
   schoolId: number; // School ID the student is associated with
+  evaluations?: StudentAnswers[]; // Optional array of evaluations for the student
 }
 
 export interface ResourceActivity {
@@ -101,6 +102,11 @@ export interface UnitData {
   evaluation: number;
   questions: MockQuestions; // Object with categories (bigLetters, smallLetters, etc.)
 }
+export type JardinNumber = 0
+export type MaternellNumber = 1
+export type firstGradeNumber = 2
+export type secondGradeNumber = 3
+export type thirdGradeNumber = 4
 
 export type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e année";
 

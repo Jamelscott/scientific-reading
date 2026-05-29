@@ -51,6 +51,20 @@ export function LoginPage() {
   const [password, setPassword] = useState("12345");
   const [rememberMe, setRememberMe] = useState(false);
 
+  const handlePortalSelect = (portalId: string) => {
+    setSelectedPortal(portalId);
+    // Update email based on portal
+    if (portalId === "teacher") {
+      setEmail("jean-pierre.dubois@ecole.qc.ca");
+    } else if (portalId === "school") {
+      setEmail("direction@saint-laurent.qc.ca");
+    } else if (portalId === "board") {
+      setEmail("jean-luc.bouchard@ecole.qc.ca");
+    } else if (portalId === "admin") {
+      setEmail("admin@gmail.com");
+    }
+  };
+
   const handleLanguageToggle = () => {
     const newLang = i18n.language === "en" ? "fr" : "en";
     i18n.changeLanguage(newLang);
@@ -157,7 +171,7 @@ export function LoginPage() {
                 {portals.map(({ id, Icon, bg, border, color }) => (
                   <button
                     key={id}
-                    onClick={() => setSelectedPortal(id)}
+                    onClick={() => handlePortalSelect(id)}
                     className="w-full flex items-center gap-4 p-5 rounded-2xl text-left transition-all hover:shadow-md group"
                     style={{
                       background: bg,

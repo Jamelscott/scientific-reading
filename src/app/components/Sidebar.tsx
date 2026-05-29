@@ -10,6 +10,7 @@ import {
   Book,
   TrendingUp,
   School,
+  GraduationCap,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../stores";
@@ -19,14 +20,6 @@ export interface SidebarItem {
   label: string;
   path: string;
 }
-
-const teacherNavItems: SidebarItem[] = [
-  { icon: Users, label: "nav.myClasses", path: "/teacher/dashboard" },
-  { icon: Book, label: "nav.library", path: "/teacher/library" },
-  { icon: BarChart3, label: "nav.reports", path: "/teacher/reports" },
-  { icon: User, label: "nav.profile", path: "/teacher/profile" },
-  { icon: Settings, label: "nav.settings", path: "/teacher/settings" },
-];
 
 const getTeacherNavItems = (teacherId: string): SidebarItem[] => [
   {
@@ -48,12 +41,29 @@ const getTeacherNavItems = (teacherId: string): SidebarItem[] => [
   },
 ];
 
-const schoolNavItems: SidebarItem[] = [
-  { icon: TrendingUp, label: "nav.overview", path: "/school/dashboard" },
-  { icon: Users, label: "nav.teachers", path: "/school/teachers" },
-  { icon: BarChart3, label: "nav.reports", path: "/school/reports" },
-  { icon: User, label: "nav.profile", path: "/school/profile" },
-  { icon: Settings, label: "nav.settings", path: "/school/settings" },
+const getSchoolNavItems = (schoolId: string): SidebarItem[] => [
+  {
+    icon: TrendingUp,
+    label: "nav.overview",
+    path: `/school/${schoolId}/dashboard`,
+  },
+  // { icon: Users, label: "nav.teachers", path: `/school/${schoolId}/teachers` },
+  // {
+  //   icon: BarChart3,
+  //   label: "nav.reports",
+  //   path: `/school/${schoolId}/reports`,
+  // },
+  {
+    icon: GraduationCap,
+    label: "nav.academics",
+    path: `/school/${schoolId}/academics`,
+  },
+  { icon: User, label: "nav.profile", path: `/school/${schoolId}/profile` },
+  {
+    icon: Settings,
+    label: "nav.settings",
+    path: `/school/${schoolId}/settings`,
+  },
 ];
 
 const boardNavItems: SidebarItem[] = [
@@ -168,7 +178,7 @@ export function Sidebar() {
   if (currentUser?.type === "school") {
     return (
       <SidebarShell
-        items={schoolNavItems}
+        items={getSchoolNavItems(currentUser.id)}
         useTranslationKey
         portalKey="portal.school"
       />

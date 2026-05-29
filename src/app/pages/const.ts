@@ -5,6 +5,33 @@ export const gradeBenchmarks = {
     "2e année": { expected: 15, label: "Fin de 2e année" },
   };
 
+export const schoolLevel = {
+  kindergarden: {
+    needsSupport:1,
+    developing: 2,
+    onTrack: 3,
+    strongMaster: 5
+  },
+  seniorKindergarden: {
+    needsSupport: 3,
+    developing: 4,
+    onTrack: 6,
+    strongMaster: 8
+  },
+  gradeOne: {
+    needsSupport: 7,
+    developing: 8,
+    onTrack: 10,
+    strongMaster: 12
+  },
+  gradeTwo: {
+    needsSupport: 11,
+    developing: 12,
+    onTrack: 14,
+    strongMaster: 15
+  }
+}
+
 export const frequentWords = [
   "le",
   "de",
