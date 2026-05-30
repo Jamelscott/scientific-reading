@@ -72,7 +72,7 @@ export function UnitHeader({
           onClick={() =>
             navigate(`/teacher/${teacherId}/class/${classData.id}`)
           }
-          className="flex items-center gap-2 mb-4 text-sm cursor-pointer"
+          className="flex items-center gap-2 mb-4 text-sm hover:font-bold transition-allcursor-pointer"
           style={{ color: "#38b6ff" }}
         >
           <ArrowLeft className="w-4 h-4" />

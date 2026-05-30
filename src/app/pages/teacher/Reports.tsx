@@ -669,7 +669,7 @@ export function ReportsPage() {
                 {t("reports.classPerformance")}
               </h2>
               <button
-                className="p-2 rounded-xl transition-all"
+                className="p-2 rounded-xl transition-all hover:shadow-md cursor-pointer"
                 style={{ background: "#dff3ff" }}
               >
                 <Download className="w-5 h-5" style={{ color: "#004aad" }} />
@@ -701,7 +701,7 @@ export function ReportsPage() {
                 {t("reports.progressOverTime")}
               </h2>
               <button
-                className="p-2 rounded-xl transition-all"
+                className="p-2 rounded-xl transition-all hover:shadow-md cursor-pointer"
                 style={{ background: "#dff3ff" }}
               >
                 <Download className="w-5 h-5" style={{ color: "#004aad" }} />
@@ -1104,7 +1104,7 @@ export function ReportsPage() {
                         `/teacher/${teacherId}/class/${selectedClassId}/student/${student.id}`,
                       );
                     }}
-                    className="px-4 py-3 rounded-xl transition-all text-left hover:shadow-md hover:bg-[#38b6ff] hover:text-white group"
+                    className="px-4 py-3 rounded-xl transition-all text-left hover:shadow-md hover:bg-[#38b6ff] hover:text-white group cursor-pointer"
                     style={{
                       background: "#dff3ff",
                       border: "1px solid #38b6ff",

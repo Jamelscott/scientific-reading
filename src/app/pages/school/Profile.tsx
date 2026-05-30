@@ -6,7 +6,12 @@ import { Initials } from "../../components/Initials";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
 import { AddTeacherModal } from "../../components/AddTeacherModal";
 import { DeleteTeacherModal } from "../../components/DeleteTeacherModal";
-import { useAuthStore, useTeacherStore, useStudentStore, useClassStore } from "../../../stores";
+import {
+  useAuthStore,
+  useTeacherStore,
+  useStudentStore,
+  useClassStore,
+} from "../../../stores";
 
 export function SchoolProfile() {
   const { t } = useTranslation();
@@ -16,7 +21,10 @@ export function SchoolProfile() {
   const students = useStudentStore((state) => state.students);
   const classes = useClassStore((state) => state.classes);
   const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
-  const [teacherToDelete, setTeacherToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [teacherToDelete, setTeacherToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   return (
     <div
@@ -143,7 +151,7 @@ export function SchoolProfile() {
               </h2>
               <button
                 onClick={() => setIsAddTeacherModalOpen(true)}
-                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all hover:shadow-md cursor-pointer"
                 style={{
                   background: "#004aad",
                   color: "#ffffff",
@@ -208,7 +216,10 @@ export function SchoolProfile() {
                       <div className="flex items-center gap-4">
                         {teacher.subjects && teacher.subjects.length > 0 && (
                           <div className="text-right">
-                            <p className="text-xs mb-1" style={{ color: "#888" }}>
+                            <p
+                              className="text-xs mb-1"
+                              style={{ color: "#888" }}
+                            >
                               {t("school.subjects")}
                             </p>
                             <p className="text-sm" style={{ color: "#004aad" }}>
@@ -218,7 +229,10 @@ export function SchoolProfile() {
                         )}
                         {teacher.phoneNumber && (
                           <div className="text-right">
-                            <p className="text-xs mb-1" style={{ color: "#888" }}>
+                            <p
+                              className="text-xs mb-1"
+                              style={{ color: "#888" }}
+                            >
                               {t("profile.phone")}
                             </p>
                             <p className="text-sm" style={{ color: "#004aad" }}>
@@ -227,8 +241,13 @@ export function SchoolProfile() {
                           </div>
                         )}
                         <button
-                          onClick={() => setTeacherToDelete({ id: teacher.id, name: teacher.name })}
-                          className="p-2 rounded-lg transition-all hover:bg-red-50"
+                          onClick={() =>
+                            setTeacherToDelete({
+                              id: teacher.id,
+                              name: teacher.name,
+                            })
+                          }
+                          className="p-2 rounded-lg transition-all hover:bg-red-50 hover:shadow-md cursor-pointer"
                           style={{ color: "#ff5757" }}
                         >
                           <Trash2 className="w-5 h-5" />

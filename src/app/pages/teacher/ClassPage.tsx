@@ -15,12 +15,21 @@ import { useShallow } from "zustand/react/shallow";
 export function ClassPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { classId, teacherId } = useParams<{
+  const { classId, teacherId, schoolId } = useParams<{
     classId: string;
     teacherId: string;
+    schoolId?: string;
   }>();
   const classes = useClassStore((state) => state.classes);
   const teacher = useTeacherStore((state) => state.teacher);
+  const allTeachers = useTeacherStore((state) => state.teachers);
+
+  // Get teacher name for a class (only needed when schoolId is present)
+  const getTeacherNameForClass = (classTeacherId: string) => {
+    if (!schoolId || !allTeachers) return null;
+    const teacher = allTeachers.find((t) => t.id === classTeacherId);
+    return teacher?.name || "Unknown Teacher";
+  };
 
   // Parse classId from URL and set it as active
   const currentClassId = parseInt(classId || "", 10);
@@ -56,7 +65,11 @@ export function ClassPage() {
 
   const handleClassChange = (classId: number) => {
     setShowClassDropdown(false);
-    navigate(`/teacher/${teacherId}/class/${classId}`);
+    if (schoolId) {
+      navigate(`/school/${schoolId}/teacher/${teacherId}/class/${classId}`);
+    } else {
+      navigate(`/teacher/${teacherId}/class/${classId}`);
+    }
   };
 
   const handleExportPDF = async () => {
@@ -83,11 +96,21 @@ export function ClassPage() {
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(`/teacher/${teacherId}/dashboard`)}
-            className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:text-[#2D92CC] transition-all cursor-pointer"
+            onClick={() =>
+              navigate(
+                schoolId
+                  ? `/school/${schoolId}/dashboard`
+                  : `/teacher/${teacherId}/dashboard`,
+              )
+            }
+            className="flex items-center gap-2 mb-4 text-sm text-[#38b6ff] hover:font-bold transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t("studentTracking.backToDashboard")}
+            {t(
+              schoolId
+                ? "studentTracking.backToDashboard"
+                : "studentTracking.backToDashboard",
+            )}
           </button>
 
           <div className="flex items-center justify-between">
@@ -95,7 +118,7 @@ export function ClassPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowClassDropdown(!showClassDropdown)}
-                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:shadow-md transition-all cursor-pointer"
                   style={{ color: "#004aad" }}
                 >
                   {currentClass?.grade || "no class available"}
@@ -111,14 +134,14 @@ export function ClassPage() {
 
                 {showClassDropdown && (
                   <div
-                    className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border overflow-hidden z-50 min-w-[250px]"
+                    className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border overflow-hidden z-50 min-w-[250px] w-max"
                     style={{ borderColor: "#dff3ff" }}
                   >
                     {classes.map((cls) => (
                       <button
                         key={cls.id}
                         onClick={() => handleClassChange(cls.id)}
-                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02]"
+                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02] hover:shadow-md cursor-pointer"
                         style={{
                           backgroundColor:
                             cls.id === currentClassId
@@ -126,24 +149,40 @@ export function ClassPage() {
                               : "transparent",
                         }}
                       >
+                        <div className="flex flex-col gap-1">
+                          <span
+                            className="group-hover:text-white transition-colors"
+                            style={{ color: "#004aad" }}
+                          >
+                            {cls.grade}
+                          </span>
+                          {schoolId && (
+                            <span
+                              className="text-xs group-hover:text-white/90 transition-colors"
+                              style={{ color: "#666" }}
+                            >
+                              {getTeacherNameForClass(cls.teacherId)}
+                            </span>
+                          )}
+                        </div>
                         <span
-                          className="group-hover:text-white transition-colors"
-                          style={{ color: "#004aad" }}
-                        >
-                          {cls.grade}
-                        </span>
-                        <span
-                          className="text-sm group-hover:text-white transition-colors"
+                          className="text-sm group-hover:text-white transition-colors whitespace-nowrap"
                           style={{ color: "#666" }}
                         >
-                          {getStudentCountByClass(cls.id)}{" "}
-                          {t("studentTracking.student")}
+                          {t("studentTracking.studentsCount", {
+                            count: getStudentCountByClass(cls.id),
+                          })}
                         </span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+              {schoolId && currentClass && (
+                <p className="text-sm mb-1" style={{ color: "#666" }}>
+                  {getTeacherNameForClass(currentClass.teacherId)}
+                </p>
+              )}
               <p className="text-lg" style={{ color: "#000000" }}>
                 {t("studentTracking.studentsCount", {
                   count: students.length,

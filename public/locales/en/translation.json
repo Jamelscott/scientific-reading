@@ -237,11 +237,21 @@
     },
     "labels": {
       "grade": "Grade",
+      "classes": "Classes",
       "workshop": "Workshop",
       "status": "Status",
       "students": "Students",
+      "avgCompleted": "Avg. completed",
+      "avgSuccessful": "Avg. successful",
       "avgWorkshop": "Avg. workshop",
       "onTrack": "On track"
+    },
+    "tooltips": {
+      "classes": "Total number of classes taught by this teacher",
+      "students": "Total number of students across all of this teacher's classes",
+      "avgCompleted": "Average percentage of evaluations completed (out of 15 total evaluations per student)",
+      "avgSuccessful": "Average percentage of evaluations scored 70% or higher (success or adequate status)",
+      "onTrack": "Percentage of students meeting their grade-level benchmarks for success"
     },
     "status": {
       "onTrack": "On track",
@@ -621,6 +631,7 @@
   "studentPage": {
     "studentNotFound": "Student not found",
     "backToClassList": "Back to class list",
+    "backToAcademics": "Back to academics",
     "smlTitle": "Student Performance Dashboard",
     "exportReport": "Export Report",
     "benchmarkTitle": "Benchmarks",

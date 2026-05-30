@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   BookOpen,
   BarChart3,
@@ -48,6 +48,7 @@ const trendData = [
 
 export function SchoolDashboard() {
   const navigate = useNavigate();
+  const { schoolId } = useParams();
   const { t } = useTranslation();
   const teachers = useTeacherStore((state) => state.teachers);
   const [year, setYear] = useState("2025-2026");
@@ -153,8 +154,7 @@ export function SchoolDashboard() {
         }
         const letterIndex = gradeClassCounts[studentClass.grade];
         gradeClassCounts[studentClass.grade]++;
-        const letter = String.fromCharCode(65 + letterIndex); // 65 = 'A'
-        const className = `${studentClass.grade} ${letter}`;
+        const className = `${studentClass.grade}`;
 
         return {
           id: student.id,
@@ -162,6 +162,8 @@ export function SchoolDashboard() {
           className,
           grade: studentClass.grade,
           teacher: teacherName,
+          teacherId: studentClass.teacherId,
+          classId: studentClass.id,
           atelier: successfulEvaluations,
           status,
         };
@@ -181,6 +183,8 @@ export function SchoolDashboard() {
       className: string;
       grade: string;
       teacher: string;
+      teacherId: string;
+      classId: number;
       atelier: number;
       status: "À risque" | "À surveiller";
     }>;
@@ -316,7 +320,7 @@ export function SchoolDashboard() {
                 {t("school.gradeBenchmarks")}
               </h2>
               <button
-                className="px-3 py-1.5 rounded-lg text-xs"
+                className="px-3 py-1.5 rounded-lg text-xs hover:shadow-md transition-all cursor-pointer"
                 style={{ background: "#38b6ff", color: "#ffffff" }}
               >
                 <Download className="w-3 h-3 inline mr-1" />
@@ -371,7 +375,9 @@ export function SchoolDashboard() {
                   tick={{ fontSize: 11, fill: "#888" }}
                   unit="%"
                 />
-                <Tooltip formatter={(v: number) => [`${v}%`, t("school.onTrack")]} />
+                <Tooltip
+                  formatter={(v: number) => [`${v}%`, t("school.onTrack")]}
+                />
                 <Line
                   type="monotone"
                   dataKey="taux"
@@ -392,7 +398,7 @@ export function SchoolDashboard() {
           <div className="flex gap-2">
             <button
               onClick={() => setViewMode("class")}
-              className="px-4 py-2 rounded-xl text-sm transition-all"
+              className="px-4 py-2 rounded-xl text-sm transition-all hover:shadow-md cursor-pointer"
               style={{
                 background: viewMode === "class" ? "#004aad" : "#dff3ff",
                 color: viewMode === "class" ? "#ffffff" : "#004aad",
@@ -402,7 +408,7 @@ export function SchoolDashboard() {
             </button>
             <button
               onClick={() => setViewMode("grade")}
-              className="px-4 py-2 rounded-xl text-sm transition-all"
+              className="px-4 py-2 rounded-xl text-sm transition-all hover:shadow-md cursor-pointer"
               style={{
                 background: viewMode === "grade" ? "#004aad" : "#dff3ff",
                 color: viewMode === "grade" ? "#ffffff" : "#004aad",
@@ -452,9 +458,11 @@ export function SchoolDashboard() {
                   <button
                     key={cls.id}
                     onClick={() =>
-                      navigate(`/teacher/${cls.teacherId}/class/${cls.id}`)
+                      navigate(
+                        `/school/${schoolId}/teacher/${cls.teacherId}/class/${cls.id}`,
+                      )
                     }
-                    className="text-left rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 group"
+                    className="text-left rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 group cursor-pointer"
                     style={{
                       background: "#F5F5F5",
                       border: "1px solid #dff3ff",
@@ -603,7 +611,8 @@ export function SchoolDashboard() {
                           </h2>
                           <p className="text-sm" style={{ color: "#666" }}>
                             {gradeClasses.length} {t("school.classes")} •{" "}
-                            {gradeStudents.length} {t("school.studentsLowercase")}
+                            {gradeStudents.length}{" "}
+                            {t("school.studentsLowercase")}
                           </p>
                         </div>
                         <div className="text-right">
@@ -630,8 +639,12 @@ export function SchoolDashboard() {
                         {gradeClasses.map((cls) => (
                           <button
                             key={cls.id}
-                            onClick={() => navigate(`/class/${cls.id}`)}
-                            className="p-4 rounded-xl text-left hover:shadow-md transition-all flex-shrink-0 mb-4"
+                            onClick={() =>
+                              navigate(
+                                `/school/${schoolId}/teacher/${cls.teacherId}/class/${cls.id}`,
+                              )
+                            }
+                            className="p-4 rounded-xl text-left hover:shadow-md transition-all flex-shrink-0 mb-4 cursor-pointer"
                             style={{
                               background: "#dff3ff",
                               border: "1px solid #38b6ff",
@@ -695,8 +708,12 @@ export function SchoolDashboard() {
               {studentsInNeed.map((student) => (
                 <button
                   key={student.id}
-                  onClick={() => navigate(`/student/${student.id}`)}
-                  className="p-4 rounded-xl flex items-center justify-between text-left hover:shadow-md transition-all"
+                  onClick={() =>
+                    navigate(
+                      `/school/${schoolId}/teacher/${student.teacherId}/class/${student.classId}/student/${student.id}`,
+                    )
+                  }
+                  className="p-4 rounded-xl flex items-center justify-between text-left hover:shadow-md transition-all cursor-pointer"
                   style={{
                     background: "#ffffff",
                     border: "1px solid #ffcccc",
@@ -730,7 +747,9 @@ export function SchoolDashboard() {
                           : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {student.status === "À risque" ? t("school.atRisk") : t("school.toMonitor")}
+                      {student.status === "À risque"
+                        ? t("school.atRisk")
+                        : t("school.toMonitor")}
                     </span>
                     <ArrowUpRight
                       className="w-4 h-4"

@@ -238,11 +238,21 @@
     },
     "labels": {
       "grade": "Niveau",
+      "classes": "Classes",
       "workshop": "Atelier",
       "status": "Statut",
       "students": "Élèves",
-      "avgWorkshop": "Atelier moy.",
+      "avgCompleted": "Moy. complétés",
+      "avgSuccessful": "Moy. réussis",
+      "avgWorkshop": "Moy. atelier",
       "onTrack": "En voie"
+    },
+    "tooltips": {
+      "classes": "Nombre total de classes enseignées par cet enseignant",
+      "students": "Nombre total d'élèves dans toutes les classes de cet enseignant",
+      "avgCompleted": "Pourcentage moyen d'évaluations complétées (sur 15 évaluations totales par élève)",
+      "avgSuccessful": "Pourcentage moyen d'évaluations réussies à 70% ou plus (statut succès ou adéquat)",
+      "onTrack": "Pourcentage d'élèves atteignant les repères de niveau pour leur année"
     },
     "status": {
       "onTrack": "En voie",
@@ -626,6 +636,7 @@
   "studentPage": {
     "studentNotFound": "Élève non trouvé",
     "backToClassList": "Retour à la liste de classe",
+    "backToAcademics": "Retour aux académiques",
     "smlTitle": "Système de mesure en lecture (SML)",
     "exportReport": "Exporter le rapport",
     "benchmarkTitle": "Progression par rapport aux attentes de niveau",

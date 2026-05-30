@@ -15,7 +15,7 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
   const { t } = useTranslation();
   const updateTeachers = useTeacherStore((state) => state.updateTeachers);
   const currentUser = useAuthStore((state) => state.currentUser);
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -53,7 +53,10 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
       newErrors.email = t("profile.errors.emailInvalid");
     }
 
-    if (formData.phoneNumber && !/^\d{10}$/.test(formData.phoneNumber.replace(/\D/g, ""))) {
+    if (
+      formData.phoneNumber &&
+      !/^\d{10}$/.test(formData.phoneNumber.replace(/\D/g, ""))
+    ) {
       newErrors.phoneNumber = t("profile.errors.phoneInvalid");
     }
 
@@ -64,7 +67,7 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
 
     // Generate a new teacher ID
     const newTeacherId = `t-${Date.now()}`;
-    
+
     // Get school info from current user
     const schoolId = currentUser?.type === "school" ? currentUser.id : "";
     const boardId = currentUser?.type === "school" ? currentUser.boardId : "";
@@ -79,13 +82,15 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
       schoolId,
       boardId,
       boardName: currentUser?.type === "school" ? "Commission scolaire" : "",
-      subjects: formData.subjects ? formData.subjects.split(",").map(s => s.trim()) : [],
+      subjects: formData.subjects
+        ? formData.subjects.split(",").map((s) => s.trim())
+        : [],
       password: "password123", // Default password
       yearsExperience: 0,
     };
 
     updateTeachers(newTeacher);
-    
+
     // Reset form
     setFormData({
       firstName: "",
@@ -150,13 +155,18 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm mb-2" style={{ color: "#000000" }}>
+              <label
+                className="block text-sm mb-2"
+                style={{ color: "#000000" }}
+              >
                 {t("profile.firstName")}
               </label>
               <input
                 type="text"
                 value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border"
                 style={{
                   background: "#dff3ff",
@@ -172,13 +182,18 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
             </div>
 
             <div>
-              <label className="block text-sm mb-2" style={{ color: "#000000" }}>
+              <label
+                className="block text-sm mb-2"
+                style={{ color: "#000000" }}
+              >
                 {t("profile.lastName")}
               </label>
               <input
                 type="text"
                 value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
                 className="w-full px-4 py-3 rounded-xl border"
                 style={{
                   background: "#dff3ff",
@@ -201,7 +216,9 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
@@ -223,7 +240,9 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
             <input
               type="tel"
               value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
@@ -245,7 +264,9 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
             <input
               type="text"
               value={formData.subjects}
-              onChange={(e) => setFormData({ ...formData, subjects: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, subjects: e.target.value })
+              }
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",

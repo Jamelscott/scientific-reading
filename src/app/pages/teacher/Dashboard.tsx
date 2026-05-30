@@ -133,7 +133,7 @@ export function TeacherDashboard() {
                       onClick={() =>
                         navigate(`/teacher/${teacherId}/class/${classItem.id}`)
                       }
-                      className="w-full py-3 rounded-xl transition-all"
+                      className="w-full py-3 rounded-xl transition-all cursor-pointer"
                       style={{ background: "#004aad", color: "#ffffff" }}
                     >
                       {t("dashboard.viewMyClass")}
@@ -141,7 +141,7 @@ export function TeacherDashboard() {
                     {editMode && (
                       <button
                         onClick={() => setShowDeleteId(classItem.id)}
-                        className="px-4 py-3 rounded-xl flex items-center gap-2 transition-all bg-[#ff5757] text-white"
+                        className="px-4 py-3 rounded-xl flex items-center gap-2 transition-all bg-[#ff5757] text-white cursor-pointer"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>

@@ -53,7 +53,7 @@ export function ResourcePage() {
             <div>
               <button
                 onClick={() => navigate(`/teacher/${teacherId}/library`)}
-                className="flex items-center gap-2 mb-4 text-sm"
+                className="flex items-center gap-2 mb-4 text-sm hover:shadow-md transition-all cursor-pointer"
                 style={{ color: "#38b6ff" }}
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -97,7 +97,7 @@ export function ResourcePage() {
               <button
                 key={item.id}
                 onClick={() => handleDownload(item.fileName)}
-                className="rounded-2xl p-6 shadow-lg transition-all hover:shadow-xl text-left flex items-center justify-between group"
+                className="rounded-2xl p-6 shadow-lg transition-all hover:shadow-xl text-left flex items-center justify-between group cursor-pointer"
                 style={{
                   background: "#ffffff",
                   border: `2px solid ${color}30`,

@@ -16,7 +16,7 @@ interface ClassTableProps {
 export function ClassTable({ students, classId }: ClassTableProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { teacherId } = useParams();
+  const { teacherId, schoolId } = useParams();
   const getUnitsData = useUnitsStore((state) => state.unitsData);
 
   const getAnswersByEvaluation = useUnitsStore(
@@ -201,7 +201,11 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                       >
                         <Link
                           className="hover:underline text-blue-500"
-                          to={`/teacher/${teacherId}/class/${classId}/student/${student.id}`}
+                          to={
+                            schoolId
+                              ? `/school/${schoolId}/teacher/${teacherId}/class/${classId}/student/${student.id}`
+                              : `/teacher/${teacherId}/class/${classId}/student/${student.id}`
+                          }
                         >
                           {student.name}
                         </Link>
@@ -235,8 +239,11 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                               <EvaluationButton
                                 status={status}
                                 onClick={() => {
+                                  const basePath = schoolId
+                                    ? `/school/${schoolId}/teacher/${teacherId}/class/${classId}`
+                                    : `/teacher/${teacherId}/class/${classId}`;
                                   navigate(
-                                    `/teacher/${teacherId}/class/${classId}/student/${student.id}/evaluation/${evaluation.id}`,
+                                    `${basePath}/student/${student.id}/evaluation/${evaluation.id}`,
                                   );
                                 }}
                                 empty={status === null}

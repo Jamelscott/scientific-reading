@@ -124,6 +124,21 @@ export const router = createBrowserRouter([
           { path: "teachers", Component: SchoolTeachers },
           { path: "settings", Component: SchoolSettings },
           { path: "academics", Component: Academics },
+          {
+            path: "teacher/:teacherId/class/:classId",
+            Component: ClassPage,
+            errorElement: <ErrorBoundary />,
+          },
+          {
+            path: "teacher/:teacherId/class/:classId/student/:studentId/evaluation/:evaluationId",
+            Component: UnitEvaluationRouter,
+            errorElement: <ErrorBoundary />,
+          },
+          {
+            path: "teacher/:teacherId/class/:classId/student/:studentId",
+            Component: StudentPage,
+            errorElement: <ErrorBoundary />,
+          },
         ],
       },
     ],

@@ -126,7 +126,7 @@ export function UnitDashboard() {
             <div>
               <button
                 onClick={() => navigate(`/teacher/${teacherId}/library/`)}
-                className="flex items-center gap-2 mb-4 text-sm"
+                className="flex items-center gap-2 mb-4 text-sm hover:font-bold"
                 style={{ color: "#38b6ff" }}
               >
                 <ArrowLeft className="w-4 h-4" />

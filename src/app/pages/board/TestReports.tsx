@@ -125,7 +125,7 @@ export function SchoolReportsPage() {
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm hover:shadow-md cursor-pointer"
               style={{
                 background: active ? "#dff3ff" : "transparent",
                 color: active ? "#004aad" : "#444",
@@ -141,7 +141,7 @@ export function SchoolReportsPage() {
         <LangToggle />
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:shadow-md transition-all cursor-pointer"
           style={{ color: "#ff5757" }}
         >
           <LogOut className="w-4 h-4" />
@@ -250,7 +250,7 @@ export function SchoolReportsPage() {
                 {t("school.gradeBenchmarks")}
               </h2>
               <button
-                className="px-3 py-1.5 rounded-lg text-xs"
+                className="px-3 py-1.5 rounded-lg text-xs hover:shadow-md transition-all cursor-pointer"
                 style={{ background: "#38b6ff", color: "#ffffff" }}
               >
                 <Download className="w-3 h-3 inline mr-1" />
@@ -328,7 +328,7 @@ export function SchoolReportsPage() {
               Performance par classe
             </h2>
             <button
-              className="px-3 py-1.5 rounded-lg text-xs"
+              className="px-3 py-1.5 rounded-lg text-xs hover:shadow-md transition-all cursor-pointer"
               style={{ background: "#38b6ff", color: "#ffffff" }}
             >
               <Download className="w-3 h-3 inline mr-1" />

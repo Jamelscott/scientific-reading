@@ -144,7 +144,7 @@ export function LibraryPage() {
                           `/teacher/${teacherId}/library/unit/${unitNum}`,
                         )
                       }
-                      className="w-full py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+                      className="w-full py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-md cursor-pointer"
                       style={{
                         background: `var(--unit-${unitNum}-bg-15)`,
                         color: `var(--unit-${unitNum}-text)`,
@@ -243,7 +243,7 @@ export function LibraryPage() {
                           `/teacher/${teacherId}/library/resources/${categorySlug}/${activitySlug}`,
                         )
                       }
-                      className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all text-left"
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all text-left hover:shadow-md cursor-pointer"
                       style={{
                         background: `${category.color}08`,
                         border: `1px solid ${category.color}20`,

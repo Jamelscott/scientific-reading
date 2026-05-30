@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   Users,
   School,
@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "../../components/Sidebar";
-import { getStudentsForAcademics, getTeachersPerformance } from "../../../stores/storeHelpers";
+import { Tooltip } from "../../components/ui/Tooltip";
+import {
+  getStudentsForAcademics,
+  getTeachersPerformance,
+} from "../../../stores/storeHelpers";
 
 type ViewMode = "students" | "teachers";
 type SortField =
@@ -35,26 +39,28 @@ interface FilterState {
 
 export function Academics() {
   const navigate = useNavigate();
+  const { schoolId } = useParams();
   const { t } = useTranslation();
-  const [viewMode, setViewMode] = useState<ViewMode>("students");
+  const [viewMode, setViewMode] = useState<ViewMode>("teachers");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [showFilters, setShowFilters] = useState(false);
 
   // Get data from stores via helper functions
   const studentsData = getStudentsForAcademics();
+  console.log(studentsData);
   const teachersData = getTeachersPerformance();
 
   const [filters, setFilters] = useState<FilterState>({
     grades: [],
     teachers: [],
-    atelierRange: [1, 14],
+    atelierRange: [0, 15],
     enVoieOnly: false,
     enRiskOnly: false,
     searchQuery: "",
   });
 
-  const grades = ["Maternelle", "Jardin", "1re année", "2e année"];
+  const grades = ["Maternelle", "Jardin", "1re année", "2e année", "3e année"];
   const allTeachers = useMemo(
     () => teachersData.map((t: { name: string }) => t.name),
     [teachersData],
@@ -85,7 +91,14 @@ export function Academics() {
     }
     // Apply filters
     if (filters.grades.length > 0) {
-      data = data.filter((item) => filters.grades.includes(item.grade));
+      if (viewMode === "students") {
+        data = data.filter((item) => filters.grades.includes(item.grade));
+      } else {
+        // For teachers, check if they teach any of the filtered grades
+        data = data.filter((item) =>
+          item.grades.some((grade: string) => filters.grades.includes(grade)),
+        );
+      }
     }
 
     if (viewMode === "students") {
@@ -103,14 +116,8 @@ export function Academics() {
       if (filters.enRiskOnly) {
         data = data.filter((item) => !item.enVoie);
       }
-    } else {
-      // For teachers, filter by avgAtelier range
-      data = data.filter(
-        (item) =>
-          item.avgAtelier >= filters.atelierRange[0] &&
-          item.avgAtelier <= filters.atelierRange[1],
-      );
     }
+    // Note: atelierRange filter not applied to teachers since avgAtelier is now a percentage
 
     // Apply sorting
     data.sort((a, b) => {
@@ -144,14 +151,14 @@ export function Academics() {
     filters.teachers.length +
     (filters.enVoieOnly ? 1 : 0) +
     (filters.enRiskOnly ? 1 : 0) +
-    (filters.atelierRange[0] !== 1 || filters.atelierRange[1] !== 14 ? 1 : 0) +
+    (filters.atelierRange[0] !== 0 || filters.atelierRange[1] !== 15 ? 1 : 0) +
     (filters.searchQuery.trim() ? 1 : 0);
 
   const clearFilters = () => {
     setFilters({
       grades: [],
       teachers: [],
-      atelierRange: [1, 14],
+      atelierRange: [0, 15],
       enVoieOnly: false,
       enRiskOnly: false,
       searchQuery: "",
@@ -175,7 +182,7 @@ export function Academics() {
       <Sidebar />
 
       {/* Main */}
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-12">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -205,19 +212,8 @@ export function Academics() {
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <button
-                onClick={() => setViewMode("students")}
-                className="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 font-medium"
-                style={{
-                  background: viewMode === "students" ? "#004aad" : "#dff3ff",
-                  color: viewMode === "students" ? "#ffffff" : "#004aad",
-                }}
-              >
-                <Users className="w-4 h-4" />
-                {t("academics.viewMode.students")} ({studentsData.length})
-              </button>
-              <button
                 onClick={() => setViewMode("teachers")}
-                className="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 font-medium"
+                className="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 font-medium hover:shadow-md cursor-pointer"
                 style={{
                   background: viewMode === "teachers" ? "#004aad" : "#dff3ff",
                   color: viewMode === "teachers" ? "#ffffff" : "#004aad",
@@ -225,6 +221,17 @@ export function Academics() {
               >
                 <UserCircle className="w-4 h-4" />
                 {t("academics.viewMode.teachers")} ({teachersData.length})
+              </button>
+              <button
+                onClick={() => setViewMode("students")}
+                className="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 font-medium hover:shadow-md cursor-pointer"
+                style={{
+                  background: viewMode === "students" ? "#004aad" : "#dff3ff",
+                  color: viewMode === "students" ? "#ffffff" : "#004aad",
+                }}
+              >
+                <Users className="w-4 h-4" />
+                {t("academics.viewMode.students")} ({studentsData.length})
               </button>
             </div>
             <div className="flex-1 max-w-md relative">
@@ -253,7 +260,7 @@ export function Academics() {
               {filters.searchQuery && (
                 <button
                   onClick={() => setFilters({ ...filters, searchQuery: "" })}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center hover:opacity-70 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center hover:opacity-70 hover:shadow-md transition-all cursor-pointer"
                   style={{ background: "#dff3ff" }}
                 >
                   <X className="w-3 h-3" style={{ color: "#004aad" }} />
@@ -262,14 +269,15 @@ export function Academics() {
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 hover:shadow-md cursor-pointer"
               style={{
                 background: activeFiltersCount > 0 ? "#38b6ff" : "#dff3ff",
                 color: activeFiltersCount > 0 ? "#ffffff" : "#004aad",
               }}
             >
               <Filter className="w-4 h-4" />
-              {t("academics.filters.title")} {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+              {t("academics.filters.title")}{" "}
+              {activeFiltersCount > 0 && `(${activeFiltersCount})`}
             </button>
           </div>
         </div>
@@ -287,7 +295,7 @@ export function Academics() {
               {activeFiltersCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:shadow-md transition-all cursor-pointer"
                   style={{ background: "#ff5757", color: "#ffffff" }}
                 >
                   <X className="w-3 h-3" />
@@ -400,8 +408,8 @@ export function Academics() {
                     </label>
                     <input
                       type="range"
-                      min="1"
-                      max="14"
+                      min="0"
+                      max="15"
                       value={filters.atelierRange[0]}
                       onChange={(e) =>
                         setFilters({
@@ -422,8 +430,8 @@ export function Academics() {
                     </label>
                     <input
                       type="range"
-                      min="1"
-                      max="14"
+                      min="0"
+                      max="15"
                       value={filters.atelierRange[1]}
                       onChange={(e) =>
                         setFilters({
@@ -498,7 +506,10 @@ export function Academics() {
             style={{ borderColor: "#dff3ff", background: "#f7ffd6" }}
           >
             <p className="text-sm font-semibold" style={{ color: "#004aad" }}>
-              {filteredAndSortedData.length} {filteredAndSortedData.length !== 1 ? t("academics.results.results") : t("academics.results.result")}
+              {filteredAndSortedData.length}{" "}
+              {filteredAndSortedData.length !== 1
+                ? t("academics.results.results")
+                : t("academics.results.result")}
             </p>
           </div>
 
@@ -517,7 +528,7 @@ export function Academics() {
               <>
                 <button
                   onClick={() => toggleSort("name")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background: sortField === "name" ? "#004aad" : "#dff3ff",
                     color: sortField === "name" ? "#ffffff" : "#004aad",
@@ -529,7 +540,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("grade")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background: sortField === "grade" ? "#004aad" : "#dff3ff",
                     color: sortField === "grade" ? "#ffffff" : "#004aad",
@@ -541,7 +552,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("atelier")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background: sortField === "atelier" ? "#004aad" : "#dff3ff",
                     color: sortField === "atelier" ? "#ffffff" : "#004aad",
@@ -553,7 +564,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("teacher")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background: sortField === "teacher" ? "#004aad" : "#dff3ff",
                     color: sortField === "teacher" ? "#ffffff" : "#004aad",
@@ -568,7 +579,7 @@ export function Academics() {
               <>
                 <button
                   onClick={() => toggleSort("name")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer"
                   style={{
                     background: sortField === "name" ? "#004aad" : "#dff3ff",
                     color: sortField === "name" ? "#ffffff" : "#004aad",
@@ -580,7 +591,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("grade")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer"
                   style={{
                     background: sortField === "grade" ? "#004aad" : "#dff3ff",
                     color: sortField === "grade" ? "#ffffff" : "#004aad",
@@ -592,7 +603,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("students")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background:
                       sortField === "students" ? "#004aad" : "#dff3ff",
@@ -605,7 +616,7 @@ export function Academics() {
                 </button>
                 <button
                   onClick={() => toggleSort("enVoie")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md cursor-pointer"
                   style={{
                     background: sortField === "enVoie" ? "#004aad" : "#dff3ff",
                     color: sortField === "enVoie" ? "#ffffff" : "#004aad",
@@ -638,9 +649,19 @@ export function Academics() {
               filteredAndSortedData.map((student: any) => (
                 <button
                   key={student.id}
-                  onClick={() => navigate(`/student/${student.id}`)}
-                  className="w-full p-5 flex items-center justify-between hover:bg-opacity-50 transition-all text-left group"
+                  onClick={() =>
+                    navigate(
+                      `/school/${schoolId}/teacher/${student.teacherId}/class/${student.classId}/student/${student.id}`,
+                    )
+                  }
+                  className="w-full p-5 flex items-center justify-between transition-all text-left group cursor-pointer hover:shadow-md"
                   style={{ background: "#ffffff" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#f0f9ff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#ffffff";
+                  }}
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div
@@ -654,7 +675,7 @@ export function Academics() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className="font-semibold text-sm mb-0.5"
+                        className="font-semibold text-sm mb-0.5 group-hover:underline"
                         style={{ color: "#004aad" }}
                       >
                         {student.name}
@@ -665,43 +686,51 @@ export function Academics() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="text-right">
+                    <div className="text-center" style={{ width: "100px" }}>
                       <p className="text-xs mb-1" style={{ color: "#888" }}>
                         {t("academics.labels.grade")}
                       </p>
-                      <span
-                        className="text-xs px-2 py-1 rounded-full"
-                        style={{ background: "#dff3ff", color: "#004aad" }}
-                      >
-                        {student.grade}
-                      </span>
+                      <div className="flex justify-center">
+                        <span
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{ background: "#dff3ff", color: "#004aad" }}
+                        >
+                          {student.grade}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-center" style={{ width: "80px" }}>
                       <p className="text-xs mb-1" style={{ color: "#888" }}>
                         {t("academics.labels.workshop")}
                       </p>
-                      <span
-                        className="text-xs px-2 py-1 rounded-full font-semibold"
-                        style={{
-                          background: getAtelierColor(student.atelier),
-                          color: "#ffffff",
-                        }}
-                      >
-                        A{student.atelier}
-                      </span>
+                      <div className="flex justify-center">
+                        <span
+                          className="text-xs px-2 py-1 rounded-full font-semibold"
+                          style={{
+                            background: getAtelierColor(student.atelier),
+                            color: "#ffffff",
+                          }}
+                        >
+                          A{student.atelier}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-center" style={{ width: "100px" }}>
                       <p className="text-xs mb-1" style={{ color: "#888" }}>
                         {t("academics.labels.status")}
                       </p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full font-medium ${student.enVoie ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                      >
-                        {student.enVoie ? t("academics.status.onTrack") : t("academics.status.atRisk")}
-                      </span>
+                      <div className="flex justify-center">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${student.enVoie ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                        >
+                          {student.enVoie
+                            ? t("academics.status.onTrack")
+                            : t("academics.status.atRisk")}
+                        </span>
+                      </div>
                     </div>
                     <ArrowUpRight
-                      className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                      className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform opacity-60 group-hover:opacity-100"
                       style={{ color: "#38b6ff" }}
                     />
                   </div>
@@ -743,20 +772,30 @@ export function Academics() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-xs mb-1" style={{ color: "#888" }}>
-                        {t("academics.labels.grade")}
-                      </p>
-                      <span
-                        className="text-xs px-2 py-1 rounded-full"
-                        style={{ background: "#dff3ff", color: "#004aad" }}
+                      <Tooltip
+                        label={t("academics.tooltips.classes")}
+                        position="top"
                       >
-                        {teacher.grade}
-                      </span>
+                        <p className="text-xs mb-1" style={{ color: "#888" }}>
+                          {t("academics.labels.classes")}
+                        </p>
+                      </Tooltip>
+                      <p
+                        className="text-lg font-bold"
+                        style={{ color: "orange" }}
+                      >
+                        {teacher.numClasses}
+                      </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs mb-1" style={{ color: "#888" }}>
-                        {t("academics.labels.students")}
-                      </p>
+                      <Tooltip
+                        label={t("academics.tooltips.students")}
+                        position="top"
+                      >
+                        <p className="text-xs mb-1" style={{ color: "#888" }}>
+                          {t("academics.labels.students")}
+                        </p>
+                      </Tooltip>
                       <p
                         className="text-lg font-bold"
                         style={{ color: "#004aad" }}
@@ -765,20 +804,46 @@ export function Academics() {
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs mb-1" style={{ color: "#888" }}>
-                        {t("academics.labels.avgWorkshop")}
+                      <Tooltip
+                        label={t("academics.tooltips.avgCompleted")}
+                        position="top"
+                      >
+                        <p className="text-xs mb-1" style={{ color: "#888" }}>
+                          {t("academics.labels.avgCompleted")}
+                        </p>
+                      </Tooltip>
+                      <p
+                        className="text-lg font-bold"
+                        style={{ color: "#6366f1" }}
+                      >
+                        {teacher.avgCompleted.toFixed(1)}%
                       </p>
+                    </div>
+                    <div className="text-center">
+                      <Tooltip
+                        label={t("academics.tooltips.avgSuccessful")}
+                        position="top"
+                      >
+                        <p className="text-xs mb-1" style={{ color: "#888" }}>
+                          {t("academics.labels.avgSuccessful")}
+                        </p>
+                      </Tooltip>
                       <p
                         className="text-lg font-bold"
                         style={{ color: "#38b6ff" }}
                       >
-                        {teacher.avgAtelier.toFixed(1)}
+                        {teacher.avgAtelier.toFixed(1)}%
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs mb-1" style={{ color: "#888" }}>
-                        {t("academics.labels.onTrack")}
-                      </p>
+                      <Tooltip
+                        label={t("academics.tooltips.onTrack")}
+                        position="top"
+                      >
+                        <p className="text-xs mb-1" style={{ color: "#888" }}>
+                          {t("academics.labels.onTrack")}
+                        </p>
+                      </Tooltip>
                       <p
                         className="text-lg font-bold"
                         style={{

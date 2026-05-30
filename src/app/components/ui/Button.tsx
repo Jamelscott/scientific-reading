@@ -24,7 +24,7 @@ export function Button({
 }: ButtonProps) {
   const { t } = useTranslation();
   const baseStyles =
-    "inline-flex items-center justify-center transition-all active:scale-95";
+    "inline-flex items-center justify-center transition-all active:scale-95 hover:shadow-md cursor-pointer";
 
   const sizeStyles = {
     small: "py-2 px-4 text-sm rounded-lg",

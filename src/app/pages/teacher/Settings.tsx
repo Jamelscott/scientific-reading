@@ -112,7 +112,7 @@ export function SettingsPage() {
                         [key]: !prev[key],
                       }))
                     }
-                    className="w-12 h-6 rounded-full transition-all relative"
+                    className="w-12 h-6 rounded-full transition-all relative hover:shadow-md cursor-pointer"
                     style={{
                       background: notifications[key] ? "#004aad" : "#d1d5db",
                     }}

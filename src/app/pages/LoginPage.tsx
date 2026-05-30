@@ -104,7 +104,7 @@ export function LoginPage() {
       <div className="fixed top-4 right-4 z-10">
         <button
           onClick={handleLanguageToggle}
-          className="px-4 py-2 rounded-lg border transition-all flex items-center gap-2"
+          className="px-4 py-2 rounded-lg border transition-all flex items-center gap-2 hover:shadow-md cursor-pointer"
           style={{
             background: "#ffffff",
             borderColor: "#dff3ff",
@@ -172,7 +172,7 @@ export function LoginPage() {
                   <button
                     key={id}
                     onClick={() => handlePortalSelect(id)}
-                    className="w-full flex items-center gap-4 p-5 rounded-2xl text-left transition-all hover:shadow-md group"
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl text-left transition-all hover:shadow-md group cursor-pointer"
                     style={{
                       background: bg,
                       border: `1.5px solid ${border}`,
@@ -213,7 +213,7 @@ export function LoginPage() {
             <>
               <button
                 onClick={() => setSelectedPortal(null)}
-                className="flex items-center gap-2 text-sm mb-8 hover:opacity-70 transition-opacity"
+                className="flex items-center gap-2 text-sm mb-8 hover:opacity-70 hover:shadow-md transition-all cursor-pointer"
                 style={{ color: "#004aad" }}
               >
                 <ArrowRight className="w-4 h-4 rotate-180" />

@@ -678,7 +678,7 @@ export function EvaluationPage() {
                 <button
                   key={student.id}
                   onClick={() => navigate(`/student/${student.id}`)}
-                  className="px-4 py-3 rounded-xl transition-all text-left hover:shadow-md"
+                  className="px-4 py-3 rounded-xl transition-all text-left hover:shadow-md cursor-pointer"
                   style={{
                     background: "#dff3ff",
                     border: "1px solid #38b6ff",
@@ -703,7 +703,7 @@ export function EvaluationPage() {
             </h2>
             <div className="flex gap-4">
               <button
-                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all hover:shadow-md cursor-pointer"
                 style={{
                   background: "#004aad",
                   color: "#ffffff",
@@ -713,7 +713,7 @@ export function EvaluationPage() {
                 {t("reports.fullReportPDF")}
               </button>
               <button
-                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+                className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all hover:shadow-md cursor-pointer"
                 style={{
                   background: "#ffffff",
                   border: "1px solid #dff3ff",

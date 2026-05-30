@@ -58,7 +58,7 @@ const getStatusText = (
 
 export function StudentPage() {
   const navigate = useNavigate();
-  const { studentId, teacherId, classId } = useParams();
+  const { studentId, teacherId, classId, schoolId } = useParams();
   const { t } = useTranslation();
   const unitData = useUnitsStore((state) => state.unitsData);
   const student = useStudentStore((state) => state.getStudentById(studentId!));
@@ -224,12 +224,18 @@ export function StudentPage() {
       >
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(`/teacher/${teacherId}/class/${classId}`)}
-            className="flex items-center gap-2 mb-4 text-sm"
+            onClick={() =>
+              schoolId
+                ? navigate(`/school/${schoolId}/academics`)
+                : navigate(`/teacher/${teacherId}/class/${classId}`)
+            }
+            className="flex items-center gap-2 mb-4 text-sm hover:font-bold transition-all cursor-pointer"
             style={{ color: "#38b6ff" }}
           >
             <ArrowLeft className="w-4 h-4" />
-            {t("studentPage.backToClassList")}
+            {schoolId
+              ? t("studentPage.backToAcademics")
+              : t("studentPage.backToClassList")}
           </button>
 
           <div className="flex items-center justify-between">
@@ -243,7 +249,7 @@ export function StudentPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowStudentDropdown(!showStudentDropdown)}
-                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:shadow-md transition-all cursor-pointer"
                   style={{ color: "#004aad" }}
                 >
                   {student.name}
@@ -266,7 +272,7 @@ export function StudentPage() {
                       <button
                         key={s.id}
                         onClick={() => handleStudentChange(s.id)}
-                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02]"
+                        className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02] hover:shadow-md cursor-pointer"
                         style={{
                           backgroundColor:
                             s.id === parseInt(studentId || "", 10)
