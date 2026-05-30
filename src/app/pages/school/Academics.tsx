@@ -740,8 +740,21 @@ export function Academics() {
               filteredAndSortedData.map((teacher: any) => (
                 <div
                   key={teacher.id}
-                  className="p-5 flex items-center justify-between hover:bg-opacity-50 transition-all"
+                  onClick={() =>
+                    navigate(
+                      schoolId
+                        ? `/school/${schoolId}/teacher/${teacher.id}`
+                        : `/board/teacher/${teacher.id}`
+                    )
+                  }
+                  className="p-5 flex items-center justify-between hover:bg-opacity-50 transition-all cursor-pointer group hover:shadow-md"
                   style={{ background: "#ffffff" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#f0f9ff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#ffffff";
+                  }}
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div
@@ -760,7 +773,7 @@ export function Academics() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className="font-semibold text-base mb-0.5"
+                        className="font-semibold text-base mb-0.5 group-hover:underline"
                         style={{ color: "#004aad" }}
                       >
                         {teacher.name}
@@ -816,7 +829,7 @@ export function Academics() {
                         className="text-lg font-bold"
                         style={{ color: "#6366f1" }}
                       >
-                        {teacher.avgCompleted.toFixed(1)}%
+                        {Math.round(teacher.avgCompleted)}%
                       </p>
                     </div>
                     <div className="text-center">
@@ -832,7 +845,7 @@ export function Academics() {
                         className="text-lg font-bold"
                         style={{ color: "#38b6ff" }}
                       >
-                        {teacher.avgAtelier.toFixed(1)}%
+                        {Math.round(teacher.avgAtelier)}%
                       </p>
                     </div>
                     <div className="text-center">
@@ -858,6 +871,10 @@ export function Academics() {
                         {teacher.enVoie}%
                       </p>
                     </div>
+                    <ArrowUpRight
+                      className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform opacity-60 group-hover:opacity-100"
+                      style={{ color: "#38b6ff" }}
+                    />
                   </div>
                 </div>
               ))

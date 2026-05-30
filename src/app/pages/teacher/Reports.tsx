@@ -103,19 +103,19 @@ export function ReportsPage() {
     return {
       good:
         submittedCount > 0
-          ? ((successCount / submittedCount) * 100).toFixed(1)
+          ? Math.round((successCount / submittedCount) * 100).toString()
           : "0",
       satisfactory:
         submittedCount > 0
-          ? ((adequateCount / submittedCount) * 100).toFixed(1)
+          ? Math.round((adequateCount / submittedCount) * 100).toString()
           : "0",
       failing:
         submittedCount > 0
-          ? ((needsImprovementCount / submittedCount) * 100).toFixed(1)
+          ? Math.round((needsImprovementCount / submittedCount) * 100).toString()
           : "0",
       notSubmitted:
         expectedTotal > 0
-          ? ((notSubmittedCount / expectedTotal) * 100).toFixed(1)
+          ? Math.round((notSubmittedCount / expectedTotal) * 100).toString()
           : "0",
     };
   };

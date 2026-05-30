@@ -20,6 +20,7 @@ import { SchoolProfile } from "./pages/school/Profile";
 import { SchoolReports } from "./pages/school/Reports";
 import { SchoolTeachers } from "./pages/school/Teachers";
 import { Settings as SchoolSettings } from "./pages/school/Settings";
+import { TeacherPage } from "./pages/school/TeacherPage";
 
 // Board pages
 import { BoardDashboard } from "./pages/board/Dashboard";
@@ -125,6 +126,11 @@ export const router = createBrowserRouter([
           { path: "settings", Component: SchoolSettings },
           { path: "academics", Component: Academics },
           {
+            path: "teacher/:teacherId",
+            Component: TeacherPage,
+            errorElement: <ErrorBoundary />,
+          },
+          {
             path: "teacher/:teacherId/class/:classId",
             Component: ClassPage,
             errorElement: <ErrorBoundary />,
@@ -160,6 +166,11 @@ export const router = createBrowserRouter([
       { path: "reports", Component: BoardReports },
       { path: "schools", Component: BoardSchools },
       { path: "settings", Component: BoardSettings },
+      {
+        path: "teacher/:teacherId",
+        Component: TeacherPage,
+        errorElement: <ErrorBoundary />,
+      },
     ],
   },
   {
