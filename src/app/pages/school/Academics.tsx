@@ -744,7 +744,7 @@ export function Academics() {
                     navigate(
                       schoolId
                         ? `/school/${schoolId}/teacher/${teacher.id}`
-                        : `/board/teacher/${teacher.id}`
+                        : `/board/teacher/${teacher.id}`,
                     )
                   }
                   className="p-5 flex items-center justify-between hover:bg-opacity-50 transition-all cursor-pointer group hover:shadow-md"

@@ -8,7 +8,7 @@ import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
+import type { Questions, StudentAnswers } from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
 type EvaluationFourState = {
@@ -29,22 +29,22 @@ export function UnitOneEvaluationSix() {
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
-  const classAnswers = evaluations(Number(classId));
+  const classAnswers = evaluations(classId!);
   const classAnswersMap = useMemo(() => {
-    const studentMap = new Map<number, Map<number, StudentAnswers>>();
+    const studentMap = new Map<string, Map<string, StudentAnswers>>();
 
     classAnswers.forEach((answer) => {
-      const { studentId, unitDataId } = answer;
-      if (!studentMap.has(studentId)) {
-        studentMap.set(studentId, new Map());
+      const { student_id, unit_data_id } = answer;
+      if (!studentMap.has(student_id)) {
+        studentMap.set(student_id, new Map());
       }
-      studentMap.get(studentId)!.set(unitDataId, answer);
+      studentMap.get(student_id)!.set(unit_data_id, answer);
     });
 
     return studentMap;
   }, [classAnswers]);
-  const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
-  const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
+  const evaluationAnswersMap = classAnswersMap.get(studentId!);
+  const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
   const evaluationSixData = unitsData[5];
 
   const getKeys = (cat: any) =>
@@ -76,7 +76,7 @@ export function UnitOneEvaluationSix() {
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
 
-    const ans: MockQuestions = singleAnswer.answers;
+    const ans: Questions = singleAnswer.answers;
     const startOfWordData = ans.startOfWord as any;
     const endOfWordData = ans.endOfWord as any;
 
@@ -174,9 +174,9 @@ export function UnitOneEvaluationSix() {
     };
 
     updateAnswer(
-      Number(studentId),
-      Number(classId),
-      Number(evaluationId),
+      studentId!,
+      classId!,
+      evaluationId!,
       answers,
       evaluationSix.comments,
       !notRequired,

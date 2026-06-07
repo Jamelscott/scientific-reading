@@ -48,59 +48,58 @@ export type QuestionMap = Record<string, QuestionValue>;
 export type QuestionCategory = QuestionMap | QuestionValue | QuestionValue[];
 
 // MockQuestions is a map of question categories to their values
-export type MockQuestions = Record<string, QuestionCategory>;
+export type Questions = Record<string, QuestionCategory>;
 
 // Backwards-compatible aliases for older code expecting the previous shapes
 export type MockEvalationQuestions = Record<string, Record<string, boolean | null>>;
 export type MockEvaluation = Record<string, MockEvalationQuestions>;
 export type LegacyMockQuestions = MockEvaluation;
-
+  
 export interface StudentAnswers {
-  id: number;
-  studentId: number;
-  classId: number;
-  unitDataId: number;
-  answers: MockQuestions;
+  id: string;
+  student_id: string;
+  class_id: string;
+  unit_data_id: string;
+  answers: Questions;
   comment:string;
   required: boolean;
-  lastModified: string,
   status?: "success" | "adequate" | "needs-improvement" | null;
 }
 
 export interface Student {
-  id: number;
+  id: string;
   name: string;
-  classIds: number[]; // Array of class IDs the student belongs to
-  schoolId: number; // School ID the student is associated with
+  class_id: string; // ID of the class the student belongs to
+  school_id: string; // School ID the student is associated with
   evaluations?: StudentAnswers[]; // Optional array of evaluations for the student
 }
 
 export interface ResourceActivity {
-  id: number;
+  id: string;
   name: string;
   fileName: string;
   description: string;
 }
 
 export interface Resource {
-  id: number;
+  id: string;
   title: string;
   activities: ResourceActivity[];
 }
 
 export interface ResourceCategory {
-  id: number;
+  id: string;
   title: string;
   color: string;
   resources: Resource[];
 }
 
 export interface UnitData {
-  id: number;
+  id: string;
   unit: number;
   title: string;
-  evaluation: number;
-  questions: MockQuestions; // Object with categories (bigLetters, smallLetters, etc.)
+  evaluation: string;
+  questions: Questions; // Object with categories (bigLetters, smallLetters, etc.)
 }
 export type JardinNumber = 0
 export type MaternellNumber = 1
@@ -111,7 +110,7 @@ export type thirdGradeNumber = 4
 export type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e année";
 
 export interface Class {
-  id: number;
+  id: string;
   grade: Grades;
   schoolYear: string;
   teacherId: string; // ID of the teacher associated with this class
@@ -122,8 +121,8 @@ export type TeacherUser = Teacher
 export type Teacher = {
   type: "teacher";
   id: string;
-  schoolId: string;
-  boardId: string;
+  school_id: string;
+  board_id: string;
   name: string;
   email: string;
   school: string;
@@ -149,7 +148,7 @@ export type SchoolUser = {
   type: "school";
   name: string;
   email: string;
-  boardId: string;
+  board_id: string;
   password:string;
 };
 

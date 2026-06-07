@@ -4,40 +4,86 @@ import type {Grades, Student} from "../../mockData/types";
 import { students as studentsT1 } from "../../mockData/teacher-t-1/students";
 import { students as studentsT2 } from "../../mockData/teacher-t-2/students";
 import { useUnitsStore } from "./useUnitsStore";
+import { supabase } from "../utils/supabase";
 
 interface StudentStore {
   students: Student[];
-  setStudents: (userId: string) => void;
+  setSupabaseStudents: (userId: string, userType: string) => Promise<void>;
   setStudentEvaluations: () => void;
-  addStudent: (firstName: string, lastName: string, classIds?: number[], schoolId?: number, grade?: Grades) => void;
-  removeStudentFromClass: (studentId: number, classId: number) => void;
-  getStudentById: (studentId: string) => Student | undefined;
-  getStudentCountByClass: (classId: number) => number;
-  getStudentByClass: (classId: number) => Student[];
+  addStudent: (firstName: string, lastName: string, class_id: string, school_id?: string, grade?: Grades) => void;
+  removeStudentFromClass: (student_id: string, class_id: string) => void;
+  getStudentById: (student_id: string) => Student | undefined;
+  getStudentCountByClass: (class_id: string) => number;
+  getStudentByClass: (class_id: string) => Student[];
 }
 
 export const useStudentStore = create<StudentStore>()(
   persist(
     (set, get) => ({
-      students: [],        
-      setStudents: (userId) => set(() => {
-          if (userId === 't-1') {
-            return { students: studentsT1 };
-          } else if (userId === 't-2') {
-            return { students: studentsT2 };
-        } else if (userId.startsWith('b') || userId.startsWith('s')) {
-            return { students: [...studentsT1, ...studentsT2]}
+      students: [] as Student[],        
+      setSupabaseStudents: async (user_id, userType) => {
+        if (userType === 'teacher') {
+          let { data: students, error } = await supabase
+          .from('students')
+          .select('*')
+          .eq('teacher_id', user_id)
+          .order('id', { ascending: true })
+          if (!students || error) {
+            console.error('Error fetching students for teacher:', error?.message);
+            alert('Failed to fetch students: ' + error?.message);
+            return;
           } else {
-            return { students: [] };
+            set(() => ({ students }));
           }
-      }),
+        } else if (userType === 'board') {
+          let { data: students, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('board_id', user_id)
+            .order('id', { ascending: true })
+          if (!students || error) {
+            console.error('Error fetching students for board:', error?.message);
+            alert('Failed to fetch students: ' + error?.message);
+            return;
+          } else {
+            set(() => ({ students }));
+          }
+        } else if (userType === 'school') {
+          let { data: students, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('school_id', user_id)
+            .order('id', { ascending: true })
+          if (!students || error) {
+            console.error('Error fetching students for school:', error?.message);
+            alert('Failed to fetch students: ' + error?.message);
+            return;
+          } else {
+            set(() => ({ students }));
+          }
+        } else if (userType === 'admin') {
+          //TODO: implement fetching all students for admin
+          return;
+        }
+      },
+      // setStudents: (userId) => set(() => {
+      //     if (userId === 't-1') {
+      //       return { students: studentsT1 };
+      //     } else if (userId === 't-2') {
+      //       return { students: studentsT2 };
+      //   } else if (userId.startsWith('b') || userId.startsWith('s')) {
+      //       return { students: [...studentsT1, ...studentsT2]}
+      //     } else {
+      //       return { students: [] };
+      //     }
+      // }),
       setStudentEvaluations: () =>
         set((state) => {
           const allAnswers = useUnitsStore.getState().answers;
           
           const studentsWithEvaluations = state.students.map((student) => {
             const studentEvaluations = allAnswers.filter(
-              (answer) => answer.studentId === student.id
+              (answer) => answer.student_id === student.id
             );
             
             return {
@@ -48,10 +94,10 @@ export const useStudentStore = create<StudentStore>()(
           
           return { students: studentsWithEvaluations };
         }),
-      addStudent: (firstName: string, lastName: string, classIds = [], schoolId = 1, grade) =>
+      addStudent: (firstName: string, lastName: string, class_id: string, school_id = "1", grade?: Grades) =>
         set((state) => {
           const maxId = state.students.reduce(
-            (max, student) => Math.max(max, student.id),
+            (max, student) => Math.max(max, parseInt(student.id)),
             0
           );
           const newStudentId = maxId + 1;
@@ -59,35 +105,35 @@ export const useStudentStore = create<StudentStore>()(
             students: [
               ...state.students,
               {
-                id: newStudentId,
+                id: newStudentId.toString(),
                 name: `${firstName} ${lastName}`,
-                classIds: classIds,
-                schoolId: schoolId,
+                class_id: class_id,
+                school_id: school_id,
                 grade: grade || "1re année"
-              },
+              } as Student,
             ],
           };
         }),
-      removeStudentFromClass: (studentId, classId) =>
+      removeStudentFromClass: (student_id: string, class_id: string) =>
         set((state) => ({
           students: state.students.map((student) =>
-            student.id === studentId
+            student.id === student_id
               ? {
                   ...student,
-                  classIds: student.classIds.filter((id) => id !== classId),
+                  class_id: student.class_id,
                 }
               : student
           ),
         })),
-        getStudentById(studentId: string): Student | undefined {
-          const student = get().students.find((s: Student) => s.id === parseInt(studentId));
+        getStudentById(student_id: string): Student | undefined {
+          const student = get().students.find((s: Student) => s.id === student_id);
           return student;
         },
-        getStudentCountByClass(classId: number): number {
-          return get().students.filter((student) => student.classIds.includes(classId)).length;
+        getStudentCountByClass(class_id: string): number {
+          return get().students.filter((student) => student.class_id === class_id).length;
         },
-        getStudentByClass(classId: number): Student[] {
-          return get().students.filter((student) => student.classIds.includes(classId));
+        getStudentByClass(class_id: string): Student[] {
+          return get().students.filter((student) => student.class_id === class_id);
         },
     }),
     {

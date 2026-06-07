@@ -22,7 +22,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
   const getAnswersByEvaluation = useUnitsStore(
     (state) => state.getAnswersByEvaluation,
   );
-  console.log(getUnitsData);
+
   const evaluationsData = useMemo(() => getUnitsData, [getUnitsData]);
   const numberOfUnitOneEvaluations = useMemo(() => {
     return evaluationsData.filter((evalData) => evalData.unit === 1).length;
@@ -168,7 +168,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                         color: "#004aad",
                         minWidth: "60px",
                         borderRight: [4, 5, 6, 7, 8, 9, 10, 11, 12].includes(
-                          template.id,
+                          Number(template.id),
                         )
                           ? "1px solid #ffffff"
                           : "none",
@@ -215,12 +215,9 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                           evaluation.id,
                         ).find(
                           (answer) =>
-                            answer.studentId === student.id &&
-                            answer.classId === Number(classId),
+                            answer.student_id === student.id &&
+                            answer.class_id === classId,
                         );
-                        const status = singleAnswer
-                          ? getScoreFromEvaluations(singleAnswer.answers)
-                          : null;
                         return (
                           <td
                             key={evaluation.id}
@@ -237,7 +234,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                               }}
                             >
                               <EvaluationButton
-                                status={status}
+                                status={singleAnswer?.status ?? null}
                                 onClick={() => {
                                   const basePath = schoolId
                                     ? `/school/${schoolId}/teacher/${teacherId}/class/${classId}`
@@ -246,7 +243,9 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                                     `${basePath}/student/${student.id}/evaluation/${evaluation.id}`,
                                   );
                                 }}
-                                empty={status === null}
+                                empty={
+                                  !singleAnswer || singleAnswer.status === null
+                                }
                               />
                             </div>
                           </td>

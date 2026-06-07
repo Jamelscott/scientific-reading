@@ -30,8 +30,8 @@ import { useClassStore, useStudentStore } from "../../../stores";
 import { schoolLevel } from "../const";
 
 const GRADE_COLORS: Record<string, string> = {
-  "Maternelle": "#ff5757",
-  "Jardin": "#ffde59",
+  Maternelle: "#ff5757",
+  Jardin: "#ffde59",
   "1re année": "#c9e265",
   "2e année": "#38b6ff",
   "3e année": "#b8a3d6",
@@ -44,11 +44,11 @@ export function TeacherPage() {
 
   const teachersData = getTeachersPerformance();
   const teacher = teachersData.find((t) => t.id === teacherId);
-  
+
   // Get actual class and student data from stores
   const allClasses = useClassStore((state) => state.classes);
   const allStudents = useStudentStore((state) => state.students);
-  
+
   const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -80,13 +80,15 @@ export function TeacherPage() {
   }
 
   // Get teacher's actual classes
-  const teacherClasses = allClasses.filter((cls) => cls.teacherId === teacherId);
+  const teacherClasses = allClasses.filter(
+    (cls) => cls.teacherId === teacherId,
+  );
 
   // Map grades to schoolLevel categories
   type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e année";
   const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
-    "Maternelle": "kindergarden",
-    "Jardin": "seniorKindergarden",
+    Maternelle: "kindergarden",
+    Jardin: "seniorKindergarden",
     "1re année": "gradeOne",
     "2e année": "gradeTwo",
     "3e année": "gradeTwo",
@@ -96,7 +98,7 @@ export function TeacherPage() {
   const detailedClasses = teacherClasses.map((cls) => {
     // Get students in this class
     const classStudents = allStudents.filter((student) =>
-      student.classIds.includes(cls.id)
+      student.classIds.includes(cls.id),
     );
 
     // Calculate class metrics
@@ -107,12 +109,14 @@ export function TeacherPage() {
     classStudents.forEach((student) => {
       if (student.evaluations && student.evaluations.length > 0) {
         const completedEvaluations = student.evaluations.filter(
-          (evaluation) => evaluation.status !== null && evaluation.status !== undefined
+          (evaluation) =>
+            evaluation.status !== null && evaluation.status !== undefined,
         ).length;
         totalCompleted += completedEvaluations;
 
         const successfulEvaluations = student.evaluations.filter(
-          (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
+          (evaluation) =>
+            evaluation.status === "success" || evaluation.status === "adequate",
         ).length;
         totalSuccessful += successfulEvaluations;
 
@@ -125,15 +129,18 @@ export function TeacherPage() {
       }
     });
 
-    const avgCompleted = classStudents.length > 0
-      ? (totalCompleted / classStudents.length / 15) * 100
-      : 0;
-    const avgAtelier = classStudents.length > 0
-      ? (totalSuccessful / classStudents.length / 15) * 100
-      : 0;
-    const enVoie = classStudents.length > 0
-      ? (studentsOnTrack / classStudents.length) * 100
-      : 0;
+    const avgCompleted =
+      classStudents.length > 0
+        ? (totalCompleted / classStudents.length / 15) * 100
+        : 0;
+    const avgAtelier =
+      classStudents.length > 0
+        ? (totalSuccessful / classStudents.length / 15) * 100
+        : 0;
+    const enVoie =
+      classStudents.length > 0
+        ? (studentsOnTrack / classStudents.length) * 100
+        : 0;
     const atRisk = 100 - enVoie;
 
     return {
@@ -149,10 +156,13 @@ export function TeacherPage() {
   });
 
   // Prepare grade distribution data for pie chart
-  const gradeDistribution = detailedClasses.reduce((acc: Record<string, number>, cls) => {
-    acc[cls.grade] = (acc[cls.grade] || 0) + cls.studentCount;
-    return acc;
-  }, {});
+  const gradeDistribution = detailedClasses.reduce(
+    (acc: Record<string, number>, cls) => {
+      acc[cls.grade] = (acc[cls.grade] || 0) + cls.studentCount;
+      return acc;
+    },
+    {},
+  );
 
   const gradeData = Object.entries(gradeDistribution).map(([grade, count]) => ({
     name: grade,
@@ -202,9 +212,7 @@ export function TeacherPage() {
             style={{ color: "#38b6ff" }}
           >
             <ArrowLeft className="w-4 h-4" />
-            {schoolId
-              ? t("studentPage.backToAcademics")
-              : "Back to Dashboard"}
+            {schoolId ? t("studentPage.backToAcademics") : "Back to Dashboard"}
           </button>
 
           <div className="flex items-center justify-between">
@@ -412,7 +420,10 @@ export function TeacherPage() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={classPerformanceData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#dff3ff" />
-                  <XAxis dataKey="name" tick={{ fill: "#000000", fontSize: 11 }} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#000000", fontSize: 11 }}
+                  />
                   <YAxis tick={{ fill: "#000000" }} domain={[0, 100]} />
                   <Tooltip />
                   <Legend />
@@ -462,7 +473,9 @@ export function TeacherPage() {
                   style={{ borderColor: "#dff3ff", background: "#ffffff" }}
                   onClick={() => {
                     if (schoolId) {
-                      navigate(`/school/${schoolId}/teacher/${teacherId}/class/${cls.id}`);
+                      navigate(
+                        `/school/${schoolId}/teacher/${teacherId}/class/${cls.id}`,
+                      );
                     } else {
                       navigate(`/teacher/${teacherId}/class/${cls.id}`);
                     }
@@ -486,7 +499,10 @@ export function TeacherPage() {
                         >
                           {cls.grade}
                         </span>
-                        <h3 className="text-lg font-bold group-hover:underline" style={{ color: "#004aad" }}>
+                        <h3
+                          className="text-lg font-bold group-hover:underline"
+                          style={{ color: "#004aad" }}
+                        >
                           {cls.name}
                         </h3>
                         <ArrowUpRight
@@ -498,7 +514,8 @@ export function TeacherPage() {
                         className="text-sm"
                         style={{ color: "#000000", opacity: 0.7 }}
                       >
-                        {cls.studentCount} {cls.studentCount === 1 ? "student" : "students"}
+                        {cls.studentCount}{" "}
+                        {cls.studentCount === 1 ? "student" : "students"}
                       </p>
                     </div>
 
@@ -507,7 +524,10 @@ export function TeacherPage() {
                         <p className="text-xs mb-1" style={{ color: "#666" }}>
                           Completion
                         </p>
-                        <p className="text-xl font-bold" style={{ color: "#004aad" }}>
+                        <p
+                          className="text-xl font-bold"
+                          style={{ color: "#004aad" }}
+                        >
                           {Math.round(cls.avgCompleted)}%
                         </p>
                       </div>
@@ -515,7 +535,10 @@ export function TeacherPage() {
                         <p className="text-xs mb-1" style={{ color: "#666" }}>
                           Success
                         </p>
-                        <p className="text-xl font-bold" style={{ color: "#004aad" }}>
+                        <p
+                          className="text-xl font-bold"
+                          style={{ color: "#004aad" }}
+                        >
                           {Math.round(cls.avgAtelier)}%
                         </p>
                       </div>
@@ -523,7 +546,10 @@ export function TeacherPage() {
                         <p className="text-xs mb-1" style={{ color: "#666" }}>
                           On Track
                         </p>
-                        <p className="text-xl font-bold" style={{ color: "#c9e265" }}>
+                        <p
+                          className="text-xl font-bold"
+                          style={{ color: "#c9e265" }}
+                        >
                           {Math.round(cls.enVoie)}%
                         </p>
                       </div>
@@ -531,7 +557,10 @@ export function TeacherPage() {
                         <p className="text-xs mb-1" style={{ color: "#666" }}>
                           At Risk
                         </p>
-                        <p className="text-xl font-bold" style={{ color: "#ff5757" }}>
+                        <p
+                          className="text-xl font-bold"
+                          style={{ color: "#ff5757" }}
+                        >
                           {Math.round(cls.atRisk)}%
                         </p>
                       </div>

@@ -8,11 +8,7 @@ import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
-import {
-  StudentAnswers,
-  MockQuestions,
-  MockEvalationQuestions,
-} from "../../../../../mockData/types";
+import type { Questions, StudentAnswers } from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
 type EvaluationTwoState = {
@@ -32,22 +28,22 @@ export function UnitOneEvaluationThree() {
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
-  const classAnswers = evaluations(Number(classId));
+  const classAnswers = evaluations(classId!);
   const classAnswersMap = useMemo(() => {
-    const studentMap = new Map<number, Map<number, StudentAnswers>>();
+    const studentMap = new Map<string, Map<string, StudentAnswers>>();
 
     classAnswers.forEach((answer) => {
-      const { studentId, unitDataId } = answer;
-      if (!studentMap.has(studentId)) {
-        studentMap.set(studentId, new Map());
+      const { student_id, unit_data_id } = answer;
+      if (!studentMap.has(student_id)) {
+        studentMap.set(student_id, new Map());
       }
-      studentMap.get(studentId)!.set(unitDataId, answer);
+      studentMap.get(student_id)!.set(String(unit_data_id), answer);
     });
 
     return studentMap;
   }, [classAnswers]);
-  const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
-  const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
+  const evaluationAnswersMap = classAnswersMap.get(studentId!);
+  const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
   const evaluationThreeData = unitsData[2];
 
   const getKeys = (cat: any) =>
@@ -70,14 +66,14 @@ export function UnitOneEvaluationThree() {
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
 
-    const ans: MockQuestions = singleAnswer.answers;
-    const big: MockEvalationQuestions =
-      (ans.bigLetters as MockEvalationQuestions) || {};
+    const ans: Questions = singleAnswer.answers;
+    const big: Record<string, { correct?: boolean | null }> =
+      (ans.bigLetters as Record<string, { correct?: boolean | null }>) || {};
 
     const bigKeysArray = getKeys(evaluationThreeData.questions.bigLetters);
     const mapToState = (
       letters: string[],
-      obj: MockEvalationQuestions | undefined,
+      obj: Record<string, { correct?: boolean | null }> | undefined,
     ) =>
       letters.map((ltr) => {
         const key = ltr === ltr.toLowerCase() ? ltr.toUpperCase() : ltr;
@@ -142,7 +138,7 @@ export function UnitOneEvaluationThree() {
   };
 
   const handleSave = () => {
-    const answers: MockQuestions = {
+    const answers: Questions = {
       bigLetters: bigKeys.reduce(
         (acc, letter, idx) => {
           acc[letter] = {
@@ -155,9 +151,9 @@ export function UnitOneEvaluationThree() {
     };
 
     updateAnswer(
-      Number(studentId),
-      Number(classId),
-      Number(evaluationId),
+      studentId!,
+      classId!,
+      evaluationId!,
       answers,
       evaluationThree.comments,
       !notRequired,

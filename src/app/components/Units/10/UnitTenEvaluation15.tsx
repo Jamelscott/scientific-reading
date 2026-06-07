@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import CommentsContainer from "../components/CommentsContainer";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import { useParams } from "react-router";
-import { StudentAnswers, MockQuestions } from "../../../../../mockData/types";
+import type { Questions, StudentAnswers } from "../../../../../mockData/types";
 
 export function UnitTenEvaluationFifteen() {
   const { t } = useTranslation();
@@ -22,22 +22,22 @@ export function UnitTenEvaluationFifteen() {
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
-  const classAnswers = evaluations(Number(classId));
+  const classAnswers = evaluations(classId!);
   const classAnswersMap = useMemo(() => {
-    const studentMap = new Map<number, Map<number, StudentAnswers>>();
+    const studentMap = new Map<string, Map<string, StudentAnswers>>();
 
     classAnswers.forEach((answer) => {
-      const { studentId, unitDataId } = answer;
-      if (!studentMap.has(studentId)) {
-        studentMap.set(studentId, new Map());
+      const { student_id, unit_data_id } = answer;
+      if (!studentMap.has(student_id)) {
+        studentMap.set(student_id, new Map());
       }
-      studentMap.get(studentId)!.set(unitDataId, answer);
+      studentMap.get(student_id)!.set(unit_data_id, answer);
     });
 
     return studentMap;
   }, [classAnswers]);
-  const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
-  const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
+  const evaluationAnswersMap = classAnswersMap.get(studentId!);
+  const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
   const evaluationFifteenData = unitsData[14];
 
   const getKeys = (cat: any) =>
@@ -67,7 +67,7 @@ export function UnitTenEvaluationFifteen() {
 
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
-    const ans: MockQuestions = singleAnswer.answers as any;
+    const ans: Questions = singleAnswer.answers as any;
     const mapToArray = (keys: string[], obj: any) => {
       if (!obj) return new Array(keys.length).fill(null);
       return keys.map((key) => {
@@ -162,9 +162,9 @@ export function UnitTenEvaluationFifteen() {
     };
 
     updateAnswer(
-      Number(studentId),
-      Number(classId),
-      Number(evaluationId),
+      studentId!,
+      classId!,
+      evaluationId!,
       answers,
       evaluationState.comments,
       !notRequired,

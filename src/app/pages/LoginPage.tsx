@@ -45,9 +45,10 @@ export function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+  const supabaseLogin = useAuthStore((state) => state.supabaseLogin);
   const [selectedPortal, setSelectedPortal] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("jean-pierre.dubois@ecole.qc.ca");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("12345");
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -55,7 +56,7 @@ export function LoginPage() {
     setSelectedPortal(portalId);
     // Update email based on portal
     if (portalId === "teacher") {
-      setEmail("jean-pierre.dubois@ecole.qc.ca");
+      setEmail("gisele.tremblay@ecole.qc.ca");
     } else if (portalId === "school") {
       setEmail("direction@saint-laurent.qc.ca");
     } else if (portalId === "board") {
@@ -69,7 +70,7 @@ export function LoginPage() {
     const newLang = i18n.language === "en" ? "fr" : "en";
     i18n.changeLanguage(newLang);
   };
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const portal = portals.find((p) => p.id === selectedPortal);
     if (!portal) {
@@ -84,16 +85,22 @@ export function LoginPage() {
       admin: admins,
     };
 
-    const users = usersByPortal[portal.id as keyof typeof usersByPortal];
-    const foundUser = users?.find((u) => u.email === email);
-
-    if (!foundUser) {
-      alert("Utilisateur non trouvé");
-      return;
-    } else {
-      login(foundUser);
-      navigate(`/${portal.id}/${foundUser.id}/dashboard`); // Redirect to the appropriate dashboard
+    if (selectedPortal) {
+      const user = await supabaseLogin(email, password, selectedPortal);
+      if (user) {
+        // Navigate based on user type
+        if (selectedPortal === "teacher") {
+          navigate(`/teacher/${user.id}/dashboard`);
+        } else if (selectedPortal === "school") {
+          navigate(`/school/dashboard`);
+        } else if (selectedPortal === "board") {
+          navigate(`/board/dashboard`);
+        } else if (selectedPortal === "admin") {
+          navigate(`/teacher/${user.id}/dashboard`);
+        }
+      }
     }
+    // }
   };
 
   const activePortal = portals.find((p) => p.id === selectedPortal);

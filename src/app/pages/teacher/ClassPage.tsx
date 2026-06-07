@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, Download, Plus, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { shallow } from "zustand/shallow";
 import { useClassStore } from "../../../stores/useClassStore";
 import { useStudentStore } from "../../../stores/useStudentStore";
 import { useTeacherStore } from "../../../stores/useTeacherStore";
@@ -10,7 +9,6 @@ import { AddStudentModal } from "../../components/AddStudentModal";
 import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
 import { exportTableToPdf } from "../../components/utils/exportToPdf";
 import { Button } from "../../components/ui/Button";
-import { useShallow } from "zustand/react/shallow";
 
 export function ClassPage() {
   const { t } = useTranslation();
@@ -22,29 +20,14 @@ export function ClassPage() {
   }>();
   const classes = useClassStore((state) => state.classes);
   const teacher = useTeacherStore((state) => state.teacher);
-  const allTeachers = useTeacherStore((state) => state.teachers);
 
-  // Get teacher name for a class (only needed when schoolId is present)
-  const getTeacherNameForClass = (classTeacherId: string) => {
-    if (!schoolId || !allTeachers) return null;
-    const teacher = allTeachers.find((t) => t.id === classTeacherId);
-    return teacher?.name || "Unknown Teacher";
-  };
-
-  // Parse classId from URL and set it as active
-  const currentClassId = parseInt(classId || "", 10);
-
-  const currentClass = useClassStore((state) =>
-    state.getClassById(currentClassId),
-  );
-
+  const currentClass = useClassStore.getState().getClassById(classId!);
+  console.log(currentClass);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
 
-  const students = useStudentStore(
-    useShallow((state) => state.getStudentByClass(Number(classId!))),
-  );
+  const students = useStudentStore.getState().getStudentByClass(classId!);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,7 +46,7 @@ export function ClassPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleClassChange = (classId: number) => {
+  const handleClassChange = (classId: string) => {
     setShowClassDropdown(false);
     if (schoolId) {
       navigate(`/school/${schoolId}/teacher/${teacherId}/class/${classId}`);
@@ -144,9 +127,7 @@ export function ClassPage() {
                         className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02] hover:shadow-md cursor-pointer"
                         style={{
                           backgroundColor:
-                            cls.id === currentClassId
-                              ? "#dff3ff"
-                              : "transparent",
+                            cls.id === classId ? "#dff3ff" : "transparent",
                         }}
                       >
                         <div className="flex flex-col gap-1">
@@ -161,7 +142,7 @@ export function ClassPage() {
                               className="text-xs group-hover:text-white/90 transition-colors"
                               style={{ color: "#666" }}
                             >
-                              {getTeacherNameForClass(cls.teacherId)}
+                              {teacher?.name || "Unknown Teacher"}
                             </span>
                           )}
                         </div>
@@ -180,7 +161,7 @@ export function ClassPage() {
               </div>
               {schoolId && currentClass && (
                 <p className="text-sm mb-1" style={{ color: "#666" }}>
-                  {getTeacherNameForClass(currentClass.teacherId)}
+                  {teacher?.name || "Unknown Teacher"}
                 </p>
               )}
               <p className="text-lg" style={{ color: "#000000" }}>
@@ -209,12 +190,13 @@ export function ClassPage() {
         </div>
       </div>
 
-      <ClassTable students={students} classId={String(currentClassId)} />
+      <ClassTable students={students} classId={classId!} />
 
       <AddStudentModal
         isOpen={showAddStudentModal}
         onClose={() => setShowAddStudentModal(false)}
-        classId={currentClassId}
+        classId={classId!}
+        schoolId={schoolId!}
       />
     </div>
   );

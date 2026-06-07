@@ -3,6 +3,11 @@ import { schoolLevel } from "../app/pages/const";
 import { useClassStore } from "./useClassStore";
 import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
+import { useSchoolStore } from "./useSchoolStore";
+import { useUnitsStore } from "./useUnitsStore";
+import { useAppStore } from "./useAppStore";
+import { mockApiData } from "../../mockData";
+import { useAuthStore } from "./useAuthStore";
 
 export interface StudentForAcademics {
   id: number;
@@ -58,7 +63,7 @@ export const getStudentsForAcademics = (): StudentForAcademics[] => {
 
   return students.map((student) => {
     // Get the first class (primary class) for the student
-    const primaryClassId = student.classIds[0];
+    const primaryClassId = student['class_id'][0];
     const primaryClass = classes.find((cls: Class) => cls.id === primaryClassId);
 
     const grade = primaryClass?.grade || "Maternelle";
@@ -131,7 +136,7 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
     // Get all students in teacher's classes
     const classIds = teacherClasses.map((cls: Class) => cls.id);
     const teacherStudents = students.filter((student: Student) =>
-      student.classIds.some((classId: number) => classIds.includes(classId))
+      student['class_id'].some((classId: number) => classIds.includes(classId))
     );
 
     // Calculate average completed and average successful evaluations
@@ -169,7 +174,7 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
       if (student.evaluations && student.evaluations.length > 0) {
         // Find the student's class to determine their grade
         const studentClass = classes.find((cls: Class) => 
-          student.classIds.includes(cls.id) && teacherClasses.some(tc => tc.id === cls.id)
+          student['class_id'].includes(cls.id) && teacherClasses.some(tc => tc.id === cls.id)
         );
         
         if (studentClass) {
@@ -204,4 +209,31 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
       enVoie,
     };
   });
+};
+
+/**
+ * Reset all stores to their initial state
+ * Call this on logout to clear all user data
+ */
+export const resetAllStores = () => {
+  // Clear all stores by setting them to their initial/empty states
+  useStudentStore.setState({ students: [] });
+  useClassStore.setState({ classes: [] });
+  useTeacherStore.setState({ teacher: null, teachers: [] });
+  useSchoolStore.setState({ activeSchool: mockApiData.schools[0] || null });
+  useAuthStore.setState({ currentUser: null });
+  useUnitsStore.setState({ 
+    unitsData: [], 
+    answers: [], 
+    resources: [] 
+  });
+  
+  // Clear persisted storage for user data only
+  localStorage.removeItem('auth-storage');
+  localStorage.removeItem('student-storage');
+  localStorage.removeItem('class-storage');
+  localStorage.removeItem('teacher-storage');
+  localStorage.removeItem('school-storage');
+  localStorage.removeItem('units-storage');
+  // Keep 'app-storage' to preserve UI preferences
 };

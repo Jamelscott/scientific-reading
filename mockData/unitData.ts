@@ -2,9 +2,9 @@ import { UnitData } from "./types";
 
 export const unitData: UnitData[] = [
   {
-    id: 1,
+    id: '1',
     unit: 1,
-    evaluation: 1,
+    evaluation: '1',
     title: "units.unit1-1",
     questions: {
       bigLetters: {
@@ -38,9 +38,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 2,
+    id: '2',
     unit: 1,
-    evaluation: 2,
+    evaluation: '2',
     title: "units.unit1-2",
     questions: {
       smallLetters: {
@@ -74,9 +74,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 3,
+    id: '3',
     unit: 1,
-    evaluation: 3,
+    evaluation: '3',
     title: "units.unit1-3",
     questions: {
       bigLetters: {
@@ -110,9 +110,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 4,
+    id: '4',
     unit: 1,
-    evaluation: 4,
+    evaluation: '4',
     title: "units.unit1-4",
     questions: {
       smallLetters: {
@@ -146,9 +146,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 5,
+    id: '5',
     unit: 1,
-    evaluation: 5,
+    evaluation: '5',
     title: "units.unit1-5",
     questions: {
       wordPairs: {
@@ -175,9 +175,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 6,
+    id: '6',
     unit: 1,
-    evaluation: 6,
+    evaluation: '6',
     title: "units.unit1-6",
     questions: {
       startOfWord: {
@@ -197,9 +197,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 7,
+    id: '7',
     unit: 2,
-    evaluation: 7,
+    evaluation: '7',
     title: "units.unit2-1",
     questions: {
       syllables: {
@@ -224,9 +224,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 8,
+    id: '8',
     unit: 3,
-    evaluation: 8,
+    evaluation: '8',
     title: "units.unit3-1",
     questions: {
       frequentWords: {
@@ -273,9 +273,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 9,
+    id: '9',
     unit: 4,
-    evaluation: 9,
+    evaluation: '9',
     title: "units.unit4-1",
     questions: {
       frequentWordsSlice: {
@@ -298,9 +298,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 10,
+    id: '10',
     unit: 5,
-    evaluation: 10,
+    evaluation: '10',
     title: "units.unit5-1",
     questions: {
       data: {
@@ -318,9 +318,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 11,
+    id: '11',
     unit: 6,
-    evaluation: 11,
+    evaluation: '11',
     title: "units.unit6-1",
     questions: {
       data: {
@@ -333,9 +333,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 12,
+    id: '12',
     unit: 7,
-    evaluation: 12,
+    evaluation: '12',
     title: "units.unit7-1",
     questions: {
       data: {
@@ -346,9 +346,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 13,
+    id: '13',
     unit: 8,
-    evaluation: 13,
+    evaluation: '13',
     title: "units.unit8-1",
     questions: {
       data: {
@@ -366,9 +366,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 14,
+    id: '14',
     unit: 9,
-    evaluation: 14,
+    evaluation: '14',
     title: "units.unit9-1",
     questions: {
       data: {
@@ -381,9 +381,9 @@ export const unitData: UnitData[] = [
     },
   },
   {
-    id: 15,
+    id: '15',
     unit: 10,
-    evaluation: 15,
+    evaluation: '15',
     title: "units.unit10-1",
     questions: {
       data: {

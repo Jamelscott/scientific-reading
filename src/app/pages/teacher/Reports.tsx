@@ -111,7 +111,9 @@ export function ReportsPage() {
           : "0",
       failing:
         submittedCount > 0
-          ? Math.round((needsImprovementCount / submittedCount) * 100).toString()
+          ? Math.round(
+              (needsImprovementCount / submittedCount) * 100,
+            ).toString()
           : "0",
       notSubmitted:
         expectedTotal > 0

@@ -6,6 +6,7 @@ import { Class, Grades } from "../../mockData/types";
 import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
 import { schoolLevel } from "../app/pages/const";
+import { supabase } from "../utils/supabase";
 
 export interface ClassPerformance {
   id: number;
@@ -19,17 +20,39 @@ export interface ClassPerformance {
 interface ClassStore {
   classes: Class[];
   addClass: (classData: Omit<Class, "id">) => void;
-  updateClass: (classId: number, updates: Partial<Omit<Class, "id">>) => void;
+  updateClass: (classId: string, updates: Partial<Omit<Class, "id">>) => void;
   setClasses: (userId: string) => void;
-  getClassById: (classId: number) => Class | undefined;
+  getClassById: (classId: string) => Class | undefined;
   getClassBenchmarks: () => Record<Grades, number | null>;
   getClassPerformance: () => ClassPerformance[];
+  setSupabaseClasses: (userId: string, userType: string) => Promise<void>;
 }
 
 export const useClassStore = create<ClassStore>()(
   persist(
     (set, get) => ({
       classes: [],
+      setSupabaseClasses: async (userId, userType) => {
+        if (userType === 'teacher') {
+          const { data: teacherClasses, error }: { data: Class[] | null; error: any } = await supabase
+          .from(`classes`)
+          .select("*")
+          .eq('teacher_id', userId)
+          .order('grade', { ascending: true })
+
+          if (error) {
+            throw new Error('Failed to fetch classes: ' + error.message);
+          }
+          set(() => ({ classes: teacherClasses || [] }))
+          return
+        } else if (userId === 'board') {
+          // return { students: studentsT2 };
+        } else if (userType === 'school') {
+          // return { students: [...studentsT1, ...studentsT2]}
+        } else if (userType === 'admin') {
+          // return { students: [] };
+        }
+    },
       setClasses: (userId) => set(() => {
         if (userId === 't-1') {
           return { classes: teachert1Classes };
@@ -63,6 +86,17 @@ export const useClassStore = create<ClassStore>()(
         set((state) => ({
           classes: state.classes.map((cls) =>
             cls.id === classId ? { ...cls, ...updates } : cls
+          ),
+        })),
+      removeStudentFromClass: (student_id: string, class_id: string) =>
+        set((state) => ({
+          students: state.students.map((student) =>
+            student.id === student_id
+              ? {
+                  ...student,
+                  class_id: student.class_id,
+                }
+              : student
           ),
         })),
       getClassById: (classId) => {
@@ -114,7 +148,7 @@ export const useClassStore = create<ClassStore>()(
           
           // Get all students in this grade
           const gradeStudents = students.filter((student) =>
-            student.classIds.some((classId) => classIds.includes(classId))
+            student.class_id.some((classId) => classIds.includes(classId))
           );
           
           if (gradeStudents.length === 0) {
@@ -172,7 +206,7 @@ export const useClassStore = create<ClassStore>()(
         return classes.map((cls) => {
           // Get students in this class
           const classStudents = students.filter((student) =>
-            student.classIds.includes(cls.id)
+            student.class_id.includes(cls.id)
           );
           
           // Get teacher name

@@ -7,16 +7,17 @@ import {
   useStudentStore,
   useTeacherStore,
   useUnitsStore,
+  useAuthStore,
 } from "../../../../stores";
 import { GlobalLoadingSpinner } from "../../GlobalLoadingSpinner";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
 
 type UnitHeaderProps = {
   title: string;
-  evaluationNumber: number;
+  evaluationNumber: string;
   notRequired: boolean;
   setNotRequired: (value: boolean) => void;
-  handleSave: (value: any) => void;
+  handleSave: () => void;
   handleNotRequired: () => void;
   isSaveDisabled?: boolean;
   setIsSaveDisabled: (val: boolean) => void;
@@ -36,7 +37,8 @@ export function UnitHeader({
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
   const [showNotRequiredModal, setShowNotRequiredModal] = useState(false);
-  const unitsData = useUnitsStore((state) => state.getUnitsData);
+  const unitsData = useUnitsStore((state) => state.unitsData);
+  const isLoading = useAuthStore((state) => state.isLoading);
   const { classId, studentId, teacherId } = useParams<{
     classId: string;
     studentId: string;
@@ -46,14 +48,13 @@ export function UnitHeader({
   const teacher = useTeacherStore((state) =>
     state.getTeacherById(teacherId || ""),
   );
-
+  console.log(isLoading);
   const classData = useMemo(() => {
-    const id = parseInt(classId || "", 10);
-    return classes.find((c) => c.id === id);
+    return classes.find((c) => c.id === classId!);
   }, [classId, classes]);
 
   const studentData = useStudentStore((state) =>
-    state.students.find((s) => s.id === Number(studentId)),
+    state.students.find((s) => s.id === studentId),
   );
 
   if (!classData || !studentData) return <GlobalLoadingSpinner />;
@@ -174,23 +175,26 @@ export function UnitHeader({
 
             <button
               onClick={() => {
-                handleSave(null);
-                setIsSaved(true);
-                setTimeout(() => setIsSaved(false), 2000);
+                handleSave();
               }}
-              disabled={isSaveDisabled}
+              disabled={isSaveDisabled || isLoading}
               className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
               style={{
                 background: isSaved ? "#22c55e" : "#004aad",
                 color: "#ffffff",
-                opacity: isSaveDisabled ? 0.5 : 1,
-                cursor: isSaveDisabled ? "not-allowed" : "pointer",
+                opacity: isSaveDisabled || isLoading ? 0.5 : 1,
+                cursor: isSaveDisabled || isLoading ? "not-allowed" : "pointer",
               }}
             >
               {isSaved ? (
                 <>
                   <Check className="w-5 h-5" />
                   {t("common.saved")}
+                </>
+              ) : isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t("common.saving", "Saving...")}
                 </>
               ) : (
                 <>

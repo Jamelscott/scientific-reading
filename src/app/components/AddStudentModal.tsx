@@ -8,17 +8,18 @@ import { useSchoolStore } from "../../stores/useSchoolStore";
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classId?: number;
+  classId?: string;
+  schoolId?: string;
 }
 
 export function AddStudentModal({
   isOpen,
   onClose,
   classId,
+  schoolId,
 }: AddStudentModalProps) {
   const { t } = useTranslation();
   const addStudent = useStudentStore((state) => state.addStudent);
-  const activeSchoolId = useSchoolStore((state) => state.activeSchoolId);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [errors, setErrors] = useState({
@@ -45,12 +46,12 @@ export function AddStudentModal({
       return;
     }
 
-    addStudent(
-      firstName.trim(),
-      lastName.trim(),
-      classId ? [classId] : [],
-      activeSchoolId,
-    );
+    // addStudent(
+    //   firstName.trim(),
+    //   lastName.trim(),
+    //   classId ? [classId] : [],
+    //   schoolId,
+    // );
     setFirstName("");
     setLastName("");
     setErrors({ firstName: "", lastName: "" });

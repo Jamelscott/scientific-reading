@@ -1,41 +1,48 @@
-import { Loader2 } from "lucide-react";
+import { Loader, Loader2, LoaderCircle, LoaderPinwheel } from "lucide-react";
 
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
   message?: string;
+  isVisible?: boolean;
 }
 
 export function LoadingSpinner({
   fullScreen = false,
   message,
+  isVisible = true,
 }: LoadingSpinnerProps) {
   if (fullScreen) {
     return (
       <div
-        className="fixed inset-0 flex items-center justify-center z-50"
-        style={{
-          background: "rgba(223, 243, 255, 0.95)",
-          backdropFilter: "blur(4px)",
-        }}
+        className={`fixed bottom-5 right-5 flex flex-col items-center gap-4 z-50 transition-opacity duration-300 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
       >
-        <div className="flex flex-col items-center gap-4">
-          <Loader2
-            className="w-12 h-12 animate-spin"
-            style={{ color: "#004aad" }}
-          />
-          {message && (
-            <p className="text-lg" style={{ color: "#004aad" }}>
-              {message}
-            </p>
-          )}
-        </div>
+        {" "}
+        <Loader2
+          className="w-12 h-12 animate-spin"
+          style={{
+            color: "#004aad",
+          }}
+        />
+        {message && (
+          <p className="text-lg font-medium" style={{ color: "#004aad" }}>
+            {message}
+          </p>
+        )}
       </div>
     );
   }
 
   return (
     <div className="flex items-center justify-center p-8">
-      <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#004aad" }} />
+      <Loader2
+        className="w-8 h-8 animate-spin"
+        style={{
+          color: "#004aad",
+          animationDuration: "2s",
+        }}
+      />
     </div>
   );
 }

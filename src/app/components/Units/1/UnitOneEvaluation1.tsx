@@ -8,10 +8,10 @@ import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
-import {
-  MockEvalationQuestions,
-  MockQuestions,
+import type {
+  Questions,
   StudentAnswers,
+  NameSoundFlags,
 } from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
@@ -33,22 +33,27 @@ export function UnitOneEvaluationOne() {
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
-  const classAnswers = evaluations(Number(classId));
+  const classAnswers = evaluations(classId!);
+
   const classAnswersMap = useMemo(() => {
-    const studentMap = new Map<number, Map<number, StudentAnswers>>();
+    const studentMap = new Map<string, Map<string, StudentAnswers>>();
 
     classAnswers.forEach((answer) => {
-      const { studentId, unitDataId } = answer;
-      if (!studentMap.has(studentId)) {
-        studentMap.set(studentId, new Map());
+      const { student_id, unit_data_id } = answer;
+      if (!studentMap.has(student_id)) {
+        studentMap.set(student_id, new Map());
       }
-      studentMap.get(studentId)!.set(unitDataId, answer);
+      // Convert unit_data_id to string for consistent comparison
+      studentMap.get(student_id)!.set(unit_data_id, answer);
     });
 
     return studentMap;
   }, [classAnswers]);
-  const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
-  const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
+
+  const evaluationAnswersMap = classAnswersMap.get(studentId!);
+
+  const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
+
   const evaluationOneData = unitsData[0];
 
   const getKeys = (cat: any) =>
@@ -56,15 +61,17 @@ export function UnitOneEvaluationOne() {
       ? Object.keys(cat)
       : [];
 
-  const bigKeys = useMemo(
-    () => getKeys(evaluationOneData.questions.bigLetters),
-    [evaluationOneData.questions.bigLetters],
-  );
+  const bigKeys = useMemo(() => {
+    if (!evaluationOneData?.questions?.bigLetters) {
+      console.warn("No bigLetters data in evaluationOneData");
+      return [];
+    }
+    const keys = getKeys(evaluationOneData.questions.bigLetters);
+    return keys;
+  }, [evaluationOneData]);
 
   const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
-    new Array(getKeys(evaluationOneData.questions.bigLetters).length).fill(
-      value,
-    );
+    new Array(bigKeys.length).fill(value);
 
   // State for Atelier 1 & 2 (check/X options)
   const [evaluationOne, setEvaluationOne] = useState<EvaluationOneState>({
@@ -74,17 +81,16 @@ export function UnitOneEvaluationOne() {
   });
 
   useEffect(() => {
-    if (!singleAnswer || !singleAnswer.answers) return;
-
-    const ans: MockQuestions = singleAnswer.answers;
-    const big: MockEvalationQuestions =
-      (ans.bigLetters as MockEvalationQuestions) || {};
-
+    if (!singleAnswer || !singleAnswer.answers) {
+      return;
+    }
+    const ans: Questions = singleAnswer.answers;
+    const big = ans.bigLetters as Record<string, NameSoundFlags> | undefined;
     const bigKeys = getKeys(evaluationOneData.questions.bigLetters);
 
     const mapToState = (
       letters: string[],
-      obj: MockEvalationQuestions | undefined,
+      obj: Record<string, NameSoundFlags> | undefined,
       field: "name" | "sound",
     ) =>
       letters.map((ltr) => {
@@ -95,14 +101,17 @@ export function UnitOneEvaluationOne() {
         return null;
       });
 
+    const upperCaseName = mapToState(bigKeys, big, "name");
+    const upperCaseSound = mapToState(bigKeys, big, "sound");
+
     setEvaluationOne({
-      upperCaseName: mapToState(bigKeys, big, "name"),
-      upperCaseSound: mapToState(bigKeys, big, "sound"),
+      upperCaseName,
+      upperCaseSound,
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, evaluationOneData]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
@@ -158,29 +167,40 @@ export function UnitOneEvaluationOne() {
 
   const handleSave = () => {
     const bigKeys = getKeys(evaluationOneData.questions.bigLetters);
-    const answers: MockQuestions = {
+    const answers: Questions = {
       bigLetters: bigKeys.reduce(
         (acc, letter, idx) => {
+          const nameVal = evaluationOne.upperCaseName[idx];
+          const soundVal = evaluationOne.upperCaseSound[idx];
           acc[letter] = {
-            name: evaluationOne.upperCaseName[idx],
-            sound: evaluationOne.upperCaseSound[idx],
+            name: nameVal === null ? undefined : nameVal,
+            sound: soundVal === null ? undefined : soundVal,
           };
           return acc;
         },
-        {} as Record<string, Record<string, boolean | null>>,
+        {} as Record<string, NameSoundFlags>,
       ),
     };
 
     updateAnswer(
-      Number(studentId),
-      Number(classId),
-      Number(evaluationId),
+      studentId!,
+      classId!,
+      evaluationId!,
       answers,
       evaluationOne.comments,
       !notRequired,
     );
     setHasChanges(false);
   };
+
+  if (!evaluationOneData) {
+    return (
+      <div className="p-8 text-center">
+        <p style={{ color: "#004aad" }}>Loading evaluation data...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <UnitHeader

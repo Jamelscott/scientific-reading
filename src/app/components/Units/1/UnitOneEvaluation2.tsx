@@ -8,10 +8,10 @@ import { useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
-import {
-  MockEvalationQuestions,
-  MockQuestions,
+import type {
+  Questions,
   StudentAnswers,
+  NameSoundFlags,
 } from "../../../../../mockData/types";
 
 type EvaluationArray = Array<boolean | null>;
@@ -33,22 +33,22 @@ export function UnitOneEvaluationTwo() {
 
   const evaluations = useUnitsStore((state) => state.getAnswersByClass);
   const updateAnswer = useUnitsStore((state) => state.updateAnswer);
-  const classAnswers = evaluations(Number(classId));
+  const classAnswers = evaluations(classId!);
   const classAnswersMap = useMemo(() => {
-    const studentMap = new Map<number, Map<number, StudentAnswers>>();
+    const studentMap = new Map<string, Map<string, StudentAnswers>>();
 
     classAnswers.forEach((answer) => {
-      const { studentId, unitDataId } = answer;
-      if (!studentMap.has(studentId)) {
-        studentMap.set(studentId, new Map());
+      const { student_id, unit_data_id } = answer;
+      if (!studentMap.has(student_id)) {
+        studentMap.set(student_id, new Map());
       }
-      studentMap.get(studentId)!.set(unitDataId, answer);
+      studentMap.get(student_id)!.set(String(unit_data_id), answer);
     });
 
     return studentMap;
   }, [classAnswers]);
-  const evaluationAnswersMap = classAnswersMap.get(Number(studentId));
-  const singleAnswer = evaluationAnswersMap?.get(Number(evaluationId));
+  const evaluationAnswersMap = classAnswersMap.get(studentId!);
+  const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
   const evaluationTwoData = unitsData[1];
 
   const getKeys = (cat: any) =>
@@ -56,10 +56,16 @@ export function UnitOneEvaluationTwo() {
       ? Object.keys(cat)
       : [];
 
-  const smallKeys = useMemo(
-    () => getKeys(evaluationTwoData.questions.smallLetters),
-    [evaluationTwoData.questions.smallLetters],
-  );
+  const smallKeys = useMemo(() => {
+    if (!evaluationTwoData?.questions?.smallLetters) {
+      console.warn("No smallLetters data in evaluationTwoData");
+      return [];
+    }
+    const keys = getKeys(evaluationTwoData.questions.smallLetters);
+    return keys;
+  }, [evaluationTwoData]);
+
+  console.log(smallKeys);
 
   const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
     new Array(smallKeys.length).fill(value);
@@ -74,14 +80,14 @@ export function UnitOneEvaluationTwo() {
   useEffect(() => {
     if (!singleAnswer || !singleAnswer.answers) return;
 
-    const ans: MockQuestions = singleAnswer.answers;
-    const small: MockEvalationQuestions =
-      (ans.smallLetters as MockEvalationQuestions) || {};
+    const ans: Questions = singleAnswer.answers;
+    const small: Record<string, NameSoundFlags> =
+      (ans.smallLetters as Record<string, NameSoundFlags>) || {};
 
     const smallKeysArray = getKeys(evaluationTwoData.questions.smallLetters);
     const mapToState = (
       letters: string[],
-      obj: MockEvalationQuestions | undefined,
+      obj: Record<string, NameSoundFlags> | undefined,
       field: "name" | "sound",
     ) =>
       letters.map((ltr) => {
@@ -91,15 +97,16 @@ export function UnitOneEvaluationTwo() {
         if (val === false) return false;
         return null;
       });
-
+    const lowerCaseName = mapToState(smallKeysArray, small, "name");
+    const lowerCaseSound = mapToState(smallKeysArray, small, "sound");
     setEvaluationTwo({
-      lowerCaseName: mapToState(smallKeysArray, small, "name"),
-      lowerCaseSound: mapToState(smallKeysArray, small, "sound"),
+      lowerCaseName,
+      lowerCaseSound,
       comments: singleAnswer.comment,
     });
     setNotRequired(!singleAnswer.required);
     setHasChanges(false);
-  }, [singleAnswer]);
+  }, [singleAnswer, evaluationTwoData]);
 
   const handleCheckAll = () => {
     setConfirmMessage(t("evaluation.confirmCheckAll"));
@@ -154,7 +161,7 @@ export function UnitOneEvaluationTwo() {
 
   const handleSave = () => {
     const smallKeysArray = getKeys(evaluationTwoData.questions.smallLetters);
-    const answers: MockQuestions = {
+    const answers: Questions = {
       smallLetters: smallKeysArray.reduce(
         (acc, letter, idx) => {
           acc[letter] = {
@@ -168,9 +175,9 @@ export function UnitOneEvaluationTwo() {
     };
 
     updateAnswer(
-      Number(studentId),
-      Number(classId),
-      Number(evaluationId),
+      studentId!,
+      classId!,
+      evaluationId!,
       answers,
       evaluationTwo.comments,
       !notRequired,
