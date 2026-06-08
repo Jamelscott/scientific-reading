@@ -3,7 +3,6 @@ export interface FormErrors {
   lastName: string;
   email: string;
   phone: string;
-  school: string;
 }
 
 export interface FormData {
@@ -15,13 +14,28 @@ export interface FormData {
   startDate: string;
 }
 
-// Format phone number for display: (111) 111-1111
+// Format phone number for display: (###) ###-####
 export const formatPhoneNumber = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, "");
   if (cleaned.length === 10) {
     return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
   }
   return phone;
+};
+
+// Format phone number as user types: (###) ###-####
+export const formatPhoneInput = (value: string): string => {
+  // Remove all non-digits
+  const cleaned = value.replace(/\D/g, "");
+  
+  // Limit to 10 digits
+  const limited = cleaned.slice(0, 10);
+  
+  // Format as user types
+  if (limited.length === 0) return "";
+  if (limited.length <= 3) return `(${limited}`;
+  if (limited.length <= 6) return `(${limited.slice(0, 3)}) ${limited.slice(3)}`;
+  return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`;
 };
 
 // Validate form fields
@@ -34,7 +48,6 @@ export const validateForm = (
     lastName: "",
     email: "",
     phone: "",
-    school: "",
   };
 
   if (!formData.firstName.trim()) {
@@ -51,12 +64,11 @@ export const validateForm = (
     errors.email = t("profile.errors.emailInvalid");
   }
 
-  if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\D/g, ""))) {
-    errors.phone = t("profile.errors.phoneInvalid");
-  }
-
-  if (!formData.school.trim()) {
-    errors.school = t("profile.errors.schoolRequired");
+  if (formData.phone) {
+    const cleaned = formData.phone.replace(/\D/g, "");
+    if (cleaned.length !== 10) {
+      errors.phone = t("profile.errors.phoneInvalid");
+    }
   }
 
   const isValid = !Object.values(errors).some((error) => error !== "");

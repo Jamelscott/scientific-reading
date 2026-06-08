@@ -67,17 +67,6 @@ export const useStudentStore = create<StudentStore>()(
           return;
         }
       },
-      // setStudents: (userId) => set(() => {
-      //     if (userId === 't-1') {
-      //       return { students: studentsT1 };
-      //     } else if (userId === 't-2') {
-      //       return { students: studentsT2 };
-      //   } else if (userId.startsWith('b') || userId.startsWith('s')) {
-      //       return { students: [...studentsT1, ...studentsT2]}
-      //     } else {
-      //       return { students: [] };
-      //     }
-      // }),
       setStudentEvaluations: () =>
         set((state) => {
           const allAnswers = useUnitsStore.getState().answers;
@@ -141,16 +130,16 @@ export const useStudentStore = create<StudentStore>()(
           students: state.students.filter((student) => student.id !== student_id)
         }));
       }),
-        getStudentById(student_id: string): Student | undefined {
-          const student = get().students.find((s: Student) => s.id === student_id);
-          return student;
-        },
-        getStudentCountByClass(class_id: string): number {
-          return get().students.filter((student) => student.class_id === class_id).length;
-        },
-        getStudentByClass(class_id: string): Student[] {
-          return get().students.filter((student) => student.class_id === class_id);
-        },
+      getStudentById(student_id: string): Student | undefined {
+        const student = get().students.find((s: Student) => s.id === student_id);
+        return student;
+      },
+      getStudentCountByClass(class_id: string): number {
+        return get().students.filter((student) => student.class_id === class_id).length;
+      },
+      getStudentByClass(class_id: string): Student[] {
+        return get().students.filter((student) => student.class_id === class_id);
+      },
     }),
     {
       name: "student-storage",

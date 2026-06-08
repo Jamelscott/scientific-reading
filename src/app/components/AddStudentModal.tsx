@@ -31,7 +31,6 @@ export function AddStudentModal({
     firstName: "",
     lastName: "",
   });
-  console.log(teacherId);
 
   const handleSubmit = () => {
     const newErrors = {

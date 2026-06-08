@@ -116,9 +116,8 @@ export function StudentPage() {
   const successCount = studentAnswers.filter(
     (e) => e.status === "success",
   ).length;
-  const successRate = completedCount > 0 
-    ? Math.round((successCount / completedCount) * 100) 
-    : 0;
+  const successRate =
+    completedCount > 0 ? Math.round((successCount / completedCount) * 100) : 0;
 
   // Calculate competency scores from student evaluations
   const calculateCompetencyScore = (atelierRange: string[]) => {

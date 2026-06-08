@@ -39,7 +39,6 @@ export function UnitNineEvaluationFourteen() {
   const evaluationAnswersMap = classAnswersMap.get(studentId!);
   const singleAnswer = evaluationAnswersMap?.get(evaluationId!);
   const evaluationFourteenData = unitsData[13];
-  console.log(singleAnswer);
   const getKeys = (cat: any) =>
     cat && typeof cat === "object" && !Array.isArray(cat)
       ? Object.keys(cat)

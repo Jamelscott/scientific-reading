@@ -124,15 +124,16 @@ export type Teacher = {
   id: string;
   school_id: string;
   board_id: string;
+  board:{name:string}
   name: string;
   email: string;
-  school: string;
+  school: {name: string};
   boardName: string;
   subjects: string[];
-  phoneNumber?: string;
+  phone_number?: string;
   password:string;
   startDate?: string;
-  yearsExperience?: number;
+  years_experience?: number;
 };
 
 export type BoardUser = {

@@ -64,7 +64,6 @@ export function SchoolDashboard() {
     () => getClassBenchmarks(),
     [students, realClasses],
   );
-  console.log(teachers);
 
   // Get real class performance data
   const classes = useMemo(() => getClassPerformance(), [students, realClasses]);

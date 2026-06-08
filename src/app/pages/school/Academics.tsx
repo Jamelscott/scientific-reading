@@ -48,7 +48,6 @@ export function Academics() {
 
   // Get data from stores via helper functions
   const studentsData = getStudentsForAcademics();
-  console.log(studentsData);
   const teachersData = getTeachersPerformance();
 
   const [filters, setFilters] = useState<FilterState>({

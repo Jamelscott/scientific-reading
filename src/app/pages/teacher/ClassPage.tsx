@@ -28,7 +28,6 @@ export function ClassPage() {
       : currentUser?.board_id;
 
   const currentClass = useClassStore.getState().getClassById(classId!);
-  console.log(currentClass);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
@@ -111,7 +110,7 @@ export function ClassPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowClassDropdown(!showClassDropdown)}
-                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:shadow-md transition-all cursor-pointer"
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:font-bold transition-all cursor-pointer"
                   style={{ color: "#004aad" }}
                 >
                   {currentClass?.grade || "no class available"}

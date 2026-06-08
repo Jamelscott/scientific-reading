@@ -65,8 +65,6 @@ export function UnitOneEvaluationTwo() {
     return keys;
   }, [evaluationTwoData]);
 
-  console.log(smallKeys);
-
   const buildEvaluationArray = (value: boolean | null): EvaluationArray =>
     new Array(smallKeys.length).fill(value);
 

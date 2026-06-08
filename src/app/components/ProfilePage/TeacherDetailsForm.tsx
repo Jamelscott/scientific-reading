@@ -1,16 +1,28 @@
 import { useState } from "react";
-import { User, Mail, Phone, Building, Calendar, Edit } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Building,
+  Calendar,
+  Edit,
+  Briefcase,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTeacherStore } from "../../../stores";
 import { Initials } from "../Initials";
-import { validateForm, formatPhoneNumber, FormErrors } from "./formValidation";
+import {
+  validateForm,
+  formatPhoneNumber,
+  formatPhoneInput,
+  FormErrors,
+} from "./formValidation";
 
 export function TeacherDetailsForm() {
   const { t } = useTranslation();
   const teacher = useTeacherStore((state) => state.teacher);
   const updateTeacher = useTeacherStore((state) => state.updateTeacher);
   const [isEditing, setIsEditing] = useState(false);
-
   // Extract first and last name from teacher.name
   const nameParts = teacher?.name?.split(" ") || [];
   const firstName = nameParts[0] || "";
@@ -20,10 +32,10 @@ export function TeacherDetailsForm() {
   const [editForm, setEditForm] = useState({
     firstName: firstName,
     lastName: lastName,
-    email: teacher?.email || "",
-    phone: teacher?.phoneNumber || "",
-    school: teacher?.school || "",
-    startDate: teacher?.startDate || "",
+    email: teacher?.email || "n/a",
+    phone: teacher?.phone_number || "n/a",
+    school: teacher?.school || "n/a",
+    startDate: teacher?.startDate || "n/a",
   });
 
   // Validation errors
@@ -32,10 +44,9 @@ export function TeacherDetailsForm() {
     lastName: "",
     email: "",
     phone: "",
-    school: "",
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const { isValid, errors: validationErrors } = validateForm(editForm, t);
 
     if (!isValid) {
@@ -43,11 +54,11 @@ export function TeacherDetailsForm() {
       return;
     }
 
-    updateTeacher({
+    await updateTeacher({
       name: `${editForm.firstName} ${editForm.lastName}`,
       email: editForm.email,
-      phoneNumber: editForm.phone,
-      school: editForm.school,
+      phone_number: editForm.phone,
+      years_experience: teacher?.years_experience,
     });
     setIsEditing(false);
     setErrors({
@@ -55,7 +66,6 @@ export function TeacherDetailsForm() {
       lastName: "",
       email: "",
       phone: "",
-      school: "",
     });
   };
 
@@ -167,31 +177,20 @@ export function TeacherDetailsForm() {
                 {t("profile.school")}
               </label>
             </div>
-            {isEditing ? (
-              <>
-                <input
-                  type="text"
-                  value={editForm.school}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, school: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl border"
-                  style={{
-                    background: "#dff3ff",
-                    borderColor: errors.school ? "#ff5757" : "#38b6ff",
-                  }}
-                />
-                {errors.school && (
-                  <p className="text-sm mt-1" style={{ color: "#ff5757" }}>
-                    {errors.school}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-lg px-4 py-3" style={{ color: "#000000" }}>
-                {teacher?.school}
-              </p>
-            )}
+            <p className="text-lg px-4 py-3" style={{ color: "#000000" }}>
+              {teacher?.school.name}
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Briefcase className="w-5 h-5" style={{ color: "#38b6ff" }} />
+              <label className="text-sm" style={{ color: "#000000" }}>
+                {t("school.yearsExperience")}
+              </label>
+            </div>
+            <p className="text-lg px-4 py-3" style={{ color: "#000000" }}>
+              {teacher?.years_experience}
+            </p>
           </div>
         </div>
 
@@ -243,9 +242,13 @@ export function TeacherDetailsForm() {
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) =>
-                    setEditForm({ ...editForm, phone: e.target.value })
+                    setEditForm({
+                      ...editForm,
+                      phone: formatPhoneInput(e.target.value),
+                    })
                   }
-                  placeholder="1234567890"
+                  placeholder="(###) ###-####"
+                  maxLength={14}
                   className="w-full px-4 py-3 rounded-xl border"
                   style={{
                     background: "#dff3ff",
@@ -263,6 +266,18 @@ export function TeacherDetailsForm() {
                 {formatPhoneNumber(editForm.phone)}
               </p>
             )}
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Building className="w-5 h-5" style={{ color: "#38b6ff" }} />
+              <label className="text-sm" style={{ color: "#000000" }}>
+                {t("profile.board")}
+              </label>
+            </div>
+            <p className="text-lg px-4 py-3" style={{ color: "#000000" }}>
+              {teacher?.board.name}
+            </p>
           </div>
 
           <div>

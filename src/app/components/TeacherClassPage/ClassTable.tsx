@@ -22,7 +22,6 @@ export function ClassTable({ students, classId }: ClassTableProps) {
   const getAnswersByEvaluation = useUnitsStore(
     (state) => state.getAnswersByEvaluation,
   );
-
   const evaluationsData = useMemo(() => getUnitsData, [getUnitsData]);
   const numberOfUnitOneEvaluations = useMemo(() => {
     return evaluationsData.filter((evalData) => evalData.unit === 1).length;
@@ -234,6 +233,7 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                               }}
                             >
                               <EvaluationButton
+                                required={singleAnswer?.required}
                                 status={singleAnswer?.status ?? null}
                                 onClick={() => {
                                   const basePath = schoolId

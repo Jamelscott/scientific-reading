@@ -2,13 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthUser, Teacher } from "../../mockData/types";
 import { teachers as allTeachers } from "../../mockData/users";
+import { supabase } from "../utils/supabase";
+import { withLoading } from "../utils/withLoading";
 
 interface TeacherStore {
   teacher: Teacher | null;
   teachers: Teacher[] | null;
-  setTeacher: (teacher: AuthUser | null) => void;
+  setSupabaseTeacher: (userId: string, userType: string) => Promise<void>;
   setTeachersForSchool: (schoolId: string) => void;
-  updateTeacher: (updates: Teacher) => void;
+  updateTeacher: (updates: Partial<Teacher>) => Promise<void>;
   updateTeachers: (updates: Teacher) => void;
   removeTeacher: (teacherId: string) => void;
   getTeacherById: (teacherId: string | number) => Teacher | null | void;
@@ -25,24 +27,24 @@ export const useTeacherStore = create<TeacherStore>()(
     (set, get) => ({
       teacher: null,
       teachers: null,
-      setTeacher: (user) => {
-        if (user && user.type === "teacher") {
-          const teacher: Teacher = {
-            id: normalizeTeacherId(user.id),
-            type: user.type,
-            password: user.password,
-            boardName: user.boardName,
-            name: user.name,
-            email: user.email,
-            school: user.school,
-            school_id: user.school_id,
-            board_id: user.board_id,
-            subjects: user.subjects,
-            yearsExperience: user.yearsExperience,
-          };
-          set({ teacher });
+      setSupabaseTeacher: async (userId: string, userType: string) => {
+        if (userType === 'teacher') {
+          const { data: teacher, error } = await supabase
+            .from('teachers')
+            .select('*, school:schools(name), board:boards(name)')
+            .eq('id', userId)
+            .single();
+          if (error) {
+            console.error('Error fetching teacher:', error.message);
+            alert('Failed to fetch teacher: ' + error.message);
+            return;
+          }
+
+          if (teacher) {
+            set({ teacher: teacher as Teacher });
+          }
         } else {
-          set({ teacher: null, teachers: null });
+          set({ teacher: null });
         }
       },
       setTeachersForSchool: (schoolId) => {
@@ -51,10 +53,32 @@ export const useTeacherStore = create<TeacherStore>()(
         );
         set({ teachers: filteredTeachers });
       },
-      updateTeacher: (updates) =>
-        set((state) => ({
-          teacher: state.teacher ? { ...state.teacher, ...updates } : null,
-        })),
+      updateTeacher: withLoading(async (updates: Partial<Teacher>) => {
+        const currentTeacher = get().teacher;
+        if (!currentTeacher) {
+          console.error('No teacher to update');
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('teachers')
+          .update(updates)
+          .eq('id', currentTeacher.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error updating teacher:', error.message);
+          alert('Failed to update teacher: ' + error.message);
+          return;
+        }
+
+        if (data) {
+          set((state) => ({
+            teacher: state.teacher ? { ...state.teacher, ...data } : null,
+          }));
+        }
+      }),
       updateTeachers: (updates) =>
         set((state) => {
           if (!state.teachers || state.teachers.length === 0) {

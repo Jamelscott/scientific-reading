@@ -48,7 +48,6 @@ export function UnitHeader({
   const teacher = useTeacherStore((state) =>
     state.getTeacherById(teacherId || ""),
   );
-  console.log(isLoading);
   const classData = useMemo(() => {
     return classes.find((c) => c.id === classId!);
   }, [classId, classes]);
