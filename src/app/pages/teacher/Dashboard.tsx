@@ -24,7 +24,7 @@ export function TeacherDashboard() {
   const { teacherId } = useParams();
   const navigate = useNavigate();
   const classes = useClassStore((state) => state.classes);
-  const setClasses = useClassStore((state) => state.setClasses);
+  const removeClass = useClassStore((state) => state.removeClass);
   const students = useStudentStore((state) => state.students);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
@@ -187,8 +187,8 @@ export function TeacherDashboard() {
                           </span>
                           <div className="flex gap-4">
                             <Button
-                              onClick={() => {
-                                setClasses(teacherId!);
+                              onClick={async () => {
+                                await removeClass(classItem.id);
                                 setShowDeleteId(null);
                               }}
                               label="common.confirm"

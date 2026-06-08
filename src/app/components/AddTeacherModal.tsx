@@ -70,7 +70,7 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
 
     // Get school info from current user
     const schoolId = currentUser?.type === "school" ? currentUser.id : "";
-    const boardId = currentUser?.type === "school" ? currentUser.boardId : "";
+    const boardId = currentUser?.type === "school" ? currentUser.board_id : "";
 
     const newTeacher: Teacher = {
       id: newTeacherId,

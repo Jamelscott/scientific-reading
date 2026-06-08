@@ -7,6 +7,7 @@ import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
 import { schoolLevel } from "../app/pages/const";
 import { supabase } from "../utils/supabase";
+import { withLoading } from "../utils/withLoading";
 
 export interface ClassPerformance {
   id: number;
@@ -19,8 +20,9 @@ export interface ClassPerformance {
 
 interface ClassStore {
   classes: Class[];
-  addClass: (classData: Omit<Class, "id">) => void;
-  updateClass: (classId: string, updates: Partial<Omit<Class, "id">>) => void;
+  addClass: (grade: Grades, schoolYear: number, teacherId: string) => Promise<void>;
+  updateClass: (classId: string, updates: Partial<Omit<Class, "id">>) => Promise<void>;
+  removeClass: (classId: string) => Promise<void>;
   setClasses: (userId: string) => void;
   getClassById: (classId: string) => Class | undefined;
   getClassBenchmarks: () => Record<Grades, number | null>;
@@ -64,41 +66,69 @@ export const useClassStore = create<ClassStore>()(
           return { classes: [] };
         }
       }),
-      addClass: (classData) =>
-        set((state) => {
-          const maxId = state.classes.reduce(
-            (max, cls) => Math.max(max, cls.id),
-            0
-          );
-          return {
-            classes: [
-              ...state.classes,
-              {
-                id: maxId + 1,
-                ...classData,
-                schoolYear: classData.schoolYear,
-                studentIds: [],
-              },
-            ],
-          };
-        }),
-      updateClass: (classId, updates) =>
+      addClass: withLoading(async ( grade, schoolYear, teacherId) => {
+        const { data: newClass, error } = await supabase
+          .from('classes')
+          .insert([
+            {
+              grade: grade,
+              teacher_id: teacherId,
+              year: schoolYear,
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error adding class:', error.message);
+          alert('Failed to add class: ' + error.message);
+          return;
+        }
+
+        if (newClass) {
+          set((state) => ({
+            classes: [...state.classes, newClass as Class]
+          }));
+        }
+      }),
+      updateClass: withLoading(async (classId: string, updates: Partial<Omit<Class, "id">>) => {
+        const { data: updatedClass, error } = await supabase
+          .from('classes')
+          .update(updates)
+          .eq('id', classId)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error updating class:', error.message);
+          alert('Failed to update class: ' + error.message);
+          return;
+        }
+
+        if (updatedClass) {
+          set((state) => ({
+            classes: state.classes.map((cls) =>
+              cls.id === classId ? updatedClass as Class : cls
+            )
+          }));
+        }
+      }),
+      removeClass: withLoading(async (classId: string) => {
+        const { error } = await supabase
+          .from('classes')
+          .delete()
+          .eq('id', classId);
+
+        if (error) {
+          console.error('Error removing class:', error.message);
+          alert('Failed to remove class: ' + error.message);
+          return;
+        }
+
         set((state) => ({
-          classes: state.classes.map((cls) =>
-            cls.id === classId ? { ...cls, ...updates } : cls
-          ),
-        })),
-      removeStudentFromClass: (student_id: string, class_id: string) =>
-        set((state) => ({
-          students: state.students.map((student) =>
-            student.id === student_id
-              ? {
-                  ...student,
-                  class_id: student.class_id,
-                }
-              : student
-          ),
-        })),
+          classes: state.classes.filter((cls) => cls.id !== classId)
+        }));
+      }),
       getClassById: (classId) => {
         const cls = get().classes.find((c) => c.id === classId);
         return cls;

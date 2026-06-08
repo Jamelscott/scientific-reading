@@ -14,7 +14,7 @@ export function LoadingSpinner({
   if (fullScreen) {
     return (
       <div
-        className={`fixed bottom-5 right-5 flex flex-col items-center gap-4 z-50 transition-opacity duration-300 ${
+        className={`fixed bottom-5 right-5 flex flex-col items-center gap-4 z-[9999] transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
       >

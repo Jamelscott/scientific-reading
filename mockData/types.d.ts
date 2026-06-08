@@ -64,6 +64,7 @@ export interface StudentAnswers {
   comment:string;
   required: boolean;
   status?: "success" | "adequate" | "needs-improvement" | null;
+  updated_at?:string;
 }
 
 export interface Student {

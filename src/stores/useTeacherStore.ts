@@ -35,8 +35,8 @@ export const useTeacherStore = create<TeacherStore>()(
             name: user.name,
             email: user.email,
             school: user.school,
-            schoolId: user.schoolId,
-            boardId: user.boardId,
+            school_id: user.school_id,
+            board_id: user.board_id,
             subjects: user.subjects,
             yearsExperience: user.yearsExperience,
           };
@@ -47,7 +47,7 @@ export const useTeacherStore = create<TeacherStore>()(
       },
       setTeachersForSchool: (schoolId) => {
         const filteredTeachers = allTeachers.filter(
-          (teacher) => teacher.schoolId === schoolId
+          (teacher) => teacher.school_id === schoolId
         );
         set({ teachers: filteredTeachers });
       },

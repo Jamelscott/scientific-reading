@@ -5,13 +5,14 @@ import { students as studentsT1 } from "../../mockData/teacher-t-1/students";
 import { students as studentsT2 } from "../../mockData/teacher-t-2/students";
 import { useUnitsStore } from "./useUnitsStore";
 import { supabase } from "../utils/supabase";
+import { withLoading } from "../utils/withLoading";
 
 interface StudentStore {
   students: Student[];
   setSupabaseStudents: (userId: string, userType: string) => Promise<void>;
   setStudentEvaluations: () => void;
-  addStudent: (firstName: string, lastName: string, class_id: string, school_id?: string, grade?: Grades) => void;
-  removeStudentFromClass: (student_id: string, class_id: string) => void;
+  addStudent: (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id?: string, board_id?: string, grade?: Grades) => Promise<void>;
+  removeStudentFromClass: (student_id: string) => Promise<void>;
   getStudentById: (student_id: string) => Student | undefined;
   getStudentCountByClass: (class_id: string) => number;
   getStudentByClass: (class_id: string) => Student[];
@@ -94,37 +95,52 @@ export const useStudentStore = create<StudentStore>()(
           
           return { students: studentsWithEvaluations };
         }),
-      addStudent: (firstName: string, lastName: string, class_id: string, school_id = "1", grade?: Grades) =>
-        set((state) => {
-          const maxId = state.students.reduce(
-            (max, student) => Math.max(max, parseInt(student.id)),
-            0
-          );
-          const newStudentId = maxId + 1;
-          return {
-            students: [
-              ...state.students,
-              {
-                id: newStudentId.toString(),
-                name: `${firstName} ${lastName}`,
-                class_id: class_id,
-                school_id: school_id,
-                grade: grade || "1re année"
-              } as Student,
-            ],
-          };
-        }),
-      removeStudentFromClass: (student_id: string, class_id: string) =>
+      addStudent: withLoading(async (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id?: string, board_id?: string, grade?: Grades) => {
+        const { data: newStudent, error } = await supabase
+          .from('students')
+          .insert([
+            {
+              name: `${firstName} ${lastName}`,
+              class_id: class_id,
+              teacher_id: teacher_id,
+              school_id: school_id,
+              board_id: board_id,
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error adding student:', error.message);
+          alert('Failed to add student: ' + error.message);
+          return;
+        }
+
+        if (newStudent) {
+          set((state) => ({
+            students: [...state.students, newStudent as Student]
+          }));
+          
+          // Set evaluations for the newly added student
+          get().setStudentEvaluations();
+        }
+      }),
+      removeStudentFromClass: withLoading(async (student_id: string) => {
+        const { error } = await supabase
+          .from('students')
+          .delete()
+          .eq('id', student_id);
+
+        if (error) {
+          console.error('Error removing student:', error.message);
+          alert('Failed to remove student: ' + error.message);
+          return;
+        }
+
         set((state) => ({
-          students: state.students.map((student) =>
-            student.id === student_id
-              ? {
-                  ...student,
-                  class_id: student.class_id,
-                }
-              : student
-          ),
-        })),
+          students: state.students.filter((student) => student.id !== student_id)
+        }));
+      }),
         getStudentById(student_id: string): Student | undefined {
           const student = get().students.find((s: Student) => s.id === student_id);
           return student;

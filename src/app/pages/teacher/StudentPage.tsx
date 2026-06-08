@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -48,12 +48,14 @@ const getStatusColor = (
 
 const getStatusText = (
   status: "success" | "adequate" | "needs-improvement" | "not-required" | null,
+  t: any,
 ) => {
-  if (status === "success") return "En voie/acquis";
-  if (status === "adequate") return "À surveiller";
-  if (status === "needs-improvement") return "À risque";
-  if (status === "not-required") return "Non requis";
-  return "Non évalué";
+  if (status === "success") return t("studentPage.status.success");
+  if (status === "adequate") return t("studentPage.status.adequate");
+  if (status === "needs-improvement")
+    return t("studentPage.status.needsImprovement");
+  if (status === "not-required") return t("studentPage.status.notRequired");
+  return t("studentPage.status.notEvaluated");
 };
 
 export function StudentPage() {
@@ -64,16 +66,15 @@ export function StudentPage() {
   const student = useStudentStore((state) => state.getStudentById(studentId!));
   const allStudents = useStudentStore((state) => state.students);
   const classes = useClassStore((state) => state.classes);
-  const currentClass = classes.find(
-    (c) => c.id === parseInt(classId || "", 10),
-  );
+  const currentClass = classes.find((c) => c.id === classId!);
   const classStudents = allStudents.filter((s) =>
-    s.classIds.includes(parseInt(classId || "", 10)),
+    s.class_id.includes(classId!),
   );
   const teacher = useAuthStore((state) => state.getCurrentUser());
-  const studentAnswers = useUnitsStore((state) =>
-    state.getAnswersByStudent(Number(studentId)!),
-  );
+  const allAnswers = useUnitsStore((state) => state.answers);
+  const studentAnswers = useMemo(() => {
+    return allAnswers.filter((answer) => answer.student_id === studentId);
+  }, [allAnswers, studentId]);
 
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -92,7 +93,7 @@ export function StudentPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleStudentChange = (newStudentId: number) => {
+  const handleStudentChange = (newStudentId: string) => {
     setShowStudentDropdown(false);
     navigate(`/teacher/${teacherId}/class/${classId}/student/${newStudentId}`);
   };
@@ -115,12 +116,14 @@ export function StudentPage() {
   const successCount = studentAnswers.filter(
     (e) => e.status === "success",
   ).length;
-  const successRate = Math.round((successCount / completedCount) * 100);
+  const successRate = completedCount > 0 
+    ? Math.round((successCount / completedCount) * 100) 
+    : 0;
 
   // Calculate competency scores from student evaluations
-  const calculateCompetencyScore = (atelierRange: number[]) => {
+  const calculateCompetencyScore = (atelierRange: string[]) => {
     const relevantAnswers = studentAnswers.filter((answer) =>
-      atelierRange.includes(answer.unitDataId),
+      atelierRange.includes(answer.unit_data_id),
     );
 
     if (relevantAnswers.length === 0) return 0;
@@ -150,23 +153,23 @@ export function StudentPage() {
   const radarData = [
     {
       subject: t("studentPage.reading"),
-      score: calculateCompetencyScore([1, 2, 3, 4, 5, 6]),
+      score: calculateCompetencyScore(["1", "2", "3", "4", "5", "6"]),
     },
     {
       subject: t("studentPage.writing"),
-      score: calculateCompetencyScore([7, 8, 9]),
+      score: calculateCompetencyScore(["7", "8", "9"]),
     },
     {
       subject: t("studentPage.decoding"),
-      score: calculateCompetencyScore([10, 11]),
+      score: calculateCompetencyScore(["10", "11"]),
     },
     {
       subject: t("studentPage.fluency"),
-      score: calculateCompetencyScore([12, 13]),
+      score: calculateCompetencyScore(["12", "13"]),
     },
     {
       subject: t("studentPage.comprehension"),
-      score: calculateCompetencyScore([14, 15]),
+      score: calculateCompetencyScore(["14", "15"]),
     },
   ];
 
@@ -183,7 +186,7 @@ export function StudentPage() {
             fontWeight="bold"
           >
             <tspan x={x} dy="-1em" style={{ paddingBottom: "10px" }}>
-              Alphabetic Knowledge
+              {t("studentPage.alphabeticKnowledge")}
             </tspan>
           </text>
         </g>
@@ -275,9 +278,7 @@ export function StudentPage() {
                         className="w-full px-4 py-3 text-left transition-all flex items-center justify-between group hover:bg-[#38b6ff] hover:scale-[1.02] hover:shadow-md cursor-pointer"
                         style={{
                           backgroundColor:
-                            s.id === parseInt(studentId || "", 10)
-                              ? "#dff3ff"
-                              : "transparent",
+                            s.id === studentId ? "#dff3ff" : "transparent",
                         }}
                       >
                         <span
@@ -439,7 +440,7 @@ export function StudentPage() {
               </p>
               <p className="text-lg" style={{ color: "#004aad" }}>
                 {formatDate(
-                  studentAnswers[studentAnswers.length - 1]?.lastModified,
+                  studentAnswers[studentAnswers.length - 1]?.updated_at,
                 )}
               </p>
             </div>
@@ -535,13 +536,14 @@ export function StudentPage() {
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <h2 className="text-2xl mb-6" style={{ color: "#004aad" }}>
-              Historique des ateliers
+              {t("studentPage.workshopHistory")}
             </h2>
 
             <div className="space-y-4">
               {studentAnswers.map((evaluation) => {
                 const unit = unitData.find(
-                  (u) => u.evaluation === evaluation.unitDataId,
+                  (u) =>
+                    Number(u.evaluation) === Number(evaluation.unit_data_id),
                 );
                 return (
                   <div
@@ -559,7 +561,8 @@ export function StudentPage() {
                               color: "#ffffff",
                             }}
                           >
-                            Atelier {evaluation.unitDataId}
+                            {t("studentPage.workshop")}{" "}
+                            {evaluation.unit_data_id}
                           </span>
                           <h3 className="text-lg" style={{ color: "#004aad" }}>
                             {t(unit!.title)}
@@ -569,9 +572,9 @@ export function StudentPage() {
                           className="text-sm mb-2"
                           style={{ color: "#000000", opacity: 0.7 }}
                         >
-                          Complété le{" "}
-                          {evaluation.lastModified
-                            ? formatDate(evaluation.lastModified)
+                          {t("studentPage.completedOn")}{" "}
+                          {evaluation.updated_at
+                            ? formatDate(evaluation.updated_at)
                             : "N/A"}
                         </p>
                       </div>
@@ -592,7 +595,7 @@ export function StudentPage() {
                                 : "#ffffff",
                           }}
                         >
-                          {getStatusText(evaluation.status || null)}
+                          {getStatusText(evaluation.status || null, t)}
                         </span>
                       </div>
                     </div>
@@ -612,7 +615,7 @@ export function StudentPage() {
                               className="text-sm mb-1"
                               style={{ color: "#004aad" }}
                             >
-                              Commentaire de l'enseignant(e)
+                              {t("studentPage.teacherComment")}
                             </p>
                             <p style={{ color: "#000000" }}>
                               {evaluation.comment}

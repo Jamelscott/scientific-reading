@@ -31,7 +31,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   const firstAvailableGrade: Grades =
     availableGrades.find((g) => !existingGrades.includes(g)) || "Maternelle";
 
-  const [schoolYear, setSchoolYear] = useState("");
+  const [schoolYear, setSchoolYear] = useState<number | null>(null);
   const [grade, setGrade] = useState<Grades>(firstAvailableGrade);
   const [errors, setErrors] = useState({
     schoolYear: "",
@@ -44,8 +44,11 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
       grade: "",
     };
 
-    if (!schoolYear.trim()) {
+    if (!schoolYear || typeof schoolYear !== "number") {
       newErrors.schoolYear = t("dashboard.errors.schoolYearRequired");
+      setErrors(newErrors);
+
+      return;
     }
 
     if (!grade) {
@@ -61,12 +64,8 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
       return;
     }
 
-    addClass({
-      grade,
-      schoolYear,
-      teacherId,
-    });
-    setSchoolYear("");
+    addClass(grade, schoolYear, teacherId);
+    setSchoolYear(null);
     setGrade(firstAvailableGrade);
     setErrors({ schoolYear: "", grade: "" });
     onClose();
@@ -112,9 +111,9 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
               class year
             </label>
             <input
-              type="text"
-              value={schoolYear}
-              onChange={(e) => setSchoolYear(e.target.value)}
+              type="number"
+              value={schoolYear ? schoolYear : ""}
+              onChange={(e) => setSchoolYear(Number(e.target.value))}
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",

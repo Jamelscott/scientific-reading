@@ -9,6 +9,7 @@ import { AddStudentModal } from "../../components/AddStudentModal";
 import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
 import { exportTableToPdf } from "../../components/utils/exportToPdf";
 import { Button } from "../../components/ui/Button";
+import { useAuthStore } from "../../../stores";
 
 export function ClassPage() {
   const { t } = useTranslation();
@@ -20,6 +21,11 @@ export function ClassPage() {
   }>();
   const classes = useClassStore((state) => state.classes);
   const teacher = useTeacherStore((state) => state.teacher);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const boardId =
+    currentUser?.type === "board" || currentUser?.type === "admin"
+      ? currentUser.id
+      : currentUser?.board_id;
 
   const currentClass = useClassStore.getState().getClassById(classId!);
   console.log(currentClass);
@@ -27,7 +33,11 @@ export function ClassPage() {
     (state) => state.getStudentCountByClass,
   );
 
-  const students = useStudentStore.getState().getStudentByClass(classId!);
+  const allStudents = useStudentStore((state) => state.students);
+  const students = useMemo(() => {
+    return allStudents.filter((student) => student.class_id === classId);
+  }, [allStudents, classId]);
+
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -197,6 +207,8 @@ export function ClassPage() {
         onClose={() => setShowAddStudentModal(false)}
         classId={classId!}
         schoolId={schoolId!}
+        teacherId={teacherId!}
+        boardId={boardId!}
       />
     </div>
   );

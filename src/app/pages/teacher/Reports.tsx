@@ -56,13 +56,13 @@ export function ReportsPage() {
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(
     classes.length > 0 ? classes[0].id : null,
   );
-  const [expandedClassIds, setExpandedClassIds] = useState<Set<number>>(
+  const [expandedClassIds, setExpandedClassIds] = useState<Set<string>>(
     new Set(classes.map((c) => c.id)),
   );
-  const toggleClassExpanded = (classId: number) => {
+  const toggleClassExpanded = (classId: string) => {
     setExpandedClassIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(classId)) {
@@ -89,7 +89,7 @@ export function ReportsPage() {
     let needsImprovementCount = 0;
     // Count submitted (non-null) scores for the selected class only
     getAllAnswers
-      .filter((answer) => answer.classId === selectedClassId)
+      .filter((answer) => answer.class_id === selectedClassId)
       .forEach((answer) => {
         const status = getScoreFromEvaluations(answer.answers);
         if (status === "success") successCount++;
@@ -123,7 +123,7 @@ export function ReportsPage() {
   };
 
   const calculateStudentDistribution = (
-    classId: number | null = selectedClassId,
+    classId: string | null = selectedClassId,
   ) => {
     let successStudents = 0;
     let adequateStudents = 0;
@@ -131,7 +131,7 @@ export function ReportsPage() {
 
     // Get students in the specified class
     const classStudentIds = new Set(
-      students.filter((s) => s.classIds.includes(classId!)).map((s) => s.id),
+      students.filter((s) => s.class_id.includes(classId!)).map((s) => s.id),
     );
 
     if (classStudentIds.size === 0) {
@@ -149,7 +149,7 @@ export function ReportsPage() {
     // Calculate average progress for each student in the specified class
     classStudentIds.forEach((studentId) => {
       const studentAnswers = getAllAnswers.filter(
-        (a) => a.studentId === studentId && a.classId === classId,
+        (a) => a.student_id === studentId && a.class_id === classId,
       );
 
       // Only count students who have submitted evaluations
@@ -196,12 +196,18 @@ export function ReportsPage() {
   // Build classPerformanceData: produce three workshop-range items for the selected class
   // Each item contains percentages for success, adequate and failing (stacked bars)
   const buildClassPerformanceData = () => {
-    const ranges: { name: string; units: number[] }[] = [
-      { name: t("reports.workshopRanges.unit1"), units: [1, 2, 3, 4, 5, 6] },
-      { name: t("reports.workshopRanges.unit2To5"), units: [7, 8, 9, 10, 11] },
+    const ranges: { name: string; units: string[] }[] = [
+      {
+        name: t("reports.workshopRanges.unit1"),
+        units: ["1", "2", "3", "4", "5", "6"],
+      },
+      {
+        name: t("reports.workshopRanges.unit2To5"),
+        units: ["7", "8", "9", "10", "11"],
+      },
       {
         name: t("reports.workshopRanges.unit6To10"),
-        units: [12, 13, 14, 15],
+        units: ["12", "13", "14", "15"],
       },
     ];
 
@@ -222,7 +228,7 @@ export function ReportsPage() {
 
       getAllAnswers
         .filter(
-          (a) => a.classId === classId && range.units.includes(a.unitDataId),
+          (a) => a.class_id === classId && range.units.includes(a.unit_data_id),
         )
         .forEach((a) => {
           const status = getScoreFromEvaluations(a.answers);
@@ -274,15 +280,15 @@ export function ReportsPage() {
     });
 
     // Group answers by unit (evaluation) and calculate average
-    const answersByUnit: Record<number, string[]> = {};
+    const answersByUnit: Record<string, string[]> = {};
 
     getAllAnswers.forEach((answer) => {
-      if (!answersByUnit[answer.unitDataId]) {
-        answersByUnit[answer.unitDataId] = [];
+      if (!answersByUnit[answer.unit_data_id]) {
+        answersByUnit[answer.unit_data_id] = [];
       }
       const status = getScoreFromEvaluations(answer.answers);
       if (status) {
-        answersByUnit[answer.unitDataId].push(status);
+        answersByUnit[answer.unit_data_id].push(status);
       }
     });
 
@@ -326,7 +332,7 @@ export function ReportsPage() {
   const calculateAverageUnitsCompleted = () => {
     const classStudentIds = new Set(
       students
-        .filter((s) => s.classIds.includes(selectedClassId!))
+        .filter((s) => s.class_id.includes(selectedClassId!))
         .map((s) => s.id),
     );
     if (classStudentIds.size === 0) return 0;
@@ -336,12 +342,12 @@ export function ReportsPage() {
 
     classStudentIds.forEach((studentId) => {
       const studentAnswers = getAllAnswers.filter(
-        (a) => a.studentId === studentId && a.classId === selectedClassId,
+        (a) => a.student_id === studentId && a.class_id === selectedClassId,
       );
 
       if (studentAnswers.length > 0) {
         // Count unique units this student has completed
-        const uniqueUnits = new Set(studentAnswers.map((a) => a.unitDataId));
+        const uniqueUnits = new Set(studentAnswers.map((a) => a.unit_data_id));
         totalUnits += uniqueUnits.size;
         studentCount++;
       }
@@ -351,7 +357,7 @@ export function ReportsPage() {
   };
 
   // Get student performance level counts
-  const getStudentLevelCounts = (classId: number | null = selectedClassId) => {
+  const getStudentLevelCounts = (classId: string | null = selectedClassId) => {
     const distribution = calculateStudentDistribution(classId);
     return {
       onTrack:
@@ -368,14 +374,14 @@ export function ReportsPage() {
   };
 
   // Calculate evaluation distribution for a class (for pie chart)
-  const calculateClassEvaluationDistribution = (classId: number) => {
+  const calculateClassEvaluationDistribution = (classId: string) => {
     let successCount = 0;
     let adequateCount = 0;
     let needsImprovementCount = 0;
 
     // Count submitted evaluations by status for this class
     getAllAnswers
-      .filter((answer) => answer.classId === classId)
+      .filter((answer) => answer.class_id === classId)
       .forEach((answer) => {
         const status = getScoreFromEvaluations(answer.answers);
         if (status === "success") successCount++;
@@ -413,10 +419,10 @@ export function ReportsPage() {
   };
 
   // Get top performing students for a class
-  const getTopStudents = (classId: number) => {
+  const getTopStudents = (classId: string) => {
     const students = useStudentStore.getState().students;
     const classStudentIds = students
-      .filter((s) => s.classIds.includes(classId))
+      .filter((s) => s.class_id.includes(classId))
       .map((s) => s.id);
 
     const studentScores = classStudentIds
@@ -425,7 +431,7 @@ export function ReportsPage() {
         if (!student) return null;
 
         const studentAnswers = getAllAnswers.filter(
-          (a) => a.studentId === studentId && a.classId === classId,
+          (a) => a.student_id === studentId && a.class_id === classId,
         );
 
         if (studentAnswers.length === 0) return null;
@@ -458,10 +464,10 @@ export function ReportsPage() {
   };
 
   // Get students needing support for a class
-  const getStudentsNeedingSupport = (classId: number) => {
+  const getStudentsNeedingSupport = (classId: string) => {
     const students = useStudentStore.getState().students;
     const classStudentIds = students
-      .filter((s) => s.classIds.includes(classId))
+      .filter((s) => s.class_id.includes(classId))
       .map((s) => s.id);
 
     const studentScores = classStudentIds
@@ -470,7 +476,7 @@ export function ReportsPage() {
         if (!student) return null;
 
         const studentAnswers = getAllAnswers.filter(
-          (a) => a.studentId === studentId && a.classId === classId,
+          (a) => a.student_id === studentId && a.class_id === classId,
         );
 
         if (studentAnswers.length === 0) return null;
@@ -534,9 +540,7 @@ export function ReportsPage() {
                 <select
                   value={selectedClassId ?? ""}
                   onChange={(e) =>
-                    setSelectedClassId(
-                      e.target.value ? Number(e.target.value) : null,
-                    )
+                    setSelectedClassId(e.target.value ? e.target.value : null)
                   }
                   className="appearance-none px-6 py-3 pr-12 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all"
                   style={{
@@ -1096,7 +1100,7 @@ export function ReportsPage() {
               {students
                 .filter(
                   (s) =>
-                    selectedClassId && s.classIds.includes(selectedClassId),
+                    selectedClassId && s.class_id.includes(selectedClassId),
                 )
                 .map((student) => (
                   <button

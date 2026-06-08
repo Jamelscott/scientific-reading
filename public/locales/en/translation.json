@@ -394,6 +394,7 @@
     "error": "An error occurred",
     "save": "Save",
     "saved": "Saved!",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "confirm": "Confirm",
@@ -650,6 +651,18 @@
     "writing": "Phonological Awareness",
     "decoding": "Decoding",
     "fluency": "Fluency",
-    "comprehension": "Comprehension"
+    "comprehension": "Comprehension",
+    "alphabeticKnowledge": "Alphabetic Knowledge",
+    "workshopHistory": "Workshop History",
+    "workshop": "Workshop",
+    "completedOn": "Completed on",
+    "teacherComment": "Teacher's Comment",
+    "status": {
+      "success": "On Track/Acquired",
+      "adequate": "To Monitor",
+      "needsImprovement": "At Risk",
+      "notRequired": "Not Required",
+      "notEvaluated": "Not Evaluated"
+    }
   }
 }

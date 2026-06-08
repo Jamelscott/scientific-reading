@@ -4,19 +4,24 @@ import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 import { useStudentStore } from "../../stores/useStudentStore";
 import { useSchoolStore } from "../../stores/useSchoolStore";
+import { useAuthStore } from "../../stores";
 
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classId?: string;
-  schoolId?: string;
+  classId: string;
+  schoolId: string;
+  boardId: string;
+  teacherId: string;
 }
 
 export function AddStudentModal({
   isOpen,
   onClose,
-  classId,
+  teacherId,
   schoolId,
+  classId,
+  boardId,
 }: AddStudentModalProps) {
   const { t } = useTranslation();
   const addStudent = useStudentStore((state) => state.addStudent);
@@ -26,6 +31,7 @@ export function AddStudentModal({
     firstName: "",
     lastName: "",
   });
+  console.log(teacherId);
 
   const handleSubmit = () => {
     const newErrors = {
@@ -46,12 +52,16 @@ export function AddStudentModal({
       return;
     }
 
-    // addStudent(
-    //   firstName.trim(),
-    //   lastName.trim(),
-    //   classId ? [classId] : [],
-    //   schoolId,
-    // );
+    // (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id?: string, board_id?: string, grade?: Grades) => {
+
+    addStudent(
+      firstName.trim(),
+      lastName.trim(),
+      classId,
+      teacherId,
+      schoolId,
+      boardId,
+    );
     setFirstName("");
     setLastName("");
     setErrors({ firstName: "", lastName: "" });
