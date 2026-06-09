@@ -62,8 +62,8 @@ export const useAuthStore = create<AuthStore>()(
           const authUser = { ...user, type: userType } as AuthUser;
           // Set current user in store
           set({ currentUser: authUser });
-          useUnitsStore.getState().setUnitsData();
-          // get data assocaited to user
+          useUnitsStore.getState().setUnitsData()
+          useUnitsStore.getState().setResources()          // get data assocaited to user
           if (userType === 'teacher') {
             useClassStore.getState().setSupabaseClasses(authUser.id, userType);
             useTeacherStore.getState().setSupabaseTeacher(authUser.id, userType);

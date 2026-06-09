@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Bell, X, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -23,7 +23,10 @@ export function NotificationDropdown() {
   const [notifications, setNotifications] = useState(notificationKeys);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications],
+  );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

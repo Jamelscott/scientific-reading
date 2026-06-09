@@ -24,7 +24,7 @@ export function Button({
 }: ButtonProps) {
   const { t } = useTranslation();
   const baseStyles =
-    "inline-flex items-center justify-center transition-all active:scale-95 hover:shadow-md cursor-pointer";
+    "inline-flex items-center justify-center transition-all active:scale-95 hover:shadow-md";
 
   const sizeStyles = {
     small: "py-2 px-4 text-sm rounded-lg",
@@ -43,12 +43,15 @@ export function Button({
     clear: "bg-[#666] hover:bg-[#555] active:bg-[#444] text-white",
   };
 
+  const disabledStyles =
+    "!bg-gray-300 !text-gray-500 !border-gray-300 !shadow-none !cursor-not-allowed !pointer-events-none !hover:bg-gray-300 !active:bg-gray-300";
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
+      className={`${baseStyles} ${sizeStyles[size]} ${disabled ? disabledStyles : `${variantStyles[variant]} cursor-pointer`} ${className}`}
     >
       {leadingIcon ? (
         <span className="inline-flex items-center mr-2">{leadingIcon}</span>

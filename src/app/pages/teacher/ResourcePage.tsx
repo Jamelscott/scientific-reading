@@ -2,12 +2,14 @@ import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, Download } from "lucide-react";
 import { useUnitsStore } from "../../../stores";
 import { NotificationDropdown } from "../../components/NotificationDropdown";
+import { useTranslation } from "react-i18next";
 
 export function ResourcePage() {
   const navigate = useNavigate();
   const { category, resourceId, teacherId } = useParams();
+  const { t } = useTranslation();
 
-  const categories = useUnitsStore((s) => s.getResources());
+  const categories = useUnitsStore((s) => s.resources);
 
   const slugify = (str: string) =>
     str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, "-");
@@ -15,12 +17,11 @@ export function ResourcePage() {
   const categoryData =
     categories.find((c) => slugify(c.title) === (category || "")) ||
     categories[0];
-  if (!categoryData) return <div>Loading...</div>;
+  if (!categoryData) return <div>{t("resourcePage.loading")}</div>;
 
   const resource = (() => {
-    const asNumber = Number(resourceId);
-    if (!Number.isNaN(asNumber))
-      return categoryData.resources.find((r) => r.id === asNumber);
+    if (!resourceId)
+      return categoryData.resources.find((r) => r.id === resourceId);
     return categoryData.resources.find(
       (r) =>
         slugify(r.title) === (resourceId || "") ||
@@ -32,7 +33,7 @@ export function ResourcePage() {
     );
   })();
 
-  if (!resource) return <div>Ressource introuvable</div>;
+  if (!resource) return <div>{t("resourcePage.notFound")}</div>;
 
   const { color, title } = categoryData;
   const activities = resource.activities || [];
@@ -48,16 +49,24 @@ export function ResourcePage() {
       style={{ background: `${color}15` }}
     >
       <div className="h-full overflow-y-auto">
-        <div className="p-12 pb-8" style={{ background: "#ffffff" }}>
+        <div
+          className="p-12 pb-8"
+          style={{
+            background: "#ffffff",
+            borderColor: "#dff3ff",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+            position: "relative",
+          }}
+        >
           <div className="flex items-start justify-between">
             <div>
               <button
                 onClick={() => navigate(`/teacher/${teacherId}/library`)}
-                className="flex items-center gap-2 mb-4 text-sm hover:shadow-md transition-all cursor-pointer"
+                className="flex items-center gap-2 mb-4 text-sm hover:font-bold transition-all cursor-pointer"
                 style={{ color: "#38b6ff" }}
               >
                 <ArrowLeft className="w-4 h-4" />
-                Retour à la bibliothèque
+                {t("resourcePage.backToLibrary")}
               </button>
               <div className="flex items-center gap-3 mb-2">
                 <div
@@ -76,7 +85,7 @@ export function ResourcePage() {
                 </div>
               </div>
               <p className="text-lg" style={{ color: "#000000" }}>
-                Sélectionnez une ressource à télécharger
+                {t("resourcePage.selectResource")}
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -108,7 +117,8 @@ export function ResourcePage() {
                     className="text-lg mb-1 font-semibold"
                     style={{ color: "#004aad" }}
                   >
-                    Activité {idx + 1} · {item.name}
+                    {t("resourcePage.activityLabel", { number: idx + 1 })} ·{" "}
+                    {item.name}
                   </h3>
                   <p className="text-sm" style={{ color: "#666" }}>
                     {item.description}
@@ -119,7 +129,9 @@ export function ResourcePage() {
                   style={{ background: `${color}15`, color: color }}
                 >
                   <Download className="w-5 h-5" />
-                  <span className="text-sm font-semibold">Télécharger</span>
+                  <span className="text-sm font-semibold">
+                    {t("resourcePage.download")}
+                  </span>
                 </div>
               </button>
             ))}

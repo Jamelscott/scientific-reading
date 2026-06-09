@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useUnitsStore } from "../../../stores/useUnitsStore";
 import { EvaluationButton } from "./EvaluationButton";
@@ -26,6 +26,18 @@ export function ClassTable({ students, classId }: ClassTableProps) {
   const numberOfUnitOneEvaluations = useMemo(() => {
     return evaluationsData.filter((evalData) => evalData.unit === 1).length;
   }, [evaluationsData]);
+
+  // Memoize navigation handler to prevent recreating on every render
+  const handleEvaluationClick = useCallback(
+    (studentId: string, evaluationId: string) => {
+      const basePath = schoolId
+        ? `/school/${schoolId}/teacher/${teacherId}/class/${classId}`
+        : `/teacher/${teacherId}/class/${classId}`;
+      navigate(`${basePath}/student/${studentId}/evaluation/${evaluationId}`);
+    },
+    [schoolId, teacherId, classId, navigate],
+  );
+
   return (
     <div className="p-8 flex-1 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -233,16 +245,14 @@ export function ClassTable({ students, classId }: ClassTableProps) {
                               }}
                             >
                               <EvaluationButton
-                                required={singleAnswer?.required}
+                                required={singleAnswer?.required ?? undefined}
                                 status={singleAnswer?.status ?? null}
-                                onClick={() => {
-                                  const basePath = schoolId
-                                    ? `/school/${schoolId}/teacher/${teacherId}/class/${classId}`
-                                    : `/teacher/${teacherId}/class/${classId}`;
-                                  navigate(
-                                    `${basePath}/student/${student.id}/evaluation/${evaluation.id}`,
-                                  );
-                                }}
+                                onClick={() =>
+                                  handleEvaluationClick(
+                                    student.id,
+                                    evaluation.id,
+                                  )
+                                }
                                 empty={
                                   !singleAnswer || singleAnswer.status === null
                                 }

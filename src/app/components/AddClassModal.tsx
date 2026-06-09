@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
@@ -18,7 +18,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   const classes = useClassStore((state) => state.classes);
 
   // Get existing grades for this teacher
-  const existingGrades = classes.map((c) => c.grade);
+  const existingGrades = useMemo(() => classes.map((c) => c.grade), [classes]);
 
   // Find first available grade
   const availableGrades: Grades[] = [
@@ -28,8 +28,11 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
     "2e année",
     "3e année",
   ];
-  const firstAvailableGrade: Grades =
-    availableGrades.find((g) => !existingGrades.includes(g)) || "Maternelle";
+  const firstAvailableGrade: Grades = useMemo(
+    () =>
+      availableGrades.find((g) => !existingGrades.includes(g)) || "Maternelle",
+    [existingGrades],
+  );
 
   const [schoolYear, setSchoolYear] = useState<number | null>(null);
   const [grade, setGrade] = useState<Grades>(firstAvailableGrade);
@@ -37,7 +40,6 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
     schoolYear: "",
     grade: "",
   });
-
   const handleSubmit = () => {
     const newErrors = {
       schoolYear: "",
@@ -72,7 +74,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   };
 
   const handleClose = () => {
-    setSchoolYear("");
+    setSchoolYear(null);
     setGrade(firstAvailableGrade);
     setErrors({ schoolYear: "", grade: "" });
     onClose();
@@ -113,13 +115,19 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
             <input
               type="number"
               value={schoolYear ? schoolYear : ""}
-              onChange={(e) => setSchoolYear(Number(e.target.value))}
+              onChange={(e) => {
+                // only allow max 4 digits and prevent non-numeric input
+                const value = e.target.value;
+                if (value.length > 4) return;
+                if (!/^\d*$/.test(value)) return;
+                setSchoolYear(Number(e.target.value));
+              }}
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
                 borderColor: errors.schoolYear ? "#ff5757" : "#38b6ff",
               }}
-              placeholder={t("dashboard.classExample")}
+              placeholder={new Date().getFullYear().toString()}
             />
             {errors.schoolYear && (
               <p className="text-sm mt-1" style={{ color: "#ff5757" }}>
@@ -203,6 +211,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
               className="flex-1"
             />
             <Button
+              disabled={classes.length >= 5} // Max 5 classes
               onClick={handleSubmit}
               label="dashboard.createClass"
               variant="primary"

@@ -177,13 +177,13 @@ export function SchoolDashboard() {
       });
 
     return atRiskStudents as Array<{
-      id: number;
+      id: string;
       name: string;
       className: string;
       grade: string;
       teacher: string;
       teacherId: string;
-      classId: number;
+      classId: string;
       atelier: number;
       status: "À risque" | "À surveiller";
     }>;

@@ -135,7 +135,7 @@ export function LibraryPage() {
                         e.currentTarget.style.borderColor = `var(--unit-${unitNum}-bg-30)`;
                       }}
                     >
-                      Fiche Rapide
+                      {t("library.quickSheet")}
                     </button>
 
                     <button
@@ -162,7 +162,7 @@ export function LibraryPage() {
                       }}
                     >
                       <ArrowRight className="w-3 h-3" />
-                      Leçons
+                      {t("library.lessons")}
                     </button>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export function LibraryPage() {
           className="text-3xl mb-8 font-bold mt-16"
           style={{ color: "#004aad", letterSpacing: "-0.02em" }}
         >
-          Ressources téléchargeables
+          {t("library.downloadableResources")}
         </h2>
 
         <div className="space-y-4">
@@ -219,7 +219,9 @@ export function LibraryPage() {
                       color: category.color,
                     }}
                   >
-                    {category.resources.length} ressources
+                    {t("library.resourcesCount", {
+                      count: category.resources.length,
+                    })}
                   </span>
                 </div>
                 <ChevronDown

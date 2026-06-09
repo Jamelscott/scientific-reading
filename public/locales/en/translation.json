@@ -25,7 +25,19 @@
     "library": "Library",
     "subtitle": "Access teaching resources and guides to support your instruction",
     "selectOption": "Select an option below",
-    "backToLibrary": "Back to library"
+    "backToLibrary": "Back to library",
+    "quickSheet": "Quick sheet",
+    "lessons": "Lessons",
+    "downloadableResources": "Downloadable resources",
+    "resourcesCount": "{{count}} resources"
+  },
+  "resourcePage": {
+    "loading": "Loading...",
+    "notFound": "Resource not found",
+    "backToLibrary": "Back to library",
+    "selectResource": "Select a resource to download",
+    "activityLabel": "Activity {{number}}",
+    "download": "Download"
   },
   "dashboard": {
     "welcome": "Welcome!",

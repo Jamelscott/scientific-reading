@@ -156,7 +156,7 @@ export const useClassStore = create<ClassStore>()(
         };
         
         // Group classes by grade
-        const gradeGroups: Record<Grades, number[]> = {
+        const gradeGroups: Record<Grades, string[]> = {
           "Maternelle": [],
           "Jardin": [],
           "1re année": [],

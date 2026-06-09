@@ -55,7 +55,7 @@ export function TeacherDetailsForm() {
     }
 
     await updateTeacher({
-      name: `${editForm.firstName} ${editForm.lastName}`,
+      school: { name: `${editForm.firstName} ${editForm.lastName}` },
       email: editForm.email,
       phone_number: editForm.phone,
       years_experience: teacher?.years_experience,

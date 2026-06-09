@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -93,10 +93,15 @@ export function StudentPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleStudentChange = (newStudentId: string) => {
-    setShowStudentDropdown(false);
-    navigate(`/teacher/${teacherId}/class/${classId}/student/${newStudentId}`);
-  };
+  const handleStudentChange = useCallback(
+    (newStudentId: string) => {
+      setShowStudentDropdown(false);
+      navigate(
+        `/teacher/${teacherId}/class/${classId}/student/${newStudentId}`,
+      );
+    },
+    [teacherId, classId, navigate],
+  );
 
   if (!student) {
     return <div>{t("studentPage.studentNotFound")}</div>;
@@ -106,6 +111,7 @@ export function StudentPage() {
   const studentGrade = currentClass?.grade || "1re année";
   const currentBenchmark =
     gradeBenchmarks[studentGrade as keyof typeof gradeBenchmarks];
+  console.log(gradeBenchmarks);
   const benchmarkProgress = Math.min(
     100,
     (completedCount / currentBenchmark.expected) * 100,
@@ -251,7 +257,7 @@ export function StudentPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowStudentDropdown(!showStudentDropdown)}
-                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:shadow-md transition-all cursor-pointer"
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:font-bold transition-all cursor-pointer"
                   style={{ color: "#004aad" }}
                 >
                   {student.name}

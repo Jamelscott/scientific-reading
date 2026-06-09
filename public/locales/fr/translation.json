@@ -26,7 +26,19 @@
     "library": "Bibliothèque",
     "subtitle": "Accédez aux ressources pédagogiques et aux guides pour soutenir votre enseignement",
     "selectOption": "Sélectionnez une option ci-dessous",
-    "backToLibrary": "Retour à la bibliothèque"
+    "backToLibrary": "Retour à la bibliothèque",
+    "quickSheet": "Fiche rapide",
+    "lessons": "Leçons",
+    "downloadableResources": "Ressources téléchargeables",
+    "resourcesCount": "{{count}} ressources"
+  },
+  "resourcePage": {
+    "loading": "Chargement...",
+    "notFound": "Ressource introuvable",
+    "backToLibrary": "Retour à la bibliothèque",
+    "selectResource": "Sélectionnez une ressource à télécharger",
+    "activityLabel": "Activité {{number}}",
+    "download": "Télécharger"
   },
   "dashboard": {
     "welcome": "Bon retour, Mme Gisèle!",
