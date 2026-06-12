@@ -1,16 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { classes as teachert1Classes } from "../../mockData/teacher-t-1/classes";
-import { classes as teachert2Classes } from "../../mockData/teacher-t-2/classes";
 import { Class, Grades } from "../../mockData/types";
 import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
-import { schoolLevel } from "../app/pages/const";
+import { useUnitsStore } from "./useUnitsStore";
+import { schoolGradeBenchmarks } from "../app/pages/const";
 import { supabase } from "../utils/supabase";
 import { withLoading } from "../utils/withLoading";
 
 export interface ClassPerformance {
-  id: number;
+  id: string;
   grade: Grades;
   teacher: string;
   teacherId: string;
@@ -20,10 +19,9 @@ export interface ClassPerformance {
 
 interface ClassStore {
   classes: Class[];
-  addClass: (grade: Grades, schoolYear: number, teacherId: string) => Promise<void>;
+  addClass: (grade: Grades, schoolYear: number, teacherId: string, boardId: string, schoolId: string) => Promise<void>;
   updateClass: (classId: string, updates: Partial<Omit<Class, "id">>) => Promise<void>;
   removeClass: (classId: string) => Promise<void>;
-  setClasses: (userId: string) => void;
   getClassById: (classId: string) => Class | undefined;
   getClassBenchmarks: () => Record<Grades, number | null>;
   getClassPerformance: () => ClassPerformance[];
@@ -50,29 +48,31 @@ export const useClassStore = create<ClassStore>()(
         } else if (userId === 'board') {
           // return { students: studentsT2 };
         } else if (userType === 'school') {
-          // return { students: [...studentsT1, ...studentsT2]}
+          const { data: schoolClasses, error }: { data: Class[] | null; error: any } = await supabase
+            .from(`classes`)
+            .select("*")
+            .eq('school_id', userId)
+            .order('grade', { ascending: true })
+
+          if (error) {
+            throw new Error('Failed to fetch classes: ' + error.message);
+          }
+          set(() => ({ classes: schoolClasses || [] }))
+          return
         } else if (userType === 'admin') {
           // return { students: [] };
+          // return { students: [...studentsT1, ...studentsT2]}
         }
     },
-      setClasses: (userId) => set(() => {
-        if (userId === 't-1') {
-          return { classes: teachert1Classes };
-        } else if (userId === 't-2') {
-          return { classes: teachert2Classes };
-        } else if (userId.startsWith('b') || userId.startsWith('s')) {
-          return { classes: [...teachert1Classes, ...teachert2Classes] };
-        } else {
-          return { classes: [] };
-        }
-      }),
-      addClass: withLoading(async ( grade, schoolYear, teacherId) => {
+      addClass: withLoading(async ( grade, schoolYear, teacherId, boardId, schoolId) => {
         const { data: newClass, error } = await supabase
           .from('classes')
           .insert([
             {
               grade: grade,
               teacher_id: teacherId,
+              board_id: boardId,
+              school_id: schoolId,
               year: schoolYear,
             }
           ])
@@ -136,14 +136,33 @@ export const useClassStore = create<ClassStore>()(
       getClassBenchmarks: () => {
         const classes = get().classes;
         const students = useStudentStore.getState().students;
-        
-        // Map grades to schoolLevel categories
-        const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+        const allAnswers = useUnitsStore.getState().answers;
+        const uniqueAnswers = Object.values(
+          allAnswers.reduce<Record<string, (typeof allAnswers)[number]>>((acc, answer) => {
+            const key = `${answer.student_id}::${answer.class_id}::${answer.unit_data_id}`;
+            const current = acc[key];
+            if (!current) {
+              acc[key] = answer;
+              return acc;
+            }
+
+            const currentUpdatedAt = current.updated_at ?? "";
+            const nextUpdatedAt = answer.updated_at ?? "";
+            const shouldReplace = nextUpdatedAt > currentUpdatedAt || String(answer.id) > String(current.id);
+            if (shouldReplace) {
+              acc[key] = answer;
+            }
+
+            return acc;
+          }, {}),
+        );
+        // Map grades to schoolGradeBenchmarks categories
+        const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
           "Maternelle": "kindergarden",
           "Jardin": "seniorKindergarden",
           "1re année": "gradeOne",
           "2e année": "gradeTwo",
-          "3e année": "gradeTwo", // Using gradeTwo as fallback for 3e année
+          "3e année": "gradeThree", // Using gradeTwo as fallback for 3e année
         };
         
         // Initialize results for each grade
@@ -168,6 +187,8 @@ export const useClassStore = create<ClassStore>()(
         classes.forEach((cls) => {
           gradeGroups[cls.grade].push(cls.id);
         });
+
+        console.log(gradeGroups)
         
         // Calculate percentage for each grade
         Object.entries(gradeGroups).forEach(([grade, classIds]) => {
@@ -178,7 +199,7 @@ export const useClassStore = create<ClassStore>()(
           
           // Get all students in this grade
           const gradeStudents = students.filter((student) =>
-            student.class_id.some((classId) => classIds.includes(classId))
+            classIds.includes(student.class_id)
           );
           
           if (gradeStudents.length === 0) {
@@ -188,18 +209,24 @@ export const useClassStore = create<ClassStore>()(
           
           // Get the benchmark thresholds for this grade
           const levelKey = gradeLevelMap[grade as Grades];
-          const benchmarks = schoolLevel[levelKey];
+          const benchmarks = schoolGradeBenchmarks[levelKey];
           
           // Count students who are onTrack or strongMaster
           let onTrackOrBetter = 0;
           
           gradeStudents.forEach((student) => {
-            if (!student.evaluations || student.evaluations.length === 0) {
+            const studentAnswers = uniqueAnswers.filter(
+              (answer) =>
+                answer.student_id === student.id &&
+                classIds.includes(answer.class_id),
+            );
+
+            if (studentAnswers.length === 0) {
               return; // Student has no evaluations, not onTrack
             }
             
             // Count successful evaluations (success or adequate status)
-            const successfulEvaluations = student.evaluations.filter(
+            const successfulEvaluations = studentAnswers.filter(
               (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
             ).length;
             
@@ -220,9 +247,29 @@ export const useClassStore = create<ClassStore>()(
         const classes = get().classes;
         const students = useStudentStore.getState().students;
         const teachers = useTeacherStore.getState().teachers || [];
+        const allAnswers = useUnitsStore.getState().answers;
+        const uniqueAnswers = Object.values(
+          allAnswers.reduce<Record<string, (typeof allAnswers)[number]>>((acc, answer) => {
+            const key = `${answer.student_id}::${answer.class_id}::${answer.unit_data_id}`;
+            const current = acc[key];
+            if (!current) {
+              acc[key] = answer;
+              return acc;
+            }
+
+            const currentUpdatedAt = current.updated_at ?? "";
+            const nextUpdatedAt = answer.updated_at ?? "";
+            const shouldReplace = nextUpdatedAt > currentUpdatedAt || String(answer.id) > String(current.id);
+            if (shouldReplace) {
+              acc[key] = answer;
+            }
+
+            return acc;
+          }, {}),
+        );
         
-        // Map grades to schoolLevel categories
-        const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+        // Map grades to schoolGradeBenchmarks categories
+        const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
           "Maternelle": "kindergarden",
           "Jardin": "seniorKindergarden",
           "1re année": "gradeOne",
@@ -236,34 +283,37 @@ export const useClassStore = create<ClassStore>()(
         return classes.map((cls) => {
           // Get students in this class
           const classStudents = students.filter((student) =>
-            student.class_id.includes(cls.id)
+            student.class_id === cls.id
           );
           
           // Get teacher name
-          const teacher = teachers.find((t) => t.id === cls.teacherId);
+          const teacher = teachers.find((t) => t.id === cls.teacher_id);
           const teacherName = teacher?.name || "Enseignant inconnu";
           
-          // Generate class name (e.g., "Maternelle A", "Jardin B")
           if (!gradeGroups[cls.grade]) {
             gradeGroups[cls.grade] = 0;
           }
-          const letterIndex = gradeGroups[cls.grade];
           gradeGroups[cls.grade]++;
           
           // Get benchmark for this grade
           const levelKey = gradeLevelMap[cls.grade];
-          const benchmarks = schoolLevel[levelKey];
+          const benchmarks = schoolGradeBenchmarks[levelKey];
           
           // Count students who are onTrack or better
           let onTrackOrBetter = 0;
           
           classStudents.forEach((student) => {
-            if (!student.evaluations || student.evaluations.length === 0) {
+            const studentAnswers = uniqueAnswers.filter(
+              (answer) =>
+                answer.student_id === student.id && answer.class_id === cls.id,
+            );
+
+            if (studentAnswers.length === 0) {
               return;
             }
             
             // Count successful evaluations
-            const successfulEvaluations = student.evaluations.filter(
+            const successfulEvaluations = studentAnswers.filter(
               (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
             ).length;
             
@@ -276,12 +326,12 @@ export const useClassStore = create<ClassStore>()(
           const percentage = classStudents.length > 0
             ? Math.round((onTrackOrBetter / classStudents.length) * 100)
             : 0;
-          
+
           return {
             id: cls.id,
             grade: cls.grade,
             teacher: teacherName,
-            teacherId: cls.teacherId,
+            teacherId: cls.teacher_id,
             students: classStudents.length,
             enVoie: percentage,
           };

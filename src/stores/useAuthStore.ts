@@ -12,7 +12,6 @@ import { withLoading } from "../utils/withLoading";
 interface AuthStore {
   currentUser: AuthUser | null;
   isLoading: boolean;
-  login: (user: AuthUser) => void;
   logout: () => Promise<void>;
   getCurrentUser: () => AuthUser | null;
   supabaseLogin: (email: string, password: string, userType: string) => Promise<AuthUser | null>;
@@ -62,36 +61,26 @@ export const useAuthStore = create<AuthStore>()(
           const authUser = { ...user, type: userType } as AuthUser;
           // Set current user in store
           set({ currentUser: authUser });
-          useUnitsStore.getState().setUnitsData()
-          useUnitsStore.getState().setResources()          // get data assocaited to user
+          useUnitsStore.getState().setResources();
+
           if (userType === 'teacher') {
-            useClassStore.getState().setSupabaseClasses(authUser.id, userType);
-            useTeacherStore.getState().setSupabaseTeacher(authUser.id, userType);
-            useStudentStore.getState().setSupabaseStudents(authUser.id, userType);
-            useUnitsStore.getState().setSupabaseStudentAnswers(authUser.id);
+            await useTeacherStore.getState().setSupabaseTeacher(authUser.id, userType);
+            await useClassStore.getState().setSupabaseClasses(authUser.id, userType);
+            await useStudentStore.getState().setSupabaseStudents(authUser.id, userType);
+            await useUnitsStore.getState().setSupabaseStudentAnswers(authUser.id, userType);
+            useStudentStore.getState().setStudentEvaluations();
+          } else if (userType === 'school') {
+            await useTeacherStore.getState().setSupabaseTeacher(authUser.id, userType);
+            await useClassStore.getState().setSupabaseClasses(authUser.id, userType);
+            await useStudentStore.getState().setSupabaseStudents(authUser.id, userType);
+            await useUnitsStore.getState().setSupabaseStudentAnswers(authUser.id, userType);
+            useStudentStore.getState().setStudentEvaluations();
           }
+
+          await useUnitsStore.getState().setUnitsData();
           
           return authUser;
         }),
-      login: async (user) => {
-        set({ currentUser: user });
-        
-        // Set classes and students based on teacher ID
-        if (user.type === 'teacher') {
-          useClassStore.getState().setClasses(user.id);
-          useStudentStore.getState().setSupabaseStudents(user.id, user.type);
-          useUnitsStore.getState().setStudentAnswers(user.id);
-        }
-        if (user.type === 'school') {
-          useTeacherStore.getState().setTeachersForSchool(user.id);
-          useClassStore.getState().setClasses(user.id);
-          useStudentStore.getState().setSupabaseStudents(user.id, user.type);
-          useUnitsStore.getState().setStudentAnswers(user.id);
-          useStudentStore.getState().setStudentEvaluations();
-        }
-        useUnitsStore.getState().setUnitsData()
-        useUnitsStore.getState().setResources()
-      },
       logout: withLoading(async () => {
         let { error } = await supabase.auth.signOut()
         if (!error) {

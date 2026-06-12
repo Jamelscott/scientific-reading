@@ -56,7 +56,7 @@ interface UnitsStore {
   resources: ResourceCategory[];
   setUnitsData: () => void;
   setStudentAnswers: (userId: string) => void;
-  setSupabaseStudentAnswers: (userId: string) => void;
+  setSupabaseStudentAnswers: (userId: string, userType:string) => void;
   updateAnswer: (
     studentId: string,
     classId: string,
@@ -108,7 +108,8 @@ export const useUnitsStore = create<UnitsStore>()(
               ...state, unitsData: unitDataParsed
             }}
         )}),
-        setSupabaseStudentAnswers: withLoading(async (userId) => {
+        setSupabaseStudentAnswers: withLoading(async (userId, userType) => {
+          if (userType === 'teacher') {
               let { data: student_answers, error } = await supabase
                 .from('student_answers')
                 .select('*')
@@ -118,9 +119,44 @@ export const useUnitsStore = create<UnitsStore>()(
                 console.error('Error fetching student answers for teacher:', error?.message);
                 alert('Failed to fetch student answers: ' + error?.message);
                 set((state) => ({ ...state, answers: [] }));
+                return;
               } else {
                 set((state) => ({ ...state, answers: student_answers.map(addEvaluationStatus) }));
-              }          
+                return;
+              }
+          } else if (userType === 'school') {
+              let { data: student_answers, error } = await supabase
+                .from('student_answers')
+                .select('*')
+                .eq('school_id', userId)
+                .order('id', { ascending: true })
+
+              if (!student_answers || error) {
+                console.error('Error fetching student answers for school:', error?.message);
+                alert('Failed to fetch student answers: ' + error?.message);
+                set((state) => ({ ...state, answers: [] }));
+                return;
+              } else {
+                set((state) => ({ ...state, answers: student_answers.map(addEvaluationStatus) }));
+                return;
+              }
+          } else if (userType === 'board') {
+              let { data: student_answers, error } = await supabase
+                .from('student_answers')
+                .select('*')
+                .eq('board_id', userId)
+                .order('id', { ascending: true })
+                
+              if (!student_answers || error) {
+                console.error('Error fetching student answers for board:', error?.message);
+                alert('Failed to fetch student answers: ' + error?.message);
+                set((state) => ({ ...state, answers: [] }));
+                return;
+              } else {
+                set((state) => ({ ...state, answers: student_answers.map(addEvaluationStatus) }));
+                return;
+              }
+          }
           // Refresh student evaluations after loading answers
           useStudentStore.getState().setStudentEvaluations();
         }),
@@ -178,7 +214,7 @@ export const useUnitsStore = create<UnitsStore>()(
           return enriched as any;
         },
 
-        updateAnswer: withLoading(async (student_id, class_id, unit_data_id, answers, comment, required) => {
+        updateAnswer: withLoading(async (student_id, class_id, unit_data_id, answers, comment, required, school_id) => {
           const user = useAuthStore.getState().currentUser
 
           if (user?.type !== 'teacher') {
@@ -187,10 +223,14 @@ export const useUnitsStore = create<UnitsStore>()(
             return;
           }
           const boardId = user.board_id;
+          const resolvedSchoolId = school_id ?? user.school_id;
 
           const status = getScoreFromEvaluations(answers);
           const existing = get().answers.find(
-            (a) => a.student_id === student_id && a.class_id === class_id && a.unit_data_id === unit_data_id
+            (a) =>
+              a.student_id === student_id &&
+              a.class_id === class_id &&
+              a.unit_data_id === unit_data_id,
           );
 
           if (existing) {
@@ -202,6 +242,7 @@ export const useUnitsStore = create<UnitsStore>()(
                 comment, 
                 required,
                 board_id: boardId,
+                school_id: resolvedSchoolId,
                 updated_at: new Date().toISOString()
               })
               .eq('id', existing.id);
@@ -234,6 +275,7 @@ export const useUnitsStore = create<UnitsStore>()(
               class_id,
               unit_data_id,
               board_id: boardId,
+              school_id: resolvedSchoolId,
               answers,
               comment,
               required,

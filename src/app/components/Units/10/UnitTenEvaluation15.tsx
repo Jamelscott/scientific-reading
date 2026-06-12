@@ -94,29 +94,21 @@ export function UnitTenEvaluationFifteen() {
   }, [singleAnswer, dataKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        readingFluency: buildEvaluationArray(true, 1),
-        comprehensionQuestions: buildEvaluationArray(true, dataKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      readingFluency: buildEvaluationArray(true, 1),
+      comprehensionQuestions: buildEvaluationArray(true, dataKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        readingFluency: buildEvaluationArray(false, 1),
-        comprehensionQuestions: buildEvaluationArray(false, dataKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      readingFluency: buildEvaluationArray(false, 1),
+      comprehensionQuestions: buildEvaluationArray(false, dataKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

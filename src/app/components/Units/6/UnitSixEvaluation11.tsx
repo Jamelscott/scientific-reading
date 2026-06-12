@@ -172,37 +172,29 @@ export function UnitSixEvaluationEleven() {
   }, [singleAnswer]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        wordFamilies: buildEvaluationArray(true, evaluationNineFamilies.length),
-        frequentEndings: buildEvaluationArray(true, evaluationNineWords.length),
-        frequentWords: buildEvaluationArray(true, evaluationNineWords.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      wordFamilies: buildEvaluationArray(true, evaluationNineFamilies.length),
+      frequentEndings: buildEvaluationArray(true, evaluationNineWords.length),
+      frequentWords: buildEvaluationArray(true, evaluationNineWords.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        wordFamilies: buildEvaluationArray(
-          false,
-          evaluationNineFamilies.length,
-        ),
-        frequentEndings: buildEvaluationArray(
-          false,
-          evaluationNineWords.length,
-        ),
-        frequentWords: buildEvaluationArray(false, evaluationNineWords.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      wordFamilies: buildEvaluationArray(
+        false,
+        evaluationNineFamilies.length,
+      ),
+      frequentEndings: buildEvaluationArray(
+        false,
+        evaluationNineWords.length,
+      ),
+      frequentWords: buildEvaluationArray(false, evaluationNineWords.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

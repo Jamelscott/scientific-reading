@@ -44,7 +44,6 @@ const portals = [
 export function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
   const supabaseLogin = useAuthStore((state) => state.supabaseLogin);
   const [selectedPortal, setSelectedPortal] = useState<string | null>(null);
 
@@ -111,7 +110,7 @@ export function LoginPage() {
       <div className="fixed top-4 right-4 z-10">
         <button
           onClick={handleLanguageToggle}
-          className="px-4 py-2 rounded-lg border transition-all flex items-center gap-2 hover:shadow-md cursor-pointer"
+          className="px-4 py-2 rounded-lg border transition-all flex items-center gap-2 hover:font-bold cursor-pointer"
           style={{
             background: "#ffffff",
             borderColor: "#dff3ff",
@@ -220,7 +219,7 @@ export function LoginPage() {
             <>
               <button
                 onClick={() => setSelectedPortal(null)}
-                className="flex items-center gap-2 text-sm mb-8 hover:opacity-70 hover:shadow-md transition-all cursor-pointer"
+                className="flex items-center gap-2 text-sm mb-8 hover:opacity-70 hover:font-bold transition-all cursor-pointer"
                 style={{ color: "#004aad" }}
               >
                 <ArrowRight className="w-4 h-4 rotate-180" />
@@ -323,14 +322,18 @@ export function LoginPage() {
                 </div>
 
                 <div className="flex justify-end">
-                  <a href="#" className="text-sm" style={{ color: "#38b6ff" }}>
+                  <a
+                    href="#"
+                    className="text-sm hover:font-bold"
+                    style={{ color: "#38b6ff" }}
+                  >
                     {t("login.forgotPassword")}
                   </a>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl font-semibold transition-all"
+                  className="w-full py-3 rounded-xl font-semibold transition-all hover:shadow-md hover:font-bold"
                   style={{ background: "#004aad", color: "#ffffff" }}
                 >
                   {t("login.signIn")}

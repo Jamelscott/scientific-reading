@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "../../ui/Button";
 import PdfIcon from "../../ui/PdfIcon";
+import { useAuthStore } from "../../../../stores";
 
 const unitPdfFiles = [
   "1 - Atelier 1 _ Connaissance des lettres et des sons.pdf",
@@ -29,7 +30,7 @@ function EvaluationHeader({
   evaluationId: string;
 }) {
   const { t } = useTranslation();
-
+  const currentUser = useAuthStore((state) => state.currentUser);
   const handleOpenUnitPdf = () => {
     const matchingFile = unitPdfFiles.find((fileName) =>
       fileName.startsWith(`${evaluationId}`),
@@ -58,27 +59,31 @@ function EvaluationHeader({
         </span>
       </div>
       <div className="flex gap-3 items-center">
-        <Button
-          onClick={handleCheckAll}
-          size="small"
-          className="px-4 py-2 rounded-lg text-sm transition-all"
-          variant="success"
-          label={"evaluation.allSuccess"}
-        />
-        <Button
-          onClick={handleFailAll}
-          size="small"
-          className="px-4 py-2 rounded-lg text-sm transition-all"
-          variant="error"
-          label={"evaluation.allFail"}
-        />
-        <Button
-          onClick={handleClearAll}
-          size="small"
-          className="px-4 py-2 rounded-lg text-sm transition-all"
-          variant="clear"
-          label={"evaluation.clear"}
-        />
+        {currentUser?.type === "teacher" && (
+          <>
+            <Button
+              onClick={handleCheckAll}
+              size="small"
+              className="px-4 py-2 rounded-lg text-sm transition-all"
+              variant="success"
+              label={"evaluation.allSuccess"}
+            />
+            <Button
+              onClick={handleFailAll}
+              size="small"
+              className="px-4 py-2 rounded-lg text-sm transition-all"
+              variant="error"
+              label={"evaluation.allFail"}
+            />
+            <Button
+              onClick={handleClearAll}
+              size="small"
+              className="px-4 py-2 rounded-lg text-sm transition-all"
+              variant="clear"
+              label={"evaluation.clear"}
+            />
+          </>
+        )}
         {evaluationId !== "3" &&
           evaluationId !== "4" &&
           evaluationId !== "12" && (

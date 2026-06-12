@@ -6,7 +6,16 @@ export const gradeBenchmarks = {
     "3e année": { expected: 15, label: "Fin de 3e année" },
   };
 
-export const schoolLevel = {
+export const GRADE_COLORS: Record<string, string> = {
+  Maternelle: "#ff5757",
+  Jardin: "#ffde59",
+  "1re année": "#c9e265",
+  "2e année": "#38b6ff",
+  "3e année": "#b8a3d6",
+};
+
+
+export const schoolGradeBenchmarks = {
   kindergarden: {
     needsSupport:1,
     developing: 2,
@@ -26,6 +35,12 @@ export const schoolLevel = {
     strongMaster: 12
   },
   gradeTwo: {
+    needsSupport: 11,
+    developing: 12,
+    onTrack: 14,
+    strongMaster: 15
+  },
+  gradeThree: {
     needsSupport: 11,
     developing: 12,
     onTrack: 14,

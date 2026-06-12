@@ -11,7 +11,7 @@ interface StudentStore {
   students: Student[];
   setSupabaseStudents: (userId: string, userType: string) => Promise<void>;
   setStudentEvaluations: () => void;
-  addStudent: (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id?: string, board_id?: string, grade?: Grades) => Promise<void>;
+  addStudent: (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id: string, board_id: string) => Promise<void>;
   removeStudentFromClass: (student_id: string) => Promise<void>;
   getStudentById: (student_id: string) => Student | undefined;
   getStudentCountByClass: (class_id: string) => number;
@@ -60,6 +60,7 @@ export const useStudentStore = create<StudentStore>()(
             alert('Failed to fetch students: ' + error?.message);
             return;
           } else {
+            console.log(students)
             set(() => ({ students }));
           }
         } else if (userType === 'admin') {
@@ -84,7 +85,7 @@ export const useStudentStore = create<StudentStore>()(
           
           return { students: studentsWithEvaluations };
         }),
-      addStudent: withLoading(async (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id?: string, board_id?: string, grade?: Grades) => {
+      addStudent: withLoading(async (firstName: string, lastName: string, class_id: string, teacher_id: string, school_id: string, board_id: string) => {
         const { data: newStudent, error } = await supabase
           .from('students')
           .insert([

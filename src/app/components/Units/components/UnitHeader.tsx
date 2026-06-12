@@ -36,13 +36,15 @@ export function UnitHeader({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
+  const currentUser = useAuthStore((state) => state.currentUser);
   const [showNotRequiredModal, setShowNotRequiredModal] = useState(false);
   const unitsData = useUnitsStore((state) => state.unitsData);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const { classId, studentId, teacherId } = useParams<{
+  const { classId, studentId, teacherId, schoolId } = useParams<{
     classId: string;
     studentId: string;
     teacherId: string;
+    schoolId?: string;
   }>();
   const classes = useClassStore((state) => state.classes);
   const teacher = useTeacherStore((state) =>
@@ -120,11 +122,17 @@ export function UnitHeader({
             <div className="relative">
               <select
                 value={evaluationNumber}
-                onChange={(e) =>
-                  navigate(
-                    `/teacher/${teacherId}/class/${classData.id}/student/${studentId}/evaluation/${e.target.value}`,
-                  )
-                }
+                onChange={(e) => {
+                  if (currentUser?.type === "teacher") {
+                    navigate(
+                      `/teacher/${teacherId}/class/${classData.id}/student/${studentId}/evaluation/${e.target.value}`,
+                    );
+                  } else if (currentUser?.type === "school") {
+                    navigate(
+                      `/school/${schoolId}/teacher/${teacherId}/class/${classData.id}/student/${studentId}/evaluation/${e.target.value}`,
+                    );
+                  }
+                }}
                 className="px-6 py-3 rounded-xl appearance-none pr-12"
                 style={{
                   background: "#ffffff",
@@ -144,64 +152,68 @@ export function UnitHeader({
               />
             </div>
 
-            <label
-              className="px-6 py-3 rounded-xl flex items-center gap-3 cursor-pointer transition-all whitespace-nowrap"
-              style={{
-                background: notRequired ? "#ffde59" : "#ffffff",
-                border: `1px solid ${notRequired ? "#ffde59" : "#dff3ff"}`,
-                color: "#000000",
-              }}
-              onClick={() => setIsSaveDisabled(false)}
-            >
-              <input
-                type="checkbox"
-                checked={notRequired}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setShowNotRequiredModal(true);
-                  } else {
-                    setNotRequired(false);
-                  }
-                  setIsSaveDisabled(true);
-                }}
-                className="w-5 h-5 rounded flex-shrink-0"
-                style={{ accentColor: "#004aad" }}
-              />
-              <span className="whitespace-nowrap">
-                {t("common.notRequired")}
-              </span>
-            </label>
-
-            <button
-              onClick={() => {
-                handleSave();
-              }}
-              disabled={isSaveDisabled || isLoading}
-              className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
-              style={{
-                background: isSaved ? "#22c55e" : "#004aad",
-                color: "#ffffff",
-                opacity: isSaveDisabled || isLoading ? 0.5 : 1,
-                cursor: isSaveDisabled || isLoading ? "not-allowed" : "pointer",
-              }}
-            >
-              {isSaved ? (
-                <>
-                  <Check className="w-5 h-5" />
-                  {t("common.saved")}
-                </>
-              ) : isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t("common.saving", "Saving...")}
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  {t("common.save")}
-                </>
-              )}
-            </button>
+            {currentUser?.type === "teacher" && (
+              <>
+                <label
+                  className="px-6 py-3 rounded-xl flex items-center gap-3 cursor-pointer transition-all whitespace-nowrap"
+                  style={{
+                    background: notRequired ? "#ffde59" : "#ffffff",
+                    border: `1px solid ${notRequired ? "#ffde59" : "#dff3ff"}`,
+                    color: "#000000",
+                  }}
+                  onClick={() => setIsSaveDisabled(false)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={notRequired}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setShowNotRequiredModal(true);
+                      } else {
+                        setNotRequired(false);
+                      }
+                      setIsSaveDisabled(true);
+                    }}
+                    className="w-5 h-5 rounded flex-shrink-0"
+                    style={{ accentColor: "#004aad" }}
+                  />
+                  <span className="whitespace-nowrap">
+                    {t("common.notRequired")}
+                  </span>
+                </label>
+                <button
+                  onClick={() => {
+                    handleSave();
+                  }}
+                  disabled={isSaveDisabled || isLoading}
+                  className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+                  style={{
+                    background: isSaved ? "#22c55e" : "#004aad",
+                    color: "#ffffff",
+                    opacity: isSaveDisabled || isLoading ? 0.5 : 1,
+                    cursor:
+                      isSaveDisabled || isLoading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isSaved ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      {t("common.saved")}
+                    </>
+                  ) : isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {t("common.saving", "Saving...")}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      {t("common.save")}
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

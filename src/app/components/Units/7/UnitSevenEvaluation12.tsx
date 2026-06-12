@@ -163,57 +163,49 @@ export function UnitSevenEvaluationTwelve() {
   }, [singleAnswer]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        sentenceFluency: buildEvaluationArray(
-          true,
-          evaluationTenSentences.length,
-        ),
-        sentencePunctuation: buildEvaluationArray(
-          true,
-          evaluationTenSentences.length,
-        ),
-        sentenceIntonation: buildEvaluationArray(
-          true,
-          evaluationTenSentences.length,
-        ),
-        pseudoWords: buildEvaluationArray(
-          true,
-          evaluationTenPseudoWords.length,
-        ),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      sentenceFluency: buildEvaluationArray(
+        true,
+        evaluationTenSentences.length,
+      ),
+      sentencePunctuation: buildEvaluationArray(
+        true,
+        evaluationTenSentences.length,
+      ),
+      sentenceIntonation: buildEvaluationArray(
+        true,
+        evaluationTenSentences.length,
+      ),
+      pseudoWords: buildEvaluationArray(
+        true,
+        evaluationTenPseudoWords.length,
+      ),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        sentenceFluency: buildEvaluationArray(
-          false,
-          evaluationTenSentences.length,
-        ),
-        sentencePunctuation: buildEvaluationArray(
-          false,
-          evaluationTenSentences.length,
-        ),
-        sentenceIntonation: buildEvaluationArray(
-          false,
-          evaluationTenSentences.length,
-        ),
-        pseudoWords: buildEvaluationArray(
-          false,
-          evaluationTenPseudoWords.length,
-        ),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      sentenceFluency: buildEvaluationArray(
+        false,
+        evaluationTenSentences.length,
+      ),
+      sentencePunctuation: buildEvaluationArray(
+        false,
+        evaluationTenSentences.length,
+      ),
+      sentenceIntonation: buildEvaluationArray(
+        false,
+        evaluationTenSentences.length,
+      ),
+      pseudoWords: buildEvaluationArray(
+        false,
+        evaluationTenPseudoWords.length,
+      ),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

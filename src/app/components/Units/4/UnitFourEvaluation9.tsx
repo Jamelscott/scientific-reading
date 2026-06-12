@@ -91,27 +91,19 @@ export function UnitFourEvaluationNine() {
   }, [singleAnswer, frequentWordsSliceKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        frequent: buildEvaluationArray(true, frequentWordsSliceKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      frequent: buildEvaluationArray(true, frequentWordsSliceKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        frequent: buildEvaluationArray(false, frequentWordsSliceKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      frequent: buildEvaluationArray(false, frequentWordsSliceKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

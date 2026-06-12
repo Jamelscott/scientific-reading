@@ -42,9 +42,28 @@ export const useTeacherStore = create<TeacherStore>()(
 
           if (teacher) {
             set({ teacher: teacher as Teacher });
+            return;
           }
-        } else {
-          set({ teacher: null });
+        } else if (userType === 'school') {
+          const { data: teachers, error } = await supabase
+            .from('teachers')
+            .select('*, school:schools(name), board:boards(name)')
+            .eq('school_id', userId)
+            .order('id', { ascending: true });
+          if (error) {
+            console.error('Error fetching teachers for school:', error.message);
+            alert('Failed to fetch teachers: ' + error.message);
+            return;
+          }
+
+          if (teachers) {
+            console.log(teachers)
+            set({ teachers: teachers as Teacher[] });
+            return;
+          } else {
+            set({ teachers: null });
+            return;
+          }
         }
       },
       setTeachersForSchool: (schoolId) => {

@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
-import { useClassStore } from "../../stores";
+import { useAuthStore, useClassStore } from "../../stores";
 import type { Grades } from "../../../mockData/types";
 import { useParams } from "react-router";
 
@@ -13,10 +13,15 @@ interface AddClassModalProps {
 
 export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
   const { t } = useTranslation();
-  const { teacherId } = useParams();
+  const { teacherId, schoolId } = useParams();
   const addClass = useClassStore((state) => state.addClass);
   const classes = useClassStore((state) => state.classes);
+  const currentUser = useAuthStore((state) => state.currentUser);
 
+  const boardId =
+    currentUser?.type === "board" || currentUser?.type === "admin"
+      ? currentUser.id
+      : currentUser?.board_id;
   // Get existing grades for this teacher
   const existingGrades = useMemo(() => classes.map((c) => c.grade), [classes]);
 
@@ -66,7 +71,7 @@ export function AddClassModal({ isOpen, onClose }: AddClassModalProps) {
       return;
     }
 
-    addClass(grade, schoolYear, teacherId);
+    addClass(grade, schoolYear, teacherId, boardId!, schoolId!);
     setSchoolYear(null);
     setGrade(firstAvailableGrade);
     setErrors({ schoolYear: "", grade: "" });

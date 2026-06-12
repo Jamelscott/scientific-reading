@@ -233,7 +233,7 @@ export function Academics() {
                 {t("academics.viewMode.students")} ({studentsData.length})
               </button>
             </div>
-            <div className="flex-1 max-w-md relative">
+            <div className="flex-1 max-w-md relative mx-2">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
                 style={{ color: "#888" }}

@@ -106,29 +106,21 @@ export function UnitOneEvaluationSix() {
   }, [singleAnswer, startOfWordKeys, endOfWordKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationSix((prev) => ({
-        ...prev,
-        beginningSound: buildEvaluationArray(true, startOfWordKeys.length),
-        endingSound: buildEvaluationArray(true, endOfWordKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationSix((prev) => ({
+      ...prev,
+      beginningSound: buildEvaluationArray(true, startOfWordKeys.length),
+      endingSound: buildEvaluationArray(true, endOfWordKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationSix((prev) => ({
-        ...prev,
-        beginningSound: buildEvaluationArray(false, startOfWordKeys.length),
-        endingSound: buildEvaluationArray(false, endOfWordKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationSix((prev) => ({
+      ...prev,
+      beginningSound: buildEvaluationArray(false, startOfWordKeys.length),
+      endingSound: buildEvaluationArray(false, endOfWordKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

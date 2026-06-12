@@ -28,12 +28,15 @@ import {
 } from "recharts";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "../../components/Sidebar";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 import {
   useClassStore,
   useStudentStore,
+  useUnitsStore,
   useTeacherStore,
+  useAuthStore,
 } from "../../../stores";
-import { schoolLevel } from "../const";
+import { schoolGradeBenchmarks } from "../const";
 import { Grades } from "../../../../mockData/types";
 
 const trendData = [
@@ -50,25 +53,29 @@ export function SchoolDashboard() {
   const navigate = useNavigate();
   const { schoolId } = useParams();
   const { t } = useTranslation();
+  const isLoading = useAuthStore((state) => state.isLoading);
   const teachers = useTeacherStore((state) => state.teachers);
   const [year, setYear] = useState("2025-2026");
   const [viewMode, setViewMode] = useState<"class" | "grade">("class");
   const students = useStudentStore((state) => state.students);
+  const answers = useUnitsStore((state) => state.answers);
   const realClasses = useClassStore((state) => state.classes);
   const getClassBenchmarks = useClassStore((state) => state.getClassBenchmarks);
   const getClassPerformance = useClassStore(
     (state) => state.getClassPerformance,
   );
-
   const classBenchmarks = useMemo(
     () => getClassBenchmarks(),
-    [students, realClasses],
+    [students, realClasses, answers],
   );
 
   // Get real class performance data
-  const classes = useMemo(() => getClassPerformance(), [students, realClasses]);
+  const classes = useMemo(
+    () => getClassPerformance(),
+    [students, realClasses, answers],
+  );
 
-  // Transform classBenchmarks into chart data, filtering out null values
+  // Transform classBenchmarks into chart data, keeping grades without data visible
   const gradeProgress = useMemo(() => {
     const getColor = (percentage: number) => {
       if (percentage >= 75) return "#3b82f6"; // Blue - good
@@ -76,13 +83,11 @@ export function SchoolDashboard() {
       return "#ef4444"; // Red - needs attention
     };
 
-    return Object.entries(classBenchmarks)
-      .filter(([_, value]) => value !== null) // Only show grades with data
-      .map(([grade, achieved]) => ({
-        grade,
-        achieved: achieved as number,
-        color: getColor(achieved as number),
-      }));
+    return Object.entries(classBenchmarks).map(([grade, achieved]) => ({
+      grade,
+      achieved,
+      color: achieved === null ? "#94a3b8" : getColor(achieved),
+    }));
   }, [classBenchmarks]);
 
   // Calculate school-wide average onTrack percentage from all grades
@@ -99,13 +104,13 @@ export function SchoolDashboard() {
 
   // Students most in need (À risque or À surveiller)
   const studentsInNeed = useMemo(() => {
-    // Map grades to schoolLevel categories
-    const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+    // Map grades to schoolGradeBenchmarks categories
+    const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
       Maternelle: "kindergarden",
       Jardin: "seniorKindergarden",
       "1re année": "gradeOne",
       "2e année": "gradeTwo",
-      "3e année": "gradeTwo",
+      "3e année": "gradeThree",
     };
 
     // Track class counts per grade for naming
@@ -114,15 +119,15 @@ export function SchoolDashboard() {
     const atRiskStudents = students
       .map((student) => {
         // Get student's class to determine grade
-        const studentClass = realClasses.find((cls) =>
-          student.classIds.includes(cls.id),
+        const studentClass = realClasses.find(
+          (cls) => student.class_id === cls.id,
         );
 
         if (!studentClass) return null;
 
         // Get grade benchmarks
         const levelKey = gradeLevelMap[studentClass.grade];
-        const benchmarks = schoolLevel[levelKey];
+        const benchmarks = schoolGradeBenchmarks[levelKey];
 
         // Count successful evaluations
         const successfulEvaluations =
@@ -144,7 +149,7 @@ export function SchoolDashboard() {
         if (!status) return null;
 
         // Get teacher name
-        const teacher = teachers?.find((t) => t.id === studentClass.teacherId);
+        const teacher = teachers?.find((t) => t.id === studentClass.teacher_id);
         const teacherName = teacher?.name || "Enseignant inconnu";
 
         // Generate class name with letter
@@ -161,7 +166,7 @@ export function SchoolDashboard() {
           className,
           grade: studentClass.grade,
           teacher: teacherName,
-          teacherId: studentClass.teacherId,
+          teacherId: studentClass.teacher_id,
           classId: studentClass.id,
           atelier: successfulEvaluations,
           status,
@@ -198,7 +203,6 @@ export function SchoolDashboard() {
     },
     {} as Record<string, typeof classes>,
   );
-
   const getAtelierColor = (atelier: number) => {
     if (atelier <= 4) return "#3b82f6";
     if (atelier === 5) return "#38bdf8";
@@ -212,6 +216,16 @@ export function SchoolDashboard() {
     if (atelier === 13) return "#ef4444";
     return "#004aad";
   };
+
+  const hasLoadedDashboardData =
+    (teachers?.length ?? 0) > 0 ||
+    students.length > 0 ||
+    realClasses.length > 0 ||
+    answers.length > 0;
+
+  if (isLoading && !hasLoadedDashboardData) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   return (
     <div
@@ -337,7 +351,7 @@ export function SchoolDashboard() {
                       {grade}
                     </span>
                     <span className="text-sm font-bold" style={{ color }}>
-                      {achieved}%
+                      {achieved === null ? "N/A" : `${achieved}%`}
                     </span>
                   </div>
                   <div
@@ -346,7 +360,7 @@ export function SchoolDashboard() {
                   >
                     <div
                       className="h-full rounded-full transition-all"
-                      style={{ width: `${achieved}%`, background: color }}
+                      style={{ width: `${achieved ?? 0}%`, background: color }}
                     />
                   </div>
                 </div>
@@ -584,12 +598,13 @@ export function SchoolDashboard() {
                     gradeClasses.reduce((sum, cls) => sum + cls.enVoie, 0) /
                       gradeClasses.length,
                   );
+                  const gradeClassIds = new Set(
+                    realClasses
+                      .filter((cls) => cls.grade === grade)
+                      .map((cls) => cls.id),
+                  );
                   const gradeStudents = students.filter((student) =>
-                    student.classIds.some((classId) =>
-                      realClasses.find(
-                        (cls) => cls.id === classId && cls.grade === grade,
-                      ),
-                    ),
+                    gradeClassIds.has(student.class_id),
                   );
 
                   return (
@@ -600,7 +615,7 @@ export function SchoolDashboard() {
                         background: "#ffffff",
                       }}
                     >
-                      <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center justify-between mb-5 mt-2<">
                         <div>
                           <h2
                             className="font-bold text-lg"
@@ -614,7 +629,7 @@ export function SchoolDashboard() {
                             {t("school.studentsLowercase")}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right mr-4">
                           <p className="text-xs" style={{ color: "#888" }}>
                             {t("school.averageOnTrack")}
                           </p>
@@ -679,7 +694,7 @@ export function SchoolDashboard() {
                         ))}
                       </div>
                       {idx < Object.entries(classesByGrade).length - 1 && (
-                        <hr className="mt-6" />
+                        <hr className="my-6 mr-2" />
                       )}
                     </div>
                   );

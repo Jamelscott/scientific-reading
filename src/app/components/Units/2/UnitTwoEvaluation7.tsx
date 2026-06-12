@@ -108,29 +108,21 @@ export function UnitTwoEvaluationSeven() {
   }, [singleAnswer, syllablesKeys, soundRowsKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        syllableReading: buildEvaluationArray(true, syllablesKeys.length),
-        soundCorrespondence: buildEvaluationArray(true, soundRowsKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      syllableReading: buildEvaluationArray(true, syllablesKeys.length),
+      soundCorrespondence: buildEvaluationArray(true, soundRowsKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        syllableReading: buildEvaluationArray(false, syllablesKeys.length),
-        soundCorrespondence: buildEvaluationArray(false, soundRowsKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      syllableReading: buildEvaluationArray(false, syllablesKeys.length),
+      soundCorrespondence: buildEvaluationArray(false, soundRowsKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

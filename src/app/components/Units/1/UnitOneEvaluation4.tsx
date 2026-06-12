@@ -92,27 +92,19 @@ export function UnitOneEvaluationFour() {
   }, [singleAnswer]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationFour((prev) => ({
-        ...prev,
-        upperCase: buildEvaluationArray(true),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationFour((prev) => ({
+      ...prev,
+      upperCase: buildEvaluationArray(true),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationFour((prev) => ({
-        ...prev,
-        upperCase: buildEvaluationArray(false),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationFour((prev) => ({
+      ...prev,
+      upperCase: buildEvaluationArray(false),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

@@ -58,6 +58,7 @@ export type LegacyMockQuestions = MockEvaluation;
 export interface StudentAnswers {
   id: string;
   student_id: string;
+  school_id: string;
   class_id: string;
   unit_data_id: string;
   answers: Questions;
@@ -114,7 +115,7 @@ export interface Class {
   id: string;
   grade: Grades;
   schoolYear: string;
-  teacherId: string; // ID of the teacher associated with this class
+  teacher_id: string; // ID of the teacher associated with this class
 }
 
 export type TeacherUser = Teacher

@@ -4,7 +4,7 @@ import { UnitContainer } from "../components/UnitContainer";
 import CommentsContainer from "../components/CommentsContainer";
 import UnitHeader from "../components/UnitHeader";
 import { ConfirmationModal } from "../../ui/ConfirmationModal";
-import { useUnitsStore } from "../../../../stores";
+import { useAuthStore, useUnitsStore } from "../../../../stores";
 import { EvaluationCheckbox } from "../../ui/EvaluationCheckbox";
 import EvaluationHeader from "../components/EvaluationHeader";
 import { useParams } from "react-router";
@@ -114,30 +114,22 @@ export function UnitOneEvaluationOne() {
   }, [singleAnswer, evaluationOneData]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationOne((prev) => ({
-        ...prev,
-        upperCaseName: buildEvaluationArray(true),
-        upperCaseSound: buildEvaluationArray(true),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationOne((prev) => ({
+      ...prev,
+      upperCaseName: buildEvaluationArray(true),
+      upperCaseSound: buildEvaluationArray(true),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationOne((prev) => ({
-        ...prev,
-        upperCaseName: buildEvaluationArray(false),
-        upperCaseSound: buildEvaluationArray(false),
-        comments: evaluationOne.comments,
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationOne((prev) => ({
+      ...prev,
+      upperCaseName: buildEvaluationArray(false),
+      upperCaseSound: buildEvaluationArray(false),
+      comments: evaluationOne.comments,
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {
@@ -189,6 +181,7 @@ export function UnitOneEvaluationOne() {
       answers,
       evaluationOne.comments,
       !notRequired,
+      schoolId!,
     );
     setHasChanges(false);
   };

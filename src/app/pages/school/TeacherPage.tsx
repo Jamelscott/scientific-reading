@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -26,28 +26,24 @@ import {
 import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { getTeachersPerformance } from "../../../stores/storeHelpers";
-import { useClassStore, useStudentStore } from "../../../stores";
-import { schoolLevel } from "../const";
-
-const GRADE_COLORS: Record<string, string> = {
-  Maternelle: "#ff5757",
-  Jardin: "#ffde59",
-  "1re année": "#c9e265",
-  "2e année": "#38b6ff",
-  "3e année": "#b8a3d6",
-};
+import { useClassStore, useStudentStore, useUnitsStore } from "../../../stores";
+import { schoolGradeBenchmarks, GRADE_COLORS } from "../const";
 
 export function TeacherPage() {
   const navigate = useNavigate();
   const { teacherId, schoolId } = useParams();
   const { t } = useTranslation();
 
-  const teachersData = getTeachersPerformance();
-  const teacher = teachersData.find((t) => t.id === teacherId);
-
+  const teachersData = useMemo(() => getTeachersPerformance(), []);
+  const teacher = useMemo(
+    () => teachersData.find((t) => t.id === teacherId),
+    [teachersData, teacherId],
+  );
+  console.log(teacher);
   // Get actual class and student data from stores
   const allClasses = useClassStore((state) => state.classes);
   const allStudents = useStudentStore((state) => state.students);
+  const allAnswers = useUnitsStore((state) => state.answers);
 
   const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -81,12 +77,12 @@ export function TeacherPage() {
 
   // Get teacher's actual classes
   const teacherClasses = allClasses.filter(
-    (cls) => cls.teacherId === teacherId,
+    (cls) => cls.teacher_id === teacherId,
   );
 
-  // Map grades to schoolLevel categories
+  // Map grades to schoolGradeBenchmarks categories
   type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e année";
-  const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+  const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
     Maternelle: "kindergarden",
     Jardin: "seniorKindergarden",
     "1re année": "gradeOne",
@@ -97,9 +93,12 @@ export function TeacherPage() {
   // Build detailed class data with performance metrics
   const detailedClasses = teacherClasses.map((cls) => {
     // Get students in this class
-    const classStudents = allStudents.filter((student) =>
-      student.classIds.includes(cls.id),
-    );
+    const classStudents = allStudents.filter((student) => {
+      const studentClassIds = Array.isArray(student.class_id)
+        ? student.class_id
+        : [student.class_id];
+      return studentClassIds.some((classId) => classId === cls.id);
+    });
 
     // Calculate class metrics
     let totalCompleted = 0;
@@ -107,14 +106,19 @@ export function TeacherPage() {
     let studentsOnTrack = 0;
 
     classStudents.forEach((student) => {
-      if (student.evaluations && student.evaluations.length > 0) {
-        const completedEvaluations = student.evaluations.filter(
+      const studentAnswers = allAnswers.filter(
+        (answer) =>
+          answer.student_id === student.id && answer.class_id === cls.id,
+      );
+      console.log(studentAnswers);
+      if (studentAnswers.length > 0) {
+        const completedEvaluations = studentAnswers.filter(
           (evaluation) =>
             evaluation.status !== null && evaluation.status !== undefined,
         ).length;
         totalCompleted += completedEvaluations;
 
-        const successfulEvaluations = student.evaluations.filter(
+        const successfulEvaluations = studentAnswers.filter(
           (evaluation) =>
             evaluation.status === "success" || evaluation.status === "adequate",
         ).length;
@@ -122,7 +126,7 @@ export function TeacherPage() {
 
         // Check if student is on track
         const levelKey = gradeLevelMap[cls.grade as Grades];
-        const benchmarks = schoolLevel[levelKey];
+        const benchmarks = schoolGradeBenchmarks[levelKey];
         if (successfulEvaluations >= benchmarks.onTrack) {
           studentsOnTrack++;
         }
@@ -145,7 +149,6 @@ export function TeacherPage() {
 
     return {
       id: cls.id,
-      name: cls.name,
       grade: cls.grade,
       studentCount: classStudents.length,
       avgCompleted,
@@ -172,11 +175,11 @@ export function TeacherPage() {
 
   // Prepare class performance data for bar chart
   const classPerformanceData = detailedClasses.map((cls) => ({
-    name: cls.name,
-    completed: cls.avgCompleted,
-    successful: cls.avgAtelier,
-    onTrack: cls.enVoie,
-    atRisk: cls.atRisk,
+    completed: Math.round(cls.avgCompleted),
+    successful: Math.round(cls.avgAtelier),
+    onTrack: Math.round(cls.enVoie),
+    atRisk: Math.round(cls.atRisk),
+    name: cls.grade,
   }));
 
   // Calculate overall performance metrics
@@ -208,7 +211,7 @@ export function TeacherPage() {
                 ? navigate(`/school/${schoolId}/academics`)
                 : navigate(`/board/dashboard`)
             }
-            className="flex items-center gap-2 mb-4 text-sm hover:font-bold transition-all cursor-pointer hover:shadow-md"
+            className="flex items-center gap-2 mb-4 text-sm hover:font-bold transition-all cursor-pointer"
             style={{ color: "#38b6ff" }}
           >
             <ArrowLeft className="w-4 h-4" />
@@ -226,7 +229,7 @@ export function TeacherPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowTeacherDropdown(!showTeacherDropdown)}
-                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:shadow-md transition-all cursor-pointer"
+                  className="flex items-center gap-2 text-3xl mb-2 hover:opacity-80 hover:font-bold transition-all cursor-pointer"
                   style={{ color: "#004aad" }}
                 >
                   {teacher.name}
@@ -267,7 +270,7 @@ export function TeacherPage() {
                 )}
               </div>
               <p className="text-lg" style={{ color: "#000000" }}>
-                {teacher.grades.join(", ")} • {teacher.numClasses}{" "}
+                {teacher.numClasses}{" "}
                 {teacher.numClasses === 1 ? "Class" : "Classes"}
               </p>
             </div>
@@ -429,13 +432,13 @@ export function TeacherPage() {
                   <Legend />
                   <Bar
                     dataKey="completed"
-                    name="Avg Completed %"
+                    name="Completed %"
                     fill="#38b6ff"
                     radius={[8, 8, 0, 0]}
                   />
                   <Bar
                     dataKey="successful"
-                    name="Avg Success %"
+                    name="Success %"
                     fill="#c9e265"
                     radius={[8, 8, 0, 0]}
                   />
@@ -499,12 +502,6 @@ export function TeacherPage() {
                         >
                           {cls.grade}
                         </span>
-                        <h3
-                          className="text-lg font-bold group-hover:underline"
-                          style={{ color: "#004aad" }}
-                        >
-                          {cls.name}
-                        </h3>
                         <ArrowUpRight
                           className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
                           style={{ color: "#38b6ff" }}

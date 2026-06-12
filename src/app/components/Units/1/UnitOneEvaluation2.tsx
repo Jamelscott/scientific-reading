@@ -107,29 +107,21 @@ export function UnitOneEvaluationTwo() {
   }, [singleAnswer, evaluationTwoData]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationTwo((prev) => ({
-        ...prev,
-        lowerCaseName: buildEvaluationArray(true),
-        lowerCaseSound: buildEvaluationArray(true),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationTwo((prev) => ({
+      ...prev,
+      lowerCaseName: buildEvaluationArray(true),
+      lowerCaseSound: buildEvaluationArray(true),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationTwo((prev) => ({
-        ...prev,
-        lowerCaseName: buildEvaluationArray(false),
-        lowerCaseSound: buildEvaluationArray(false),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationTwo((prev) => ({
+      ...prev,
+      lowerCaseName: buildEvaluationArray(false),
+      lowerCaseSound: buildEvaluationArray(false),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

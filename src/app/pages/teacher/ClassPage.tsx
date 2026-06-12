@@ -10,15 +10,21 @@ import { ClassTable } from "../../components/TeacherClassPage/ClassTable";
 import { exportTableToPdf } from "../../components/utils/exportToPdf";
 import { Button } from "../../components/ui/Button";
 import { useAuthStore } from "../../../stores";
+import { SchoolUser, TeacherUser } from "../../../../mockData/types";
 
 export function ClassPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { classId, teacherId, schoolId } = useParams<{
+  const {
+    classId,
+    teacherId,
+    schoolId: schoolIdParam,
+  } = useParams<{
     classId: string;
     teacherId: string;
     schoolId?: string;
   }>();
+
   const classes = useClassStore((state) => state.classes);
   const teacher = useTeacherStore((state) => state.teacher);
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -26,6 +32,11 @@ export function ClassPage() {
     currentUser?.type === "board" || currentUser?.type === "admin"
       ? currentUser.id
       : currentUser?.board_id;
+
+  const schoolId =
+    (currentUser as TeacherUser).school_id ||
+    (currentUser as SchoolUser).id ||
+    schoolIdParam;
 
   const currentClass = useClassStore.getState().getClassById(classId!);
   const getStudentCountByClass = useStudentStore(
@@ -181,12 +192,14 @@ export function ClassPage() {
             </div>
 
             <div className="flex gap-3">
-              <Button
-                onClick={() => setShowAddStudentModal(true)}
-                label="studentTracking.addStudent"
-                leadingIcon={<Plus className="w-5 h-5" />}
-                className="bg-[#38b6ff] text-white"
-              />
+              {currentUser?.type === "teacher" && (
+                <Button
+                  onClick={() => setShowAddStudentModal(true)}
+                  label="studentTracking.addStudent"
+                  leadingIcon={<Plus className="w-5 h-5" />}
+                  className="bg-[#38b6ff] text-white"
+                />
+              )}
               <Button
                 onClick={handleExportPDF}
                 label="studentTracking.exportPdf"

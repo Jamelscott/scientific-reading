@@ -1,22 +1,21 @@
-import { Class, Grades, Student, Teacher } from "../../mockData/types";
-import { schoolLevel } from "../app/pages/const";
+import { Class, Grades, Student, StudentAnswers, Teacher } from "../../mockData/types";
+import { schoolGradeBenchmarks } from "../app/pages/const";
 import { useClassStore } from "./useClassStore";
 import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
 import { useSchoolStore } from "./useSchoolStore";
 import { useUnitsStore } from "./useUnitsStore";
-import { useAppStore } from "./useAppStore";
 import { mockApiData } from "../../mockData";
 import { useAuthStore } from "./useAuthStore";
 
 export interface StudentForAcademics {
-  id: number;
+  id: string;
   name: string;
   className: string;
   grade: Grades;
   teacher: string;
-  teacherId: string;
-  classId: number;
+  teacher_id: string;
+  class_id: string;
   atelier: number;
   enVoie: boolean;
 }
@@ -37,9 +36,19 @@ export const getStudentsForAcademics = (): StudentForAcademics[] => {
   const students = useStudentStore.getState().students;
   const classes: Class[] = useClassStore.getState().classes;
   const teachers: Teacher[] = useTeacherStore.getState().teachers || [];
+  const answers: StudentAnswers[] = useUnitsStore.getState().answers || [];
 
-  // Map grades to schoolLevel categories
-  const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+  const answersByStudentId = answers.reduce<Record<string, StudentAnswers[]>>((acc, answer) => {
+    const studentId = String(answer.student_id);
+    if (!acc[studentId]) {
+      acc[studentId] = [];
+    }
+    acc[studentId].push(answer);
+    return acc;
+  }, {});
+
+  // Map grades to schoolGradeBenchmarks categories
+  const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
     "Maternelle": "kindergarden",
     "Jardin": "seniorKindergarden",
     "1re année": "gradeOne",
@@ -49,34 +58,34 @@ export const getStudentsForAcademics = (): StudentForAcademics[] => {
 
   // Track class names by grade for consistent naming
   const gradeClassCount: Record<string, number> = {};
-  const classNameCache: Record<number, string> = {};
+  const classNameCache: Record<string, string> = {};
 
   // Pre-generate class names
   classes.forEach((cls: Class) => {
     if (!gradeClassCount[cls.grade]) {
       gradeClassCount[cls.grade] = 0;
     }
-    const letter = String.fromCharCode(65 + gradeClassCount[cls.grade]); // A, B, C, etc.
     classNameCache[cls.id] = `${cls.grade}`;
     gradeClassCount[cls.grade]++;
   });
 
   return students.map((student) => {
     // Get the first class (primary class) for the student
-    const primaryClassId = student['class_id'][0];
+    const primaryClassId = student.class_id;
     const primaryClass = classes.find((cls: Class) => cls.id === primaryClassId);
 
     const grade = primaryClass?.grade || "Maternelle";
     const className = classNameCache[primaryClassId] || "Unknown Class";
 
     // Get teacher for this class
-    const teacher = teachers.find((t: Teacher) => t.id === primaryClass?.teacherId);
+    const teacher = teachers.find((t: Teacher) => t.id === primaryClass?.teacher_id);
     const teacherName = teacher?.name || "Unknown Teacher";
 
     // Calculate current atelier from successful evaluations
     let atelier = 0;
-    if (student.evaluations && student.evaluations.length > 0) {
-      const successfulEvaluations = student.evaluations.filter(
+    const studentAnswers = answersByStudentId[String(student.id)] || [];
+    if (studentAnswers.length > 0) {
+      const successfulEvaluations = studentAnswers.filter(
         (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
       ).length;
       atelier = successfulEvaluations;
@@ -84,7 +93,7 @@ export const getStudentsForAcademics = (): StudentForAcademics[] => {
 
     // Determine enVoie status
     const levelKey = gradeLevelMap[grade as Grades];
-    const benchmarks = schoolLevel[levelKey];
+    const benchmarks = schoolGradeBenchmarks[levelKey];
     const enVoie = atelier >= benchmarks.onTrack;
 
     return {
@@ -93,8 +102,8 @@ export const getStudentsForAcademics = (): StudentForAcademics[] => {
       className,
       grade,
       teacher: teacherName,
-      teacherId: primaryClass?.teacherId || '',
-      classId: primaryClassId,
+      teacher_id: primaryClass?.teacher_id || '',
+      class_id: primaryClassId,
       atelier,
       enVoie,
     };
@@ -105,9 +114,10 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
   const teachers = useTeacherStore.getState().teachers || [];
   const classes: Class[] = useClassStore.getState().classes;
   const students: Student[] = useStudentStore.getState().students;
+  const answers: StudentAnswers[] = useUnitsStore.getState().answers || [];
 
-  // Map grades to schoolLevel categories
-  const gradeLevelMap: Record<Grades, keyof typeof schoolLevel> = {
+  // Map grades to schoolGradeBenchmarks categories
+  const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
     "Maternelle": "kindergarden",
     "Jardin": "seniorKindergarden",
     "1re année": "gradeOne",
@@ -117,7 +127,7 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
 
   return teachers.map((teacher) => {
     // Find all classes taught by this teacher
-    const teacherClasses = classes.filter((cls: Class) => cls.teacherId === teacher.id);
+    const teacherClasses = classes.filter((cls: Class) => cls.teacher_id === teacher.id);
 
     // Get all unique grades the teacher teaches
     const uniqueGrades = [...new Set(teacherClasses.map((cls: Class) => cls.grade))] as Grades[];
@@ -128,16 +138,31 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
       if (!gradeClassCount[cls.grade]) {
         gradeClassCount[cls.grade] = 0;
       }
-      const letter = String.fromCharCode(65 + gradeClassCount[cls.grade]); // A, B, C, etc.
       gradeClassCount[cls.grade]++;
       return `${cls.grade}`;
     });
 
     // Get all students in teacher's classes
-    const classIds = teacherClasses.map((cls: Class) => cls.id);
-    const teacherStudents = students.filter((student: Student) =>
-      student['class_id'].some((classId: number) => classIds.includes(classId))
-    );
+    const classIdSet = new Set(teacherClasses.map((cls: Class) => String(cls.id)));
+    const teacherStudents = students.filter((student: Student) => {
+      const studentClassIds = Array.isArray(student.class_id)
+        ? student.class_id
+        : [student.class_id];
+
+      return studentClassIds.some((classId) => classIdSet.has(String(classId)));
+    });
+    const teacherAnswersByStudentId = answers.reduce<Record<string, StudentAnswers[]>>((acc, answer) => {
+      if (!classIdSet.has(answer.class_id)) {
+        return acc;
+      }
+
+      const studentId = answer.student_id;
+      if (!acc[studentId]) {
+        acc[studentId] = [];
+      }
+      acc[studentId].push(answer);
+      return acc;
+    }, {});
 
     // Calculate average completed and average successful evaluations
     let totalCompleted = 0;
@@ -145,15 +170,16 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
     let studentsWithEvals = 0;
 
     teacherStudents.forEach((student: Student) => {
-      if (student.evaluations && student.evaluations.length > 0) {
+      const studentAnswers = teacherAnswersByStudentId[student.id] || [];
+      if (studentAnswers.length > 0) {
         // Count completed evaluations (those with any status)
-        const completedEvaluations = student.evaluations.filter(
+        const completedEvaluations = studentAnswers.filter(
           (evaluation) => evaluation.status !== null && evaluation.status !== undefined
         ).length;
         totalCompleted += completedEvaluations;
         
         // Count successful evaluations (success or adequate)
-        const successfulEvaluations = student.evaluations.filter(
+        const successfulEvaluations = studentAnswers.filter(
           (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
         ).length;
         totalSuccessful += successfulEvaluations;
@@ -171,18 +197,23 @@ export const getTeachersPerformance = (): TeacherPerformance[] => {
     // Calculate enVoie percentage - check each student against their own grade's benchmark
     let onTrackOrBetter = 0;
     teacherStudents.forEach((student: Student) => {
-      if (student.evaluations && student.evaluations.length > 0) {
+      const studentAnswers = teacherAnswersByStudentId[String(student.id)] || [];
+      if (studentAnswers.length > 0) {
         // Find the student's class to determine their grade
-        const studentClass = classes.find((cls: Class) => 
-          student['class_id'].includes(cls.id) && teacherClasses.some(tc => tc.id === cls.id)
+        const studentClassIds = Array.isArray(student.class_id)
+          ? student.class_id
+          : [student.class_id];
+        const studentClass = classes.find((cls: Class) =>
+          studentClassIds.some((classId) => String(classId) === String(cls.id)) &&
+          teacherClasses.some((tc) => tc.id === cls.id)
         );
         
         if (studentClass) {
           const studentGrade = studentClass.grade;
           const levelKey = gradeLevelMap[studentGrade as Grades];
-          const benchmarks = schoolLevel[levelKey];
+          const benchmarks = schoolGradeBenchmarks[levelKey];
           
-          const successfulEvaluations = student.evaluations.filter(
+          const successfulEvaluations = studentAnswers.filter(
             (evaluation) => evaluation.status === "success" || evaluation.status === "adequate"
           ).length;
 

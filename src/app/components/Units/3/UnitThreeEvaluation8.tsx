@@ -108,31 +108,23 @@ export function UnitThreeEvaluationEight() {
   }, [singleAnswer, frequentWordsKeys, openClosedListKeys, complexListKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        openClosed: buildEvaluationArray(true, openClosedListKeys.length),
-        complex: buildEvaluationArray(true, complexListKeys.length),
-        frequent: buildEvaluationArray(true, frequentWordsKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      openClosed: buildEvaluationArray(true, openClosedListKeys.length),
+      complex: buildEvaluationArray(true, complexListKeys.length),
+      frequent: buildEvaluationArray(true, frequentWordsKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        openClosed: buildEvaluationArray(false, openClosedListKeys.length),
-        complex: buildEvaluationArray(false, complexListKeys.length),
-        frequent: buildEvaluationArray(false, frequentWordsKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      openClosed: buildEvaluationArray(false, openClosedListKeys.length),
+      complex: buildEvaluationArray(false, complexListKeys.length),
+      frequent: buildEvaluationArray(false, frequentWordsKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {

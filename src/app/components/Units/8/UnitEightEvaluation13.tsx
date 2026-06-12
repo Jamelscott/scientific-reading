@@ -91,27 +91,19 @@ export function UnitEightEvaluationThirteen() {
   }, [singleAnswer, dataKeys]);
 
   const handleCheckAll = () => {
-    setConfirmMessage(t("evaluation.confirmCheckAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        advancedGraphemeWords: buildEvaluationArray(true, dataKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      advancedGraphemeWords: buildEvaluationArray(true, dataKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleFailAll = () => {
-    setConfirmMessage(t("evaluation.confirmFailAll"));
-    setPendingAction(() => () => {
-      setEvaluationState((prev) => ({
-        ...prev,
-        advancedGraphemeWords: buildEvaluationArray(false, dataKeys.length),
-      }));
-      setHasChanges(true);
-    });
-    setShowConfirmModal(true);
+    setEvaluationState((prev) => ({
+      ...prev,
+      advancedGraphemeWords: buildEvaluationArray(false, dataKeys.length),
+    }));
+    setHasChanges(true);
   };
 
   const handleClearAll = () => {
