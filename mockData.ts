@@ -19,7 +19,7 @@ export interface MockClass {
   grade: grades;
   subject?: string;
   studentCount:number;
-  schoolYear:string;
+  year:string;
   studentIds: number[]; // Array of student IDs in this class
 }
 

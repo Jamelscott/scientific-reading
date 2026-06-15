@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Users,
   Plus,
   BookOpen,
   Edit,
   Trash2,
-  Pencil,
+  ChevronDown,
   RotateCcw,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -25,7 +25,6 @@ export function TeacherDashboard() {
   const navigate = useNavigate();
   const classes = useClassStore((state) => state.classes);
   const removeClass = useClassStore((state) => state.removeClass);
-  const students = useStudentStore((state) => state.students);
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
@@ -33,6 +32,61 @@ export function TeacherDashboard() {
   const [showEditClassesModal, setShowEditClassesModal] = useState(false);
   const [showDeleteId, setShowDeleteId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+  const getClassYear = (classItem: unknown): number | null => {
+    const maybeYear = (classItem as { year?: unknown }).year;
+    if (typeof maybeYear === "number") {
+      return maybeYear;
+    }
+
+    const maybeSchoolYear = (classItem as { schoolYear?: unknown }).schoolYear;
+    if (typeof maybeSchoolYear === "string") {
+      const startYear = Number(maybeSchoolYear.split("-")[0]);
+      if (!Number.isNaN(startYear)) {
+        return startYear;
+      }
+    }
+
+    return null;
+  };
+
+  const availableYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        classes
+          .map((classItem) => getClassYear(classItem))
+          .filter((year): year is number => year !== null),
+      ),
+    );
+    return years.sort((a, b) => b - a);
+  }, [classes]);
+
+  useEffect(() => {
+    if (availableYears.length === 0) {
+      setSelectedYear(null);
+      return;
+    }
+
+    setSelectedYear((currentYear) => {
+      if (currentYear !== null && availableYears.includes(currentYear)) {
+        return currentYear;
+      }
+      return availableYears[0];
+    });
+  }, [availableYears]);
+
+  const filteredClasses = useMemo(() => {
+    if (selectedYear === null) {
+      return classes;
+    }
+    return classes.filter(
+      (classItem) => getClassYear(classItem) === selectedYear,
+    );
+  }, [classes, selectedYear]);
+
+  const formatSchoolYear = (year: number) => `${year}-${year + 1}`;
+
   const handleClearCache = () => {
     if (window.confirm(t("dashboard.confirmClearCache"))) {
       // Clear localStorage
@@ -74,8 +128,31 @@ export function TeacherDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <NotificationDropdown />
-              <Initials size="sm" />
+              <div className="relative">
+                <select
+                  value={selectedYear ?? ""}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-4 py-2.5 rounded-xl appearance-none pr-9 text-sm transition-shadow duration-200 hover:shadow-md"
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #dff3ff",
+                    color: "#004aad",
+                  }}
+                  aria-label={t("schoolBoard.dashboard.schoolYear")}
+                >
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>
+                      {formatSchoolYear(year)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: "#004aad" }}
+                />
+              </div>
+              {/* <NotificationDropdown />
+              <Initials size="sm" /> */}
             </div>
           </div>
 
@@ -101,7 +178,7 @@ export function TeacherDashboard() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {classes.map((classItem, index) => {
+              {filteredClasses.map((classItem, index) => {
                 const numOfStudents = getStudentCountByClass(classItem.id);
                 return (
                   <div
@@ -208,18 +285,19 @@ export function TeacherDashboard() {
             </div>
 
             {/* Clear Cache Button */}
-            <div className="mt-12 flex justify-center">
+            {/* <div className="mt-12 flex justify-center">
               <Button
                 onClick={handleClearCache}
                 label="dashboard.clearCache"
                 leadingIcon={<RotateCcw className="w-5 h-5" />}
                 variant="secondary"
               />
-            </div>
+            </div> */}
           </div>
         </div>
         <AddClassModal
           isOpen={showAddClassModal}
+          defaultSchoolYear={selectedYear}
           onClose={() => setShowAddClassModal(false)}
         />
         <EditClassesModal

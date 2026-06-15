@@ -114,7 +114,7 @@ export type Grades = "Maternelle" | "Jardin" | "1re année" | "2e année" | "3e 
 export interface Class {
   id: string;
   grade: Grades;
-  schoolYear: string;
+  year: string;
   teacher_id: string; // ID of the teacher associated with this class
 }
 
@@ -129,7 +129,7 @@ export type Teacher = {
   name: string;
   email: string;
   school: {name: string};
-  boardName: string;
+  boardName?: string;
   subjects: string[];
   phone_number?: string;
   password:string;

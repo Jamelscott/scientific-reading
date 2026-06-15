@@ -102,7 +102,7 @@ export function UnitHeader({
             </p>
             <p className="text-sm">{teacher?.name}</p>
             <p className="text-sm" style={{ color: "#000000", opacity: 0.7 }}>
-              {classData.schoolYear}
+              {classData.year} - {parseInt(classData.year.split("-")[0]) + 1}
             </p>
           </div>
 

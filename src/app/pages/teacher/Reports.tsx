@@ -18,7 +18,7 @@ import {
   Download,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   BarChart,
@@ -56,9 +56,76 @@ export function ReportsPage() {
   const getStudentCountByClass = useStudentStore(
     (state) => state.getStudentCountByClass,
   );
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(
-    classes.length > 0 ? classes[0].id : null,
+
+  const getClassYear = (classItem: unknown): number | null => {
+    const maybeYear = (classItem as { year?: unknown }).year;
+    if (typeof maybeYear === "number") return maybeYear;
+
+    const maybeSchoolYear = (classItem as { schoolYear?: unknown }).schoolYear;
+    if (typeof maybeSchoolYear === "string") {
+      const startYear = Number(maybeSchoolYear.split("-")[0]);
+      if (!Number.isNaN(startYear)) return startYear;
+    }
+
+    return null;
+  };
+
+  const availableYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        classes
+          .map((classItem) => getClassYear(classItem))
+          .filter((year): year is number => year !== null),
+      ),
+    );
+
+    return years.sort((a, b) => b - a);
+  }, [classes]);
+
+  const [selectedYear, setSelectedYear] = useState<number | null>(
+    availableYears[0] ?? null,
   );
+
+  useEffect(() => {
+    if (availableYears.length === 0) {
+      setSelectedYear(null);
+      return;
+    }
+
+    setSelectedYear((currentYear) => {
+      if (currentYear !== null && availableYears.includes(currentYear)) {
+        return currentYear;
+      }
+      return availableYears[0];
+    });
+  }, [availableYears]);
+
+  const filteredClasses = useMemo(() => {
+    if (selectedYear === null) return classes;
+    return classes.filter(
+      (classItem) => getClassYear(classItem) === selectedYear,
+    );
+  }, [classes, selectedYear]);
+
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (filteredClasses.length === 0) {
+      setSelectedClassId(null);
+      return;
+    }
+
+    setSelectedClassId((currentClassId) => {
+      if (
+        currentClassId &&
+        filteredClasses.some((classItem) => classItem.id === currentClassId)
+      ) {
+        return currentClassId;
+      }
+      return filteredClasses[0].id;
+    });
+  }, [filteredClasses]);
+
   const [expandedClassIds, setExpandedClassIds] = useState<Set<string>>(
     new Set(classes.map((c) => c.id)),
   );
@@ -74,7 +141,7 @@ export function ReportsPage() {
     });
   };
   // Calculate grade distribution percentages
-  const selectedClass = classes.find((c) => c.id === selectedClassId);
+  const selectedClass = filteredClasses.find((c) => c.id === selectedClassId);
   const classStudentCount = selectedClassId
     ? getStudentCountByClass(selectedClassId)
     : 0;
@@ -211,7 +278,8 @@ export function ReportsPage() {
       },
     ];
 
-    const classId = selectedClassId ?? (classes[0] && classes[0].id) ?? null;
+    const classId =
+      selectedClassId ?? (filteredClasses[0] && filteredClasses[0].id) ?? null;
     if (!classId)
       return ranges.map((r) => ({
         name: r.name,
@@ -521,7 +589,7 @@ export function ReportsPage() {
       {/* Main Content */}
       <div className="flex-1 p-12 overflow-y-auto">
         {/* Header */}
-        <div className="flex items-start justify-between mb-12">
+        <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-3xl mb-2" style={{ color: "#004aad" }}>
               {t("nav.reports")}
@@ -529,44 +597,77 @@ export function ReportsPage() {
             <p className="text-lg" style={{ color: "#000000" }}>
               {t("reports.subtitle")}
             </p>
-            <div className="mt-6">
-              <label
-                className="text-sm mb-2 block font-medium"
-                style={{ color: "#004aad" }}
-              >
-                {t("reports.selectClass")}
-              </label>
-              <div className="relative inline-block">
-                <select
-                  value={selectedClassId ?? ""}
-                  onChange={(e) =>
-                    setSelectedClassId(e.target.value ? e.target.value : null)
-                  }
-                  className="appearance-none px-6 py-3 pr-12 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all"
-                  style={{
-                    background: "#ffffff",
-                    border: "2px solid #dff3ff",
-                    color: "#004aad",
-                    minWidth: "250px",
-                  }}
-                >
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.grade}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+            <div className="flex items-center gap-4">
+              <div className="mt-4">
+                <label
+                  className="text-sm mb-2 block font-medium"
                   style={{ color: "#004aad" }}
-                />
+                >
+                  {t("schoolBoard.dashboard.schoolYear")}
+                </label>
+                <div className="relative inline-block">
+                  <select
+                    value={selectedYear ?? ""}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    className="appearance-none px-6 py-3 pr-12 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all"
+                    style={{
+                      background: "#e8f9ec",
+                      border: "2px solid #9ed9ad",
+                      color: "#004aad",
+                      minWidth: "250px",
+                    }}
+                  >
+                    {availableYears.map((year) => (
+                      <option key={year} value={year}>
+                        {`${year}-${year + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                    style={{ color: "#004aad" }}
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label
+                  className="text-sm mb-2 block font-medium"
+                  style={{ color: "#004aad" }}
+                >
+                  {t("reports.selectClass")}
+                </label>
+                <div className="relative inline-block">
+                  <select
+                    value={selectedClassId ?? ""}
+                    onChange={(e) =>
+                      setSelectedClassId(e.target.value ? e.target.value : null)
+                    }
+                    className="appearance-none px-6 py-3 pr-12 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all"
+                    style={{
+                      background: "#fff4d6",
+                      border: "2px solid #ffd98a",
+                      color: "#004aad",
+                      minWidth: "250px",
+                    }}
+                  >
+                    {filteredClasses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.grade}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                    style={{ color: "#004aad" }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <NotificationDropdown />
             <Initials size="sm" />
-          </div>
+          </div> */}
         </div>
 
         {/* Metrics Cards */}
@@ -581,7 +682,7 @@ export function ReportsPage() {
               {t("reports.metrics.numberOfClasses")}
             </p>
             <p className="text-2xl font-semibold" style={{ color: "#004aad" }}>
-              {classes.length}
+              {filteredClasses.length}
             </p>
           </div>
 

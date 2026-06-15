@@ -33,10 +33,10 @@ export function ProfilePage() {
               {t("profile.subtitle")}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <NotificationDropdown />
             <Initials size="sm" />
-          </div>
+          </div> */}
         </div>
 
         {/* Profile Card */}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   BookOpen,
@@ -22,8 +22,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  Radar,
+  RadarChart,
+  PolarRadiusAxis,
+  PolarAngleAxis,
+  PolarGrid,
   Cell,
 } from "recharts";
 import { useTranslation } from "react-i18next";
@@ -39,40 +42,211 @@ import {
 import { schoolGradeBenchmarks } from "../const";
 import { Grades } from "../../../../mockData/types";
 
-const trendData = [
-  { month: "Sept", taux: 58 },
-  { month: "Oct", taux: 63 },
-  { month: "Nov", taux: 67 },
-  { month: "Déc", taux: 70 },
-  { month: "Jan", taux: 73 },
-  { month: "Fév", taux: 75 },
-  { month: "Mars", taux: 76 },
-];
-
 export function SchoolDashboard() {
   const navigate = useNavigate();
   const { schoolId } = useParams();
   const { t } = useTranslation();
   const isLoading = useAuthStore((state) => state.isLoading);
   const teachers = useTeacherStore((state) => state.teachers);
-  const [year, setYear] = useState("2025-2026");
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"class" | "grade">("class");
   const students = useStudentStore((state) => state.students);
   const answers = useUnitsStore((state) => state.answers);
   const realClasses = useClassStore((state) => state.classes);
-  const getClassBenchmarks = useClassStore((state) => state.getClassBenchmarks);
   const getClassPerformance = useClassStore(
     (state) => state.getClassPerformance,
   );
-  const classBenchmarks = useMemo(
-    () => getClassBenchmarks(),
+  const getClassYear = (classItem: unknown): number | null => {
+    const maybeYear = (classItem as { year?: unknown }).year;
+    if (typeof maybeYear === "number") {
+      return maybeYear;
+    }
+
+    const maybeSchoolYear = (classItem as { schoolYear?: unknown }).schoolYear;
+    if (typeof maybeSchoolYear === "string") {
+      const startYear = Number(maybeSchoolYear.split("-")[0]);
+      if (!Number.isNaN(startYear)) {
+        return startYear;
+      }
+    }
+
+    return null;
+  };
+
+  const availableYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        realClasses
+          .map((classItem) => getClassYear(classItem))
+          .filter((year): year is number => year !== null),
+      ),
+    );
+    return years.sort((a, b) => b - a);
+  }, [realClasses]);
+
+  useEffect(() => {
+    if (availableYears.length === 0) {
+      setSelectedYear(null);
+      return;
+    }
+
+    setSelectedYear((currentYear) => {
+      if (currentYear !== null && availableYears.includes(currentYear)) {
+        return currentYear;
+      }
+      return availableYears[0];
+    });
+  }, [availableYears]);
+
+  const filteredRealClasses = useMemo(() => {
+    if (selectedYear === null) {
+      return realClasses;
+    }
+    return realClasses.filter(
+      (classItem) => getClassYear(classItem) === selectedYear,
+    );
+  }, [realClasses, selectedYear]);
+
+  const filteredClassIds = useMemo(
+    () => new Set(filteredRealClasses.map((cls) => cls.id)),
+    [filteredRealClasses],
+  );
+
+  const filteredStudents = useMemo(
+    () => students.filter((student) => filteredClassIds.has(student.class_id)),
+    [students, filteredClassIds],
+  );
+
+  const filteredTeachers = useMemo(() => {
+    const classTeacherIds = new Set(
+      filteredRealClasses.map((cls) => cls.teacher_id),
+    );
+    return (teachers ?? []).filter((teacher) =>
+      classTeacherIds.has(teacher.id),
+    );
+  }, [teachers, filteredRealClasses]);
+
+  const filteredAnswers = useMemo(() => {
+    const studentIds = new Set(filteredStudents.map((student) => student.id));
+    return answers.filter(
+      (answer) =>
+        filteredClassIds.has(answer.class_id) &&
+        studentIds.has(answer.student_id),
+    );
+  }, [answers, filteredClassIds, filteredStudents]);
+
+  const classBenchmarks = useMemo(() => {
+    const gradeLevelMap: Record<Grades, keyof typeof schoolGradeBenchmarks> = {
+      Maternelle: "kindergarden",
+      Jardin: "seniorKindergarden",
+      "1re année": "gradeOne",
+      "2e année": "gradeTwo",
+      "3e année": "gradeThree",
+    };
+
+    const results: Record<Grades, number | null> = {
+      Maternelle: null,
+      Jardin: null,
+      "1re année": null,
+      "2e année": null,
+      "3e année": null,
+    };
+
+    const gradeGroups: Record<Grades, string[]> = {
+      Maternelle: [],
+      Jardin: [],
+      "1re année": [],
+      "2e année": [],
+      "3e année": [],
+    };
+
+    filteredRealClasses.forEach((cls) => {
+      gradeGroups[cls.grade].push(cls.id);
+    });
+
+    const uniqueAnswers = Object.values(
+      filteredAnswers.reduce<Record<string, (typeof filteredAnswers)[number]>>(
+        (acc, answer) => {
+          const key = `${answer.student_id}::${answer.class_id}::${answer.unit_data_id}`;
+          const current = acc[key];
+
+          if (!current) {
+            acc[key] = answer;
+            return acc;
+          }
+
+          const currentUpdatedAt = current.updated_at ?? "";
+          const nextUpdatedAt = answer.updated_at ?? "";
+          const shouldReplace =
+            nextUpdatedAt > currentUpdatedAt ||
+            String(answer.id) > String(current.id);
+
+          if (shouldReplace) {
+            acc[key] = answer;
+          }
+
+          return acc;
+        },
+        {},
+      ),
+    );
+
+    Object.entries(gradeGroups).forEach(([grade, classIds]) => {
+      if (classIds.length === 0) {
+        results[grade as Grades] = null;
+        return;
+      }
+
+      const gradeStudents = filteredStudents.filter((student) =>
+        classIds.includes(student.class_id),
+      );
+
+      if (gradeStudents.length === 0) {
+        results[grade as Grades] = null;
+        return;
+      }
+
+      const levelKey = gradeLevelMap[grade as Grades];
+      const benchmarks = schoolGradeBenchmarks[levelKey];
+      let onTrackOrBetter = 0;
+
+      gradeStudents.forEach((student) => {
+        const studentAnswers = uniqueAnswers.filter(
+          (answer) =>
+            answer.student_id === student.id &&
+            classIds.includes(answer.class_id),
+        );
+
+        if (studentAnswers.length === 0) {
+          return;
+        }
+
+        const successfulEvaluations = studentAnswers.filter(
+          (evaluation) =>
+            evaluation.status === "success" || evaluation.status === "adequate",
+        ).length;
+
+        if (successfulEvaluations >= benchmarks.onTrack) {
+          onTrackOrBetter++;
+        }
+      });
+
+      const percentage = (onTrackOrBetter / gradeStudents.length) * 100;
+      results[grade as Grades] = Math.round(percentage);
+    });
+
+    return results;
+  }, [filteredRealClasses, filteredStudents, filteredAnswers]);
+
+  // Get real class performance data
+  const allClassPerformance = useMemo(
+    () => getClassPerformance(),
     [students, realClasses, answers],
   );
 
-  // Get real class performance data
   const classes = useMemo(
-    () => getClassPerformance(),
-    [students, realClasses, answers],
+    () => allClassPerformance.filter((cls) => filteredClassIds.has(cls.id)),
+    [allClassPerformance, filteredClassIds],
   );
 
   // Transform classBenchmarks into chart data, keeping grades without data visible
@@ -116,10 +290,10 @@ export function SchoolDashboard() {
     // Track class counts per grade for naming
     const gradeClassCounts: Record<string, number> = {};
 
-    const atRiskStudents = students
+    const atRiskStudents = filteredStudents
       .map((student) => {
         // Get student's class to determine grade
-        const studentClass = realClasses.find(
+        const studentClass = filteredRealClasses.find(
           (cls) => student.class_id === cls.id,
         );
 
@@ -149,14 +323,16 @@ export function SchoolDashboard() {
         if (!status) return null;
 
         // Get teacher name
-        const teacher = teachers?.find((t) => t.id === studentClass.teacher_id);
+        const teacher = filteredTeachers.find(
+          (t) => t.id === studentClass.teacher_id,
+        );
         const teacherName = teacher?.name || "Enseignant inconnu";
 
         // Generate class name with letter
         if (!gradeClassCounts[studentClass.grade]) {
           gradeClassCounts[studentClass.grade] = 0;
         }
-        const letterIndex = gradeClassCounts[studentClass.grade];
+        const _letterIndex = gradeClassCounts[studentClass.grade];
         gradeClassCounts[studentClass.grade]++;
         const className = `${studentClass.grade}`;
 
@@ -192,7 +368,117 @@ export function SchoolDashboard() {
       atelier: number;
       status: "À risque" | "À surveiller";
     }>;
-  }, [students, realClasses, teachers]);
+  }, [filteredStudents, filteredRealClasses, filteredTeachers]);
+
+  const atRiskStudents = studentsInNeed.filter(
+    (student) => student.status === "À risque",
+  );
+  const studentsToMonitor = studentsInNeed.filter(
+    (student) => student.status === "À surveiller",
+  );
+
+  const calculateSchoolCompetencyScore = (atelierRange: string[]) => {
+    const relevantAnswers = filteredAnswers.filter((answer) =>
+      atelierRange.includes(String(answer.unit_data_id)),
+    );
+
+    if (relevantAnswers.length === 0) return 0;
+
+    let totalScore = 0;
+    let countedAnswers = 0;
+
+    relevantAnswers.forEach((answer) => {
+      if (answer.status === "success") {
+        totalScore += 100;
+        countedAnswers++;
+      } else if (answer.status === "adequate") {
+        totalScore += 70;
+        countedAnswers++;
+      } else if (answer.status === "needs-improvement") {
+        totalScore += 40;
+        countedAnswers++;
+      }
+    });
+
+    if (countedAnswers === 0) return 0;
+
+    return Math.round(totalScore / countedAnswers);
+  };
+
+  const schoolRadarData = [
+    {
+      axis: "1",
+      color: "#38b6ff",
+      subject: t("studentPage.reading"),
+      score: calculateSchoolCompetencyScore(["1", "2", "3", "4", "5", "6"]),
+    },
+    {
+      axis: "2",
+      color: "#a3e635",
+      subject: t("studentPage.writing"),
+      score: calculateSchoolCompetencyScore(["7", "8", "9"]),
+    },
+    {
+      axis: "3",
+      color: "#ffde59",
+      subject: t("studentPage.decoding"),
+      score: calculateSchoolCompetencyScore(["10", "11"]),
+    },
+    {
+      axis: "4",
+      color: "#fb923c",
+      subject: t("studentPage.fluency"),
+      score: calculateSchoolCompetencyScore(["12", "13"]),
+    },
+    {
+      axis: "5",
+      color: "#ff5757",
+      subject: t("studentPage.comprehension"),
+      score: calculateSchoolCompetencyScore(["14", "15"]),
+    },
+  ];
+
+  const radarAxisColorMap = schoolRadarData.reduce<Record<string, string>>(
+    (acc, item) => {
+      acc[item.axis] = item.color;
+      return acc;
+    },
+    {},
+  );
+
+  const RadarNumberTick = ({ payload, x, y, cx, cy }: any) => {
+    const dx = x - cx;
+    const dy = y - cy;
+    const length = Math.hypot(dx, dy) || 1;
+    const offset = 16;
+    const tx = x + (dx / length) * offset;
+    const ty = y + (dy / length) * offset;
+    const axisColor = radarAxisColorMap[String(payload.value)] || "#38b6ff";
+
+    return (
+      <g>
+        <circle
+          cx={tx}
+          cy={ty}
+          r={11}
+          fill="#ffffff"
+          stroke={axisColor}
+          strokeWidth={2}
+        />
+        <text
+          x={tx}
+          y={ty}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill={axisColor}
+          fontSize={11}
+          fontWeight={700}
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
 
   // Group classes by grade for grade view
   const classesByGrade = classes.reduce(
@@ -257,17 +543,21 @@ export function SchoolDashboard() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <select
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="px-4 py-2.5 rounded-xl appearance-none pr-9 text-sm"
+                value={selectedYear ?? ""}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="px-4 py-2.5 rounded-xl appearance-none pr-9 text-sm transition-shadow duration-200 hover:shadow-md"
                 style={{
                   background: "#ffffff",
                   border: "1px solid #dff3ff",
                   color: "#004aad",
                 }}
+                aria-label={t("schoolBoard.dashboard.schoolYear")}
               >
-                <option value="2025-2026">2025–2026</option>
-                <option value="2024-2025">2024–2025</option>
+                {availableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {`${year}-${year + 1}`}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
@@ -282,14 +572,14 @@ export function SchoolDashboard() {
           {[
             {
               label: t("school.enrolledStudents"),
-              value: students.length,
+              value: filteredStudents.length,
               icon: Users,
               bg: "#dff3ff",
               iconColor: "#004aad",
             },
             {
               label: t("common.classes"),
-              value: realClasses.length,
+              value: filteredRealClasses.length,
               icon: School,
               bg: "#dff3ff",
               iconColor: "#004aad",
@@ -322,10 +612,10 @@ export function SchoolDashboard() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
           {/* Grade benchmarks */}
           <div
-            className="rounded-2xl p-6"
+            className="rounded-2xl p-6 min-w-0"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
             <div className="flex items-center justify-between mb-5">
@@ -368,38 +658,65 @@ export function SchoolDashboard() {
             </div>
           </div>
 
-          {/* Trend line */}
+          {/* School-wide Skills Radar */}
           <div
             className="rounded-2xl p-6"
             style={{ background: "#ffffff", border: "1px solid #dff3ff" }}
           >
-            <h2
-              className="font-bold text-base mb-5"
-              style={{ color: "#004aad" }}
-            >
-              {t("school.progressionYear")}
-            </h2>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#888" }} />
-                <YAxis
-                  domain={[50, 85]}
-                  tick={{ fontSize: 11, fill: "#888" }}
-                  unit="%"
-                />
-                <Tooltip
-                  formatter={(v: number) => [`${v}%`, t("school.onTrack")]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="taux"
-                  stroke="#004aad"
-                  strokeWidth={2.5}
-                  dot={{ fill: "#004aad", r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col lg:flex-row gap-4 lg:items-start h-full">
+              <div
+                className="lg:w-44 lg:flex-shrink-0 flex flex-col items-start h-full"
+                style={{ color: "#004aad" }}
+              >
+                <h2
+                  className="font-bold text-base mb-4"
+                  style={{ color: "#004aad" }}
+                >
+                  {t("studentPage.skillsProfile")}
+                </h2>
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-x-4 gap-y-2 text-xs h-full">
+                  {schoolRadarData.map((item) => (
+                    <div key={item.axis} className="flex items-center gap-2">
+                      <span
+                        className="inline-flex w-6 h-6 items-center justify-center rounded-full text-[11px]"
+                        style={{
+                          background: "#ffffff",
+                          color: item.color,
+                          border: `2px solid ${item.color}`,
+                        }}
+                      >
+                        {item.axis}
+                      </span>
+                      <span style={{ color: item.color }}>{item.subject}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full h-[220px] sm:h-[260px] lg:h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={schoolRadarData} outerRadius="58%">
+                    <PolarGrid stroke="#dff3ff" />
+                    <PolarAngleAxis dataKey="axis" tick={<RadarNumberTick />} />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 100]}
+                      tick={{ fill: "#000000", fontSize: 10 }}
+                    />
+                    <Radar
+                      name={t("studentPage.skillsProfile")}
+                      dataKey="score"
+                      stroke="#38b6ff"
+                      fill="#38b6ff"
+                      fillOpacity={0.5}
+                    />
+                    <Tooltip
+                      formatter={(v: number) => [`${v}%`, t("school.onTrack")]}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -599,11 +916,11 @@ export function SchoolDashboard() {
                       gradeClasses.length,
                   );
                   const gradeClassIds = new Set(
-                    realClasses
+                    filteredRealClasses
                       .filter((cls) => cls.grade === grade)
                       .map((cls) => cls.id),
                   );
-                  const gradeStudents = students.filter((student) =>
+                  const gradeStudents = filteredStudents.filter((student) =>
                     gradeClassIds.has(student.class_id),
                   );
 
@@ -703,8 +1020,8 @@ export function SchoolDashboard() {
             </div>
           </div>
         )}
-        {/* Students Most in Need */}
-        {studentsInNeed.length > 0 && (
+        {/* At Risk Students */}
+        {atRiskStudents.length > 0 && (
           <div
             className="rounded-2xl p-6 mt-8"
             style={{ background: "#fff5f5", border: "2px solid #ff5757" }}
@@ -712,14 +1029,14 @@ export function SchoolDashboard() {
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="w-5 h-5" style={{ color: "#ff5757" }} />
               <h2 className="font-bold text-base" style={{ color: "#ff5757" }}>
-                {t("school.studentsToMonitor")} ({studentsInNeed.length})
+                {t("school.atRisk")} ({atRiskStudents.length})
               </h2>
             </div>
             <div
               className="grid grid-cols-2 gap-3"
               style={{ maxHeight: "300px", overflowY: "auto" }}
             >
-              {studentsInNeed.map((student) => (
+              {atRiskStudents.map((student) => (
                 <button
                   key={student.id}
                   onClick={() =>
@@ -764,6 +1081,71 @@ export function SchoolDashboard() {
                       {student.status === "À risque"
                         ? t("school.atRisk")
                         : t("school.toMonitor")}
+                    </span>
+                    <ArrowUpRight
+                      className="w-4 h-4"
+                      style={{ color: "#38b6ff" }}
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Students To Monitor */}
+        {studentsToMonitor.length > 0 && (
+          <div
+            className="rounded-2xl p-6 mt-8"
+            style={{ background: "#fffaf0", border: "2px solid #fbbf24" }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="w-5 h-5" style={{ color: "#f59e0b" }} />
+              <h2 className="font-bold text-base" style={{ color: "#d97706" }}>
+                {t("school.studentsToMonitor")} ({studentsToMonitor.length})
+              </h2>
+            </div>
+            <div
+              className="grid grid-cols-2 gap-3"
+              style={{ maxHeight: "300px", overflowY: "auto" }}
+            >
+              {studentsToMonitor.map((student) => (
+                <button
+                  key={student.id}
+                  onClick={() =>
+                    navigate(
+                      `/school/${schoolId}/teacher/${student.teacherId}/class/${student.classId}/student/${student.id}`,
+                    )
+                  }
+                  className="p-4 rounded-xl flex items-center justify-between text-left hover:shadow-md transition-all cursor-pointer"
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #fde68a",
+                  }}
+                >
+                  <div className="flex-1">
+                    <p
+                      className="font-semibold text-sm mb-1"
+                      style={{ color: "#004aad" }}
+                    >
+                      {student.name}
+                    </p>
+                    <p className="text-xs" style={{ color: "#666" }}>
+                      {student.className} • {student.teacher}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{
+                        background: getAtelierColor(student.atelier),
+                        color: "#ffffff",
+                      }}
+                    >
+                      A{student.atelier}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                      {t("school.toMonitor")}
                     </span>
                     <ArrowUpRight
                       className="w-4 h-4"

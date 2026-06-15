@@ -5,6 +5,10 @@ import { Button } from "./ui/Button";
 import { useTeacherStore } from "../../stores/useTeacherStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { Teacher } from "../../../mockData/types";
+import {
+  formatPhoneNumber,
+  formatPhoneInput,
+} from "./ProfilePage/formValidation";
 
 interface AddTeacherModalProps {
   isOpen: boolean;
@@ -13,7 +17,7 @@ interface AddTeacherModalProps {
 
 export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
   const { t } = useTranslation();
-  const updateTeachers = useTeacherStore((state) => state.updateTeachers);
+  // const addTeacher = useTeacherStore((state) => state.updateTeachers);
   const currentUser = useAuthStore((state) => state.currentUser);
 
   const [formData, setFormData] = useState({
@@ -65,31 +69,25 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
       return;
     }
 
-    // Generate a new teacher ID
-    const newTeacherId = `t-${Date.now()}`;
-
     // Get school info from current user
     const schoolId = currentUser?.type === "school" ? currentUser.id : "";
     const boardId = currentUser?.type === "school" ? currentUser.board_id : "";
 
-    const newTeacher: Teacher = {
-      id: newTeacherId,
+    const newTeacher: Partial<Teacher> = {
       type: "teacher",
       name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
       email: formData.email.trim(),
-      phoneNumber: formData.phoneNumber.trim() || undefined,
-      school: currentUser?.name || "École Laurier-Trudeau",
-      schoolId,
-      boardId,
-      boardName: currentUser?.type === "school" ? "Commission scolaire" : "",
+      phone_number: formData.phoneNumber.trim() || undefined,
+      school_id: schoolId,
+      board_id: boardId,
       subjects: formData.subjects
         ? formData.subjects.split(",").map((s) => s.trim())
         : [],
       password: "password123", // Default password
-      yearsExperience: 0,
+      years_experience: 0,
     };
 
-    updateTeachers(newTeacher);
+    // addTeacher(newTeacher);
 
     // Reset form
     setFormData({
@@ -106,6 +104,7 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
       phoneNumber: "",
     });
     onClose();
+    alert("ask your administator to add a new teacher.");
   };
 
   const handleClose = () => {
@@ -241,14 +240,18 @@ export function AddTeacherModal({ isOpen, onClose }: AddTeacherModalProps) {
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
+                setFormData({
+                  ...formData,
+                  phoneNumber: formatPhoneInput(e.target.value),
+                })
               }
               className="w-full px-4 py-3 rounded-xl border"
               style={{
                 background: "#dff3ff",
                 borderColor: errors.phoneNumber ? "#ff5757" : "#38b6ff",
               }}
-              placeholder="5141234567"
+              placeholder="(###) ###-####"
+              maxLength={14}
             />
             {errors.phoneNumber && (
               <p className="text-sm mt-1" style={{ color: "#ff5757" }}>

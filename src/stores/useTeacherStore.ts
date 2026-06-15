@@ -10,6 +10,7 @@ interface TeacherStore {
   teachers: Teacher[] | null;
   setSupabaseTeacher: (userId: string, userType: string) => Promise<void>;
   setTeachersForSchool: (schoolId: string) => void;
+  addTeacher: (teacher: Partial<Teacher>) => void;
   updateTeacher: (updates: Partial<Teacher>) => Promise<void>;
   updateTeachers: (updates: Teacher) => void;
   removeTeacher: (teacherId: string) => void;
@@ -57,7 +58,6 @@ export const useTeacherStore = create<TeacherStore>()(
           }
 
           if (teachers) {
-            console.log(teachers)
             set({ teachers: teachers as Teacher[] });
             return;
           } else {
@@ -123,6 +123,25 @@ export const useTeacherStore = create<TeacherStore>()(
             ? state.teachers.filter((teacher) => teacher.id !== teacherId)
             : null,
         })),
+      addTeacher: withLoading(async (teacher) => {
+        const { data, error } = await supabase
+          .from('teachers')
+          .insert([teacher])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error adding teacher:', error.message);
+          alert('Failed to add teacher: ' + error.message);
+          return;
+        }
+
+        if (data) {
+          set((state) => ({
+            teachers: state.teachers ? [...state.teachers, data as Teacher] : [data as Teacher],
+          }));
+        }
+      }),
       getTeacherById: (teacherId: string | number) => {
         const activeTeacher = get().teacher;
         if (Array.isArray(activeTeacher)) {
