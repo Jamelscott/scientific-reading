@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthUser } from "../../mockData/types";
+import { AuthUser } from "../../types";
 import { useClassStore } from "./useClassStore";
 import { useStudentStore } from "./useStudentStore";
 import { useUnitsStore } from "./useUnitsStore";

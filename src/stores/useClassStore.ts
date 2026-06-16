@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Class, Grades } from "../../mockData/types";
+import { Class, Grades } from "../../types";
 import { useStudentStore } from "./useStudentStore";
 import { useTeacherStore } from "./useTeacherStore";
 import { useUnitsStore } from "./useUnitsStore";

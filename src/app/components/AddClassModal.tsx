@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 import { useAuthStore, useClassStore } from "../../stores";
-import type { Grades, TeacherUser } from "../../../mockData/types";
+import type { Grades, TeacherUser } from "../../../types";
 import { useParams } from "react-router";
 
 interface AddClassModalProps {

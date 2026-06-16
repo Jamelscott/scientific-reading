@@ -1,4 +1,4 @@
-import { SchoolUser, Teacher, BoardUser, AdminUser } from "./types"
+import { SchoolUser, Teacher, BoardUser, AdminUser } from "../types"
 
 export const admins = [
     {
@@ -26,7 +26,7 @@ export const schools = [
       id: "s-1",
       name: "École Primaire Saint-Laurent",
       email: "direction@saint-laurent.qc.ca",
-      boardId: "b-1",
+      board_id: "b-1",
       password:"12345",
     }
 ] as SchoolUser[]
@@ -37,23 +37,23 @@ export const teachers = [
       id: "t-1",
       name: "Madame Gisèle Tremblay",
       email: "gisele.tremblay@ecole.qc.ca",
-      schoolId: "s-1",
-      boardId:"b-1",
+      school_id: "s-1",
+      board_id:"b-1",
       password:"12345",
-      phoneNumber: "(514) 555-0123",
+      phone_number: "(514) 555-0123",
       startDate: "Septembre 2018",
-      yearsExperience: 12,
+      years_experience: 12,
     },
         {
       type: "teacher" as const,
       id: "t-2",
       name: "Monsieur Jean-Pierre Dubois",
       email: "jean-pierre.dubois@ecole.qc.ca",
-      schoolId: "s-1",
-      boardId: "b-1",
+      school_id: "s-1",
+      board_id: "b-1",
       password:"12345",
-      phoneNumber: "(514) 555-0123",
+      phone_number: "(514) 555-0123",
       startDate: "Septembre 2018",
-      yearsExperience: 12,  
+      years_experience: 12,  
     },
 ] as Teacher[]

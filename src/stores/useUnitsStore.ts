@@ -1,13 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { StudentAnswers, UnitData } from "../../mockData/types";
-import { unitData } from "../../mockData/unitData";
+import type { StudentAnswers, UnitData } from "../../types";
 import { downloadableResources } from "../../mockData/resources";
-import type { ResourceCategory } from "../../mockData/types";
+import type { ResourceCategory } from "../../types";
 import getScoreFromEvaluations from "../app/utils/getScoreFromEvaluations";
 import { useStudentStore } from "./useStudentStore";
-import {answers as studentT1Answers} from '../../mockData/teacher-t-1/answers'
-import {answers as studentT2Answers} from '../../mockData/teacher-t-2/answers'
 import { supabase } from "../utils/supabase";
 import { useAuthStore } from "./useAuthStore";
 import { withLoading } from "../utils/withLoading";
@@ -55,7 +52,6 @@ interface UnitsStore {
   answers: StudentAnswers[];
   resources: ResourceCategory[];
   setUnitsData: () => void;
-  setStudentAnswers: (userId: string) => void;
   setSupabaseStudentAnswers: (userId: string, userType:string) => void;
   updateAnswer: (
     studentId: string,
@@ -64,7 +60,8 @@ interface UnitsStore {
     answers: StudentAnswers["answers"],
     comment: string,
     required: boolean,
-  ) => void;
+    schoolId?: string,
+  ) => Promise<void>;
   getAnswersByStudent: (
     studentId: string,
   ) => StudentAnswers[];
@@ -160,25 +157,6 @@ export const useUnitsStore = create<UnitsStore>()(
           // Refresh student evaluations after loading answers
           useStudentStore.getState().setStudentEvaluations();
         }),
-        setStudentAnswers: (userId) => {
-          set((state) => {
-            if (userId === 't-1') {
-              return { ...state, answers: studentT1Answers.map(addEvaluationStatus)};
-            } else if (userId === 't-2') {
-              return { ...state, answers: studentT2Answers.map(addEvaluationStatus)};
-            } else if (userId === 't-2') {
-              return { ...state, answers: studentT2Answers.map(addEvaluationStatus)};
-            } else if (userId.startsWith('b') || userId.startsWith('s')) {
-              const allStudents = [...studentT1Answers, ...studentT2Answers]
-              return { ...state, answers: allStudents.map(addEvaluationStatus)};
-            } else {
-              return { ...state, answers: [] };
-            }
-          });
-          
-          // Refresh student evaluations after loading answers
-          useStudentStore.getState().setStudentEvaluations();
-        },
         setResources: () => set((state) => {
           return {
             ...state, resources: downloadableResources

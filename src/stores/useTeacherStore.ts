@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AuthUser, Teacher } from "../../mockData/types";
-import { teachers as allTeachers } from "../../mockData/users";
+import type { Teacher } from "../../types";
 import { supabase } from "../utils/supabase";
 import { withLoading } from "../utils/withLoading";
 
@@ -67,10 +66,10 @@ export const useTeacherStore = create<TeacherStore>()(
         }
       },
       setTeachersForSchool: (schoolId) => {
-        const filteredTeachers = allTeachers.filter(
+        const filteredTeachers = get().teachers?.filter(
           (teacher) => teacher.school_id === schoolId
         );
-        set({ teachers: filteredTeachers });
+        set({ teachers: filteredTeachers || null });
       },
       updateTeacher: withLoading(async (updates: Partial<Teacher>) => {
         const currentTeacher = get().teacher;

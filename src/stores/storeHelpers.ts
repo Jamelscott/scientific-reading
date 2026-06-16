@@ -1,4 +1,4 @@
-import { Class, Grades, Student, StudentAnswers, Teacher } from "../../mockData/types";
+import { Class, Grades, Student, StudentAnswers, Teacher } from "../../types";
 import { schoolGradeBenchmarks } from "../app/pages/const";
 import { useClassStore } from "./useClassStore";
 import { useStudentStore } from "./useStudentStore";

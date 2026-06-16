@@ -40,7 +40,7 @@ import {
   useAuthStore,
 } from "../../../stores";
 import { schoolGradeBenchmarks } from "../const";
-import { Grades } from "../../../../mockData/types";
+import { Grades } from "../../../../types";
 
 export function SchoolDashboard() {
   const navigate = useNavigate();

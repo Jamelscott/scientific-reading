@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type {Grades, Student} from "../../mockData/types";
-import { students as studentsT1 } from "../../mockData/teacher-t-1/students";
-import { students as studentsT2 } from "../../mockData/teacher-t-2/students";
+import type {Student} from "../../types";
 import { useUnitsStore } from "./useUnitsStore";
 import { supabase } from "../utils/supabase";
 import { withLoading } from "../utils/withLoading";

@@ -77,13 +77,6 @@ export function LoginPage() {
       return;
     }
 
-    const usersByPortal = {
-      teacher: teachers,
-      school: schools,
-      board: boards,
-      admin: admins,
-    };
-
     if (selectedPortal) {
       const user = await supabaseLogin(email, password, selectedPortal);
       if (user) {

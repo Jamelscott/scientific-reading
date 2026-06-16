@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 import { useTeacherStore } from "../../stores/useTeacherStore";
 import { useAuthStore } from "../../stores/useAuthStore";
-import { Teacher } from "../../../mockData/types";
+import { Teacher } from "../../../types";
 import {
   formatPhoneNumber,
   formatPhoneInput,
